@@ -1,0 +1,11 @@
+{
+    "name": "TalentoHumano",
+    "alias": "talentohumano",
+    "description": "FOLIUM - Módulo de Talento Humano: activación de cargos, selección y vinculación del personal de SENA Empresa.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TalentoHumano\\Providers\\TalentoHumanoServiceProvider"
+    ],
+    "files": []
+}

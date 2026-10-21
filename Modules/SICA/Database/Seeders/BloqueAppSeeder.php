@@ -115,8 +115,8 @@ class BloqueAppSeeder extends Seeder
             'url' => '/talento-humano',
             'color' => '#ff9800',
             'icon' => 'fas fa-users-cog',
-            'description' => 'Administración de aprendices, instructores, asignación de turnos operacionales en SENA Empresa y control de asistencia.',
-            'description_english' => 'Management of apprentices, instructors, operational shifts and attendance control.'
+            'description' => 'Activación de cargos, selección y vinculación del personal de SENA Empresa (FOLIUM).',
+            'description_english' => 'Position activation, selection and onboarding of SENA Empresa staff (FOLIUM).'
         ]);
     }
 }
