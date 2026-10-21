@@ -118,14 +118,5 @@ class BloqueAppSeeder extends Seeder
             'description' => 'Administración de aprendices, instructores, asignación de turnos operacionales en SENA Empresa y control de asistencia.',
             'description_english' => 'Management of apprentices, instructors, operational shifts and attendance control.'
         ]);
-
-        App::updateOrCreate(['name' => 'SISGEDI'], [
-            'bloque_id' => $apoyo->id, // Asignado a Procesos de Apoyo
-            'url' => '/sisgedi',
-            'color' => '#e65100', // Color para el bloque de apoyo
-            'icon' => 'fas fa-folder-open', // Icono de FontAwesome
-            'description' => 'Sistema de Gestión Documental para el control de listados maestros y formatos.',
-            'description_english' => 'Document Management System for master list control and formats.'
-        ]);
     }
 }
