@@ -160,6 +160,11 @@
                 <a href="{{ route('direccion.politicas.index') }}" class="nav-link-custom {{ Route::is('direccion.politicas.*') && !Route::is('direccion.politicas.create') ? 'active' : '' }}">
                     <i class="fas fa-file-contract"></i> Gestión de Políticas
                 </a>
+                @if (Auth::check() && Auth::user()->hasSuperAdmin())
+                    <a href="{{ route('talentohumano.panel') }}" class="nav-link-custom">
+                        <i class="fas fa-users-cog"></i> Talento Humano
+                    </a>
+                @endif
             </div>
 
             <!-- Right Actions & User Profile Area -->
@@ -214,6 +219,16 @@
                                     <span>Listado de Políticas</span>
                                 </a>
                             </li>
+                            @if (Auth::user()->hasSuperAdmin())
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li><h6 class="dropdown-header px-2 py-1 fs-8 text-uppercase">Submódulos</h6></li>
+                                <li>
+                                    <a class="dropdown-item py-2 rounded-3 text-dark fw-semibold d-flex align-items-center gap-2" href="{{ route('talentohumano.panel') }}">
+                                        <i class="fas fa-users-cog fs-6" style="color: #064C3D;"></i>
+                                        <span>Talento Humano · FOLIUM</span>
+                                    </a>
+                                </li>
+                            @endif
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <a class="dropdown-item py-2 rounded-3 text-danger fw-semibold d-flex align-items-center gap-2" href="{{ route('logout', ['redirect' => route('direccion.welcome')]) }}">
