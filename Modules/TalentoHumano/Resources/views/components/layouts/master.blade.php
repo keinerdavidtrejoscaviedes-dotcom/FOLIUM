@@ -24,6 +24,13 @@
             </div>
         </div>
     @endif
+    @if (session('error'))
+        <div class="bg-amber-50 text-sm text-amber-800" role="alert">
+            <div class="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2.5">
+                <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {{ session('error') }}
+            </div>
+        </div>
+    @endif
     <header class="border-b border-white/10 bg-[#064C3D] text-white">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
             <a href="{{ route('talentohumano.index') }}" class="flex items-center gap-3">

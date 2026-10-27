@@ -9,12 +9,14 @@ class TalentoHumanoController extends Controller
 {
     /**
      * Secciones del módulo y los roles (sufijo del slug talentohumano.*) que las usan.
+     * 'ruta': nombre de la ruta de la sección; sin ella, la tarjeta se muestra como "Próximamente".
      */
     private const SECCIONES = [
-        ['icono' => 'fa-layer-group', 'titulo' => 'Fases', 'texto' => 'Crea la fase, elige las fichas participantes y activa los cargos.', 'roles' => ['admin']],
+        ['icono' => 'fa-layer-group', 'titulo' => 'Fases', 'texto' => 'Registra la fase, elige las fichas participantes, activa los cargos y elabora el cronograma.', 'roles' => ['admin', 'instructor', 'gestor'], 'ruta' => 'talentohumano.fases.index'],
         ['icono' => 'fa-bullhorn', 'titulo' => 'Convocatoria y cronograma', 'texto' => 'Publica la convocatoria y define las fechas de cada etapa.', 'roles' => ['admin', 'instructor']],
         ['icono' => 'fa-file-signature', 'titulo' => 'Postulaciones', 'texto' => 'Revisa a los aspirantes y analiza sus hojas de vida.', 'roles' => ['admin', 'instructor', 'gestor']],
-        ['icono' => 'fa-brain', 'titulo' => 'Prueba psicotécnica', 'texto' => 'Administra el cuestionario y consulta los resultados.', 'roles' => ['admin', 'psicologo']],
+        ['icono' => 'fa-brain', 'titulo' => 'Prueba psicotécnica', 'texto' => 'Diseña las pruebas que presentan los postulantes, con sus preguntas y puntajes.', 'roles' => ['admin', 'psicologo', 'gestor'], 'ruta' => 'talentohumano.pruebas.index'],
+        ['icono' => 'fa-list-check', 'titulo' => 'Mi formato de entrevista', 'texto' => 'Tus preguntas de entrevista con su puntaje, para calificar a los aspirantes.', 'roles' => ['psicologo', 'instructor'], 'ruta' => 'talentohumano.formato.edit'],
         ['icono' => 'fa-comments', 'titulo' => 'Entrevistas', 'texto' => 'Programa entrevistas, asigna evaluadores y registra calificaciones.', 'roles' => ['admin', 'instructor', 'psicologo', 'gestor']],
         ['icono' => 'fa-user-check', 'titulo' => 'Selección y actas', 'texto' => 'Valida a los seleccionados, haz reubicaciones y genera el acta.', 'roles' => ['admin', 'instructor']],
         ['icono' => 'fa-handshake', 'titulo' => 'Empalmes', 'texto' => 'Acta de recibimiento, inventario del cargo y firmas digitales.', 'roles' => ['admin', 'instructor', 'gestor']],

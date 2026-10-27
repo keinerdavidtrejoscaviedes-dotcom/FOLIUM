@@ -60,9 +60,20 @@
                             <span class="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8F3EF] text-lg text-[#064C3D] transition duration-300 group-hover:bg-[#064C3D] group-hover:text-[#34D399]">
                                 <i class="fas {{ $seccion['icono'] }}" aria-hidden="true"></i>
                             </span>
-                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">Próximamente</span>
+                            @if (isset($seccion['ruta']))
+                                <span class="rounded-full bg-[#E8F3EF] px-3 py-1 text-xs font-semibold text-[#064C3D]">Abrir <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                            @else
+                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">Próximamente</span>
+                            @endif
                         </div>
-                        <h2 class="mt-5 font-bold text-slate-900">{{ $seccion['titulo'] }}</h2>
+                        <h2 class="mt-5 font-bold text-slate-900">
+                            @if (isset($seccion['ruta']))
+                                {{-- El enlace cubre toda la tarjeta --}}
+                                <a href="{{ route($seccion['ruta']) }}" class="after:absolute after:inset-0 after:rounded-3xl">{{ $seccion['titulo'] }}</a>
+                            @else
+                                {{ $seccion['titulo'] }}
+                            @endif
+                        </h2>
                         <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{{ $seccion['texto'] }}</p>
                     </article>
                 @endforeach
