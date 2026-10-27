@@ -17,13 +17,20 @@
     @stack('styles')
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 antialiased" style="font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif">
-    @if (session('success') || session('info'))
-        <div class="bg-[#E8F3EF] text-sm text-[#064C3D]" role="status">
-            <div class="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2.5">
-                <i class="fas fa-circle-check" aria-hidden="true"></i> {{ session('success') ?? session('info') }}
+    @foreach ([
+        'success' => ['bg-[#E8F3EF] text-[#064C3D]', 'fa-circle-check'],
+        'info' => ['bg-sky-50 text-sky-900', 'fa-circle-info'],
+        'warning' => ['bg-amber-50 text-amber-900', 'fa-triangle-exclamation'],
+        'error' => ['bg-red-50 text-red-800', 'fa-circle-xmark'],
+    ] as $tipo => [$color, $icono])
+        @if (session($tipo))
+            <div class="{{ $color }} text-sm" role="{{ in_array($tipo, ['warning', 'error']) ? 'alert' : 'status' }}">
+                <div class="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2.5 sm:px-6">
+                    <i class="fas {{ $icono }}" aria-hidden="true"></i> {{ session($tipo) }}
+                </div>
             </div>
-        </div>
-    @endif
+        @endif
+    @endforeach
     <header class="border-b border-white/10 bg-[#064C3D] text-white">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
             <a href="{{ route('talentohumano.index') }}" class="flex items-center gap-3">

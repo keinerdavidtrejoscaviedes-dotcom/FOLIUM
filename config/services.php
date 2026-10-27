@@ -18,6 +18,11 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    // API de SICEFA para FOLIUM · Talento Humano (IE-001 a IE-006); mientras no exista, FOLIUM lee los datos del ERP
+    'sicefa' => [
+        'url' => env('SICEFA_API_URL'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],
