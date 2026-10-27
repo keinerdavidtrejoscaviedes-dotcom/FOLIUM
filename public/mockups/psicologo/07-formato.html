@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi formato de entrevista · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="psicologo" data-activo="formato" data-mockup="PSI-07|Mi formato de entrevista psicológica|HU-040 · RF-009 · RN-016"
+      data-estados="usado:Con calificaciones,nueva:Nueva versión,editar:Sin calificaciones,sin-puntaje:Pregunta sin puntaje,vacio:Formato vacío">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Mi formato de entrevista</h1>
+            <p class="mt-1 text-sm text-slate-600">Tus propias preguntas para la entrevista <strong>psicológica</strong>, cada una con su puntaje. Solo se usan en las entrevistas que tú califiques.</p>
+        </div>
+        <span id="version" class="rounded-full px-3 py-1 text-xs font-semibold"></span>
+    </div>
+
+    <div data-estado="usado" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <i class="fas fa-lock text-amber-500"></i><span class="flex-1">Este formato ya tiene <strong>55 calificaciones</strong>. Para cambiarlo se crea una nueva versión; las calificaciones registradas no cambian.</span>
+        <button type="button" onclick="cambiarEstado('nueva')" class="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600"><i class="fas fa-code-branch mr-1"></i>Crear nueva versión</button>
+    </div>
+    <div data-estado="nueva" class="mt-4 flex items-start gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900">
+        <i class="fas fa-code-branch mt-0.5"></i><span>Editando la <strong>versión 2</strong>, copiada de la versión 1. Al guardar quedará vigente y la versión 1 se desactivará.</span>
+    </div>
+    <div data-estado="sin-puntaje" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">
+        <i class="fas fa-circle-exclamation mr-1"></i> Asigne un puntaje numérico a la pregunta
+    </div>
+
+    <div data-estado="vacio" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#E8F3EF] text-2xl text-[#064C3D]"><i class="fas fa-list-check"></i></span>
+        <p class="mt-4 font-semibold text-slate-800">Todavía no tienes preguntas</p>
+        <p class="mt-1 text-sm text-slate-500">Empieza con los ítems base de la entrevista psicológica y ajústalos a tu criterio.</p>
+        <div class="mt-5 flex flex-wrap justify-center gap-2">
+            <button type="button" onclick="cambiarEstado('editar')" class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-wand-magic-sparkles mr-1"></i> Cargar ítems base</button>
+            <button type="button" onclick="cambiarEstado('editar')" class="rounded-full px-5 py-2 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-[#E8F3EF]"><i class="fas fa-plus mr-1"></i> Agregar pregunta</button>
+        </div>
+    </div>
+
+    <form data-estado="usado nueva editar sin-puntaje" novalidate class="mt-6 space-y-4" data-ok="Formato guardado." onsubmit="return false">
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="font-bold text-[#064C3D]">Preguntas</h2>
+                <p class="text-sm text-slate-600">Puntaje máximo: <strong id="total" class="text-[#064C3D]"></strong> · se lleva a la escala común de 0 a 100</p>
+            </div>
+            <ol id="preguntas" class="mt-4 space-y-2"></ol>
+            <button type="button" data-editable id="agregar" class="mt-3 rounded-xl bg-[#E8F3EF] px-4 py-2 text-sm font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-plus mr-1"></i> Agregar pregunta</button>
+        </section>
+        <div data-estado="nueva editar sin-puntaje" class="flex justify-end gap-2 pb-4">
+            <button type="button" id="guardar" class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-floppy-disk mr-1"></i> Guardar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const BASE = [
+        ['Presentación personal', 20, 'base'], ['Tipo de comunicación (pasiva, agresiva o asertiva)', 30, 'base'],
+        ['Actitud', 25, 'base'], ['Proyección personal y laboral', 25, 'base'],
+    ];
+    const pintar = (estado) => {
+        const lectura = estado === 'usado';
+        const preguntas = estado === 'sin-puntaje' ? [...BASE, ['¿Cómo reacciona el aspirante ante una crítica del grupo?', '']] : estado === 'nueva' ? [...BASE, ['Manejo del conflicto en la dinámica grupal', 10]] : BASE;
+        document.getElementById('preguntas').innerHTML = preguntas.map(([texto, puntaje, base], i) => `
+            <li class="flex flex-col gap-2 rounded-2xl p-3 ring-1 ${puntaje === '' ? 'ring-red-300 bg-red-50/40' : 'ring-slate-200'} sm:flex-row sm:items-center">
+                <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#064C3D] text-xs font-bold text-white">${i + 1}</span>
+                <input value="${texto}" ${lectura ? 'disabled' : ''} aria-label="Pregunta" class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-50">
+                ${base ? '<span class="w-fit rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">Ítem base</span>' : ''}
+                <label class="flex items-center gap-2 text-xs text-slate-500">Puntaje <input type="number" min="1" value="${puntaje}" ${lectura ? 'disabled' : ''} aria-label="Puntaje" class="w-20 rounded-xl border ${puntaje === '' ? 'border-red-400' : 'border-slate-200'} bg-white px-3 py-2 text-sm disabled:bg-slate-50"></label>
+                ${lectura ? '' : '<button type="button" data-quitar class="self-end rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-slate-100 hover:text-red-600 sm:self-auto" aria-label="Quitar pregunta"><i class="fas fa-xmark"></i></button>'}
+            </li>`).join('');
+        document.getElementById('total').textContent = preguntas.reduce((s, p) => s + (Number(p[1]) || 0), 0);
+        document.getElementById('agregar').hidden = lectura;
+        const v = document.getElementById('version');
+        v.textContent = { usado: 'Versión 1 · vigente', nueva: 'Versión 2 · borrador', vacio: 'Sin preguntas' }[estado] || 'Versión 1 · sin calificaciones';
+        v.className = 'rounded-full px-3 py-1 text-xs font-semibold ' + (estado === 'nueva' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800');
+    };
+    document.addEventListener('estado', ({ detail }) => pintar(detail));
+    document.getElementById('agregar').addEventListener('click', () => {
+        document.getElementById('preguntas').insertAdjacentHTML('beforeend', `<li class="flex flex-col gap-2 rounded-2xl p-3 ring-1 ring-slate-200 sm:flex-row sm:items-center"><span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#064C3D] text-xs font-bold text-white">+</span><input placeholder="Escribe la pregunta" aria-label="Pregunta" class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><label class="flex items-center gap-2 text-xs text-slate-500">Puntaje <input type="number" min="1" aria-label="Puntaje" class="w-20 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></label><button type="button" data-quitar class="self-end rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-slate-100 hover:text-red-600 sm:self-auto" aria-label="Quitar pregunta"><i class="fas fa-xmark"></i></button></li>`);
+    });
+    document.addEventListener('click', (e) => { const q = e.target.closest('[data-quitar]'); if (q) q.closest('li').remove(); });
+    document.getElementById('guardar').addEventListener('click', () => {
+        const vacio = [...document.querySelectorAll('#preguntas input[type="number"]')].some((c) => !c.value);
+        if (vacio) cambiarEstado('sin-puntaje');
+        else { aviso('success', location.hash.includes('nueva') ? 'Versión 2 guardada y vigente. La versión 1 quedó inactiva con sus calificaciones.' : 'Formato guardado.'); }
+    });
+</script>
+</body>
+</html>

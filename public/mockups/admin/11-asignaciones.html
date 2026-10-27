@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Asignaciones · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="asignaciones" data-mockup="ADM-11|Asignaciones de cargo|HU-012, HU-016 · RF-015 · RN-029 a RN-031"
+      data-estados="actual:Fase en curso,suspendidas:Suspendidas,historial:Fase anterior">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Asignaciones</h1>
+            <p class="mt-1 text-sm text-slate-600">Quién ocupa cada cargo en cada fase, con su estado y su origen.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="12-carga-individual.html" class="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-white"><i class="fas fa-user-plus" aria-hidden="true"></i> Asignación inicial</a>
+            <a href="13-carga-masiva.html" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-file-excel" aria-hidden="true"></i> Carga masiva</a>
+        </div>
+    </div>
+
+    <!-- Fase -->
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+        <label for="fase" class="text-sm font-semibold text-slate-700">Fase</label>
+        <select id="fase" onchange="cambiarEstado(this.value)" class="max-w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[#064C3D] focus:border-[#064C3D] focus:outline-none">
+            <option value="actual">Fase XXXV · En curso (04/08/2026 – 11/12/2026)</option>
+            <option value="historial">Fase XXXIV · Cerrada (03/02/2026 – 26/06/2026)</option>
+            <option value="historial">Fase XXXIII · Cerrada</option>
+        </select>
+        <span data-estado="actual suspendidas" class="text-xs text-slate-500"><i class="fas fa-circle-info mr-1"></i>Las asignaciones de la Fase XXXVI se crearán al publicar su acta de seleccionados.</span>
+        <span data-estado="historial" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"><i class="fas fa-lock mr-1"></i>Fase cerrada · solo consulta</span>
+    </div>
+
+    <!-- Resumen por estado -->
+    <div class="mt-4 grid gap-3 sm:grid-cols-4">
+        <button type="button" onclick="cambiarEstado('actual')" class="rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200/70 transition hover:ring-[#34D399]">
+            <p class="text-xs text-slate-500">Vigentes</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="actual suspendidas">98</span><span data-estado="historial">0</span></p>
+        </button>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Asignadas <span class="text-slate-400">(en empalme)</span></p><p class="text-2xl font-extrabold text-[#064C3D]">0</p></div>
+        <button type="button" onclick="cambiarEstado('suspendidas')" class="rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200/70 transition hover:ring-amber-300">
+            <p class="text-xs text-slate-500">Suspendidas</p><p class="text-2xl font-extrabold text-amber-600"><span data-estado="actual suspendidas">2</span><span data-estado="historial">0</span></p>
+        </button>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Finalizadas</p><p class="text-2xl font-extrabold text-slate-500"><span data-estado="actual suspendidas">0</span><span data-estado="historial">94</span></p></div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="mt-4 grid gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 sm:grid-cols-[minmax(0,1fr)_10rem_11rem_11rem]">
+        <label class="relative"><span class="sr-only">Buscar</span>
+            <i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+            <input type="search" placeholder="Aprendiz, documento o cargo…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">
+        </label>
+        <select aria-label="Estado" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" onchange="this.value === 'Suspendida' && cambiarEstado('suspendidas')">
+            <option>Todos los estados</option><option>Asignada</option><option>Vigente</option><option>Suspendida</option><option>Finalizada</option>
+        </select>
+        <select aria-label="Origen" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todos los orígenes</option><option>Acta de seleccionados</option><option>Reubicación</option><option>Carga inicial</option></select>
+        <select aria-label="Área" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todas las áreas</option><option>Administrativa</option><option>Agrícola</option><option>Pecuaria</option><option>Agroindustrial</option><option>Ambiental</option><option>Comercial</option></select>
+    </div>
+
+    <!-- Listado -->
+    <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr>
+                        <th class="px-4 py-3 font-semibold">Aprendiz</th>
+                        <th class="px-4 py-3 font-semibold">Cargo</th>
+                        <th class="hidden px-4 py-3 font-semibold xl:table-cell">Unidad productiva</th>
+                        <th class="hidden px-4 py-3 font-semibold md:table-cell">Inicio</th>
+                        <th class="px-4 py-3 font-semibold">Estado</th>
+                        <th class="hidden px-4 py-3 font-semibold lg:table-cell">Origen</th>
+                        <th class="px-4 py-3"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody id="filas" class="divide-y divide-slate-100"></tbody>
+            </table>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
+            <span data-estado="actual">1–10 de 100 asignaciones</span><span data-estado="suspendidas">1–2 de 2 asignaciones</span><span data-estado="historial">1–10 de 94 asignaciones</span>
+            <div class="flex gap-1">
+                <a class="pointer-events-none rounded-lg px-3 py-1.5 font-semibold text-slate-300"><i class="fas fa-chevron-left mr-1"></i>Anterior</a>
+                <a href="#" class="rounded-lg px-3 py-1.5 font-semibold text-[#064C3D] hover:bg-[#E8F3EF]">Siguiente<i class="fas fa-chevron-right ml-1"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <p class="mt-4 flex items-start gap-2 text-xs text-slate-500">
+        <i class="fas fa-database mt-0.5"></i>
+        Los demás módulos de FOLIUM consultan las asignaciones vigentes (persona, cargo, fase y estado) en modo de solo lectura. Ninguna asignación se elimina: al cierre de la fase pasa a «finalizada».
+    </p>
+
+    <!-- Modal: suspender (HU-012) -->
+    <dialog id="modal-suspender" aria-labelledby="titulo-suspender" class="m-auto w-[min(94vw,32rem)] rounded-3xl p-0 shadow-2xl">
+        <form novalidate class="p-6" data-ok="Asignación suspendida. Se avisó por correo al Instructor Líder." data-ok-tipo="warning" data-estado-destino="suspendidas">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-amber-50 text-xl text-amber-500"><i class="fas fa-pause"></i></span>
+            <h2 id="titulo-suspender" class="mt-4 text-lg font-bold text-slate-900">Suspender asignación</h2>
+            <div class="mt-3 rounded-2xl bg-slate-50 p-3 text-sm">
+                <p class="font-semibold text-slate-800">Juan Esteban Rojas · CC 1.081.402.337</p>
+                <p class="text-xs text-slate-500">Gestor de Talento Humano · Fase XXXV · Vigente desde 04/08/2026</p>
+            </div>
+            <ul class="mt-3 space-y-1.5 text-sm text-slate-600">
+                <li><i class="fas fa-circle-minus mr-1.5 text-amber-500"></i> Pierde de inmediato las funciones del cargo.</li>
+                <li><i class="fas fa-user-shield mr-1.5 text-amber-500"></i> Se le retira el rol <strong>Gestor de Talento Humano</strong>.</li>
+                <li><i class="fas fa-envelope mr-1.5 text-amber-500"></i> Se avisa por correo al Instructor Líder.</li>
+            </ul>
+            <div class="mt-4" data-campo>
+                <label for="justificacion" class="mb-1 block text-sm font-semibold text-slate-700">Justificación <span class="text-red-500">*</span></label>
+                <textarea id="justificacion" rows="3" data-obligatorio placeholder="Motivo acordado con el Instructor Líder…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+                <p data-error hidden class="mt-1 text-xs font-semibold text-red-600">Registra el motivo para poder suspender la asignación.</p>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600">Suspender</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Modal: reactivar -->
+    <dialog id="modal-reactivar" aria-labelledby="titulo-reactivar" class="m-auto w-[min(94vw,32rem)] rounded-3xl p-0 shadow-2xl">
+        <form novalidate class="p-6" data-ok="Asignación reactivada. Se avisó por correo al Instructor Líder." data-estado-destino="actual">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8F3EF] text-xl text-[#064C3D]"><i class="fas fa-play"></i></span>
+            <h2 id="titulo-reactivar" class="mt-4 text-lg font-bold text-slate-900">Reactivar asignación</h2>
+            <div class="mt-3 rounded-2xl bg-slate-50 p-3 text-sm">
+                <p class="font-semibold text-slate-800">Kevin Alejandro Murcia · CC 1.075.318.902</p>
+                <p class="text-xs text-slate-500">Líder de Unidad de Lácteos · Suspendida el 06/10/2026 por Yina (Administrador)</p>
+                <p class="mt-2 text-xs text-slate-600"><strong>Motivo:</strong> Incapacidad médica de 15 días.</p>
+            </div>
+            <div class="mt-4" data-campo>
+                <label for="justificacion-r" class="mb-1 block text-sm font-semibold text-slate-700">Justificación <span class="text-red-500">*</span></label>
+                <textarea id="justificacion-r" rows="3" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Reactivar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Panel lateral: historial del aprendiz (HU-016) -->
+    <div id="cajon-historial" data-cajon class="cajon fixed inset-y-0 right-0 z-50 flex w-[min(100vw,28rem)] flex-col bg-white shadow-2xl ring-1 ring-slate-200" aria-label="Historial del aprendiz">
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 p-6">
+            <div class="flex items-center gap-3">
+                <span class="grid h-12 w-12 place-items-center rounded-full bg-[#064C3D] text-sm font-bold text-[#34D399]">LC</span>
+                <div><p class="font-bold text-slate-900">Laura Valentina Cuéllar</p><p class="text-xs text-slate-500">CC 1.077.856.214 · Ficha 2758641 · Gestión Agroempresarial</p></div>
+            </div>
+            <button type="button" data-cerrar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6">
+            <h3 class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Asignaciones</h3>
+            <ol class="relative mt-4 space-y-5 border-l-2 border-[#E8F3EF] pl-5">
+                <li class="relative"><span class="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-[#064C3D] ring-4 ring-white"></span>
+                    <p class="text-sm font-bold text-slate-800">Gestor de Talento Humano · Fase XXXV</p>
+                    <p class="text-xs text-slate-500">Vigente desde 04/08/2026 · Origen: acta de seleccionados</p>
+                    <span class="mt-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">Vigente</span></li>
+                <li class="relative"><span class="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-slate-300 ring-4 ring-white"></span>
+                    <p class="text-sm font-bold text-slate-800">Equipo de Calidad · Fase XXXIV</p>
+                    <p class="text-xs text-slate-500">03/02/2026 – 26/06/2026 · Origen: carga inicial</p>
+                    <span class="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">Finalizada</span></li>
+            </ol>
+            <h3 class="mt-8 text-xs font-bold uppercase tracking-[.18em] text-slate-400">Movimientos</h3>
+            <ul class="mt-3 space-y-3 text-sm">
+                <li class="rounded-2xl bg-slate-50 p-3"><p class="font-semibold text-slate-700">Pasó a «vigente»</p><p class="text-xs text-slate-500">04/08/2026 9:12 a. m. · Visto bueno del empalme por Juan Pablo Díaz (Gestor de TH)</p></li>
+                <li class="rounded-2xl bg-slate-50 p-3"><p class="font-semibold text-slate-700">Se otorgó el rol Gestor de Talento Humano</p><p class="text-xs text-slate-500">04/08/2026 9:12 a. m. · Sistema</p></li>
+                <li class="rounded-2xl bg-slate-50 p-3"><p class="font-semibold text-slate-700">Asignación creada en estado «asignada»</p><p class="text-xs text-slate-500">25/07/2026 4:30 p. m. · Publicación del acta de seleccionados</p></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const filas = {
+        actual: [
+            ['Laura Valentina Cuéllar', '1.077.856.214', 'Gestor de Talento Humano', 'Gestor', 'Administración', '04/08/2026', 'Vigente', 'Acta de seleccionados'],
+            ['Juan Esteban Rojas', '1.081.402.337', 'Gestor de Talento Humano', 'Gestor', 'Administración', '04/08/2026', 'Vigente', 'Acta de seleccionados'],
+            ['Valeria Andrea Polanía', '1.075.290.118', 'Gerente Administrativo', 'Gerente', 'Administración', '04/08/2026', 'Vigente', 'Acta de seleccionados'],
+            ['Sebastián Trujillo Ramos', '1.079.611.045', 'Gerente de Producción', 'Gerente', 'Todas las unidades', '04/08/2026', 'Vigente', 'Acta de seleccionados'],
+            ['María José Ospina', '1.075.221.876', 'Líder de U. F. Productiva Cacao', 'Líder', 'Cacao', '04/08/2026', 'Vigente', 'Acta de seleccionados'],
+            ['Kevin Alejandro Murcia', '1.075.318.902', 'Líder Unidad de Lácteos', 'Líder', 'Lácteos', '04/08/2026', 'Suspendida', 'Acta de seleccionados'],
+            ['Daniela Fernanda Cortés', '1.084.117.390', 'Equipo Ambiental', 'Equipo', 'Servicios ambientales', '04/08/2026', 'Vigente', 'Reubicación'],
+            ['Brayan Stiven Perdomo', '1.075.402.661', 'Equipo de Sanidad', 'Equipo', 'Bovinos', '11/08/2026', 'Suspendida', 'Acta de seleccionados'],
+            ['Natalia Rincón Vargas', '1.077.900.512', 'Gestor Agrícola', 'Gestor', 'Agrícola', '04/08/2026', 'Vigente', 'Acta de seleccionados'],
+            ['Cristian Camilo Losada', '1.075.338.774', 'Líder de riego', 'Líder', 'Riego', '18/08/2026', 'Vigente', 'Carga inicial'],
+        ],
+    };
+    filas.suspendidas = filas.actual.filter((f) => f[6] === 'Suspendida');
+    filas.historial = filas.actual.map((f) => [f[0], f[1], f[2], f[3], f[4], '03/02/2026', 'Finalizada', f[7] === 'Reubicación' ? 'Reubicación' : 'Carga inicial']);
+    const estadoChip = { Vigente: 'bg-emerald-100 text-emerald-800', Asignada: 'bg-sky-100 text-sky-800', Suspendida: 'bg-amber-100 text-amber-800', Finalizada: 'bg-slate-100 text-slate-500' };
+    const origenChip = { 'Acta de seleccionados': 'fa-file-circle-check', 'Reubicación': 'fa-arrows-rotate', 'Carga inicial': 'fa-upload' };
+    const nivelChip = { Gerente: 'bg-[#043A2F] text-white', Gestor: 'bg-[#064C3D] text-white', 'Líder': 'bg-emerald-100 text-emerald-800', Equipo: 'bg-slate-100 text-slate-600' };
+
+    const pintar = (clave) => {
+        document.getElementById('filas').innerHTML = filas[clave].map(([nombre, doc, cargo, nivel, unidad, inicio, estado, origen]) => `
+            <tr class="transition hover:bg-[#E8F3EF]/40">
+                <td class="px-4 py-3"><p class="font-semibold text-slate-800">${nombre}</p><p class="text-xs text-slate-500">CC ${doc}</p></td>
+                <td class="px-4 py-3"><p class="font-medium text-slate-700">${cargo}</p><span class="mt-0.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${nivelChip[nivel]}">${nivel}</span></td>
+                <td class="hidden px-4 py-3 text-slate-600 xl:table-cell">${unidad}</td>
+                <td class="hidden px-4 py-3 text-slate-600 md:table-cell">${inicio}</td>
+                <td class="px-4 py-3"><span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ${estadoChip[estado]}">${estado}</span></td>
+                <td class="hidden px-4 py-3 text-xs text-slate-600 lg:table-cell"><i class="fas ${origenChip[origen]} mr-1 text-slate-400"></i>${origen}</td>
+                <td class="px-4 py-3 text-right">
+                    <div class="flex justify-end gap-1">
+                        <button type="button" data-abrir="#cajon-historial" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#064C3D]" title="Historial" aria-label="Historial de ${nombre}"><i class="fas fa-clock-rotate-left"></i></button>
+                        ${estado === 'Vigente' ? `<button type="button" data-abrir="#modal-suspender" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-amber-50 hover:text-amber-600" title="Suspender" aria-label="Suspender"><i class="fas fa-pause"></i></button>` : ''}
+                        ${estado === 'Suspendida' ? `<button type="button" data-abrir="#modal-reactivar" class="grid h-8 w-8 place-items-center rounded-lg text-amber-600 hover:bg-[#E8F3EF] hover:text-[#064C3D]" title="Reactivar" aria-label="Reactivar"><i class="fas fa-play"></i></button>` : ''}
+                    </div>
+                </td>
+            </tr>`).join('');
+    };
+    document.addEventListener('estado', ({ detail }) => {
+        pintar(detail);
+        document.getElementById('fase').selectedIndex = detail === 'historial' ? 1 : 0;
+    });
+</script>
+</body>
+</html>

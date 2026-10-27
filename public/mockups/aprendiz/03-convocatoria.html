@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Convocatoria · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="convocatoria" data-mockup="APR-03|Convocatoria y cargos disponibles|HU-044 · RF-004 · RN-007, RN-040"
+      data-estados="abierta:Abierta,por-abrir:Aún no abre,cerrada:Cerrada">
+<div id="contenido" class="mx-auto max-w-4xl">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Convocatoria Fase XXXVI</h1>
+            <p class="mt-1 text-sm text-slate-600">Cargos disponibles para tu ficha (2902187 · Gestión de la Producción Agrícola).</p>
+        </div>
+        <a data-estado="abierta" href="04-postularme.html" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-file-signature"></i> Postularme</a>
+        <span data-estado="por-abrir" class="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white opacity-50"><i class="fas fa-file-signature"></i> Postularme</span>
+    </div>
+
+    <div data-estado="abierta" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]"><span class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span><span>Abierta del <strong>01/09</strong> al <strong>12/09/2026</strong>. Elige exactamente 3 cargos en orden de preferencia.</span></div>
+    <div data-estado="por-abrir" class="mt-4 flex items-center gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900"><i class="fas fa-clock"></i><span>La postulación abre el <strong>01/09/2026</strong>. Mientras tanto puedes consultar los cargos.</span></div>
+    <div data-estado="cerrada" class="mt-4 flex items-center gap-3 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700"><i class="fas fa-door-closed"></i><span>La convocatoria está cerrada desde el 12/09/2026.</span></div>
+
+    <div class="mt-4 grid gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 sm:grid-cols-[minmax(0,1fr)_12rem]">
+        <label class="relative"><span class="sr-only">Buscar</span><i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i><input type="search" placeholder="Buscar cargo…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm"></label>
+        <select aria-label="Área" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todas las áreas</option><option>Agrícola</option><option>Ambiental</option><option>Administrativa</option></select>
+    </div>
+
+    <div id="cargos" class="mt-4 space-y-3"></div>
+    <p class="mt-4 text-xs text-slate-500"><i class="fas fa-circle-info mr-1"></i>Solo ves los cargos compatibles con el programa de tu ficha. 18 cargos disponibles.</p>
+</div>
+<script>
+    const cargos = [
+        ['Líder de U. F. Productiva Cacao', 'Líder', 'Agrícola', 1, 'Coordinar las labores de la unidad de cacao, sus registros y su equipo.', ['Hoja de vida con soportes', 'Certificados', 'Propuesta de trabajo']],
+        ['Gestor Agrícola', 'Gestor', 'Agrícola', 1, 'Gestionar la producción de las unidades agrícolas y reportar sus indicadores.', ['Hoja de vida con soportes', 'Certificados', 'Propuesta de trabajo']],
+        ['Líder de herramientas', 'Líder', 'Agrícola', 1, 'Controlar la bodega de herramientas y su inventario.', ['Hoja de vida con soportes', 'Propuesta de trabajo']],
+        ['Gestor de Talento Humano', 'Gestor', 'Administrativa', 2, 'Gestionar la selección, la coordinación y el bienestar del personal.', ['Hoja de vida con soportes', 'Certificados', 'Propuesta de trabajo', 'Soporte del curso virtual de talento humano'], 'Tu programa es alterno para este cargo: puedes postularte.'],
+    ];
+    const nivel = { Gestor: 'bg-[#064C3D] text-white', 'Líder': 'bg-emerald-100 text-emerald-800' };
+    document.getElementById('cargos').innerHTML = cargos.map(([n, niv, area, cupos, rol, docs, nota]) => `
+        <details class="group rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <summary class="flex cursor-pointer list-none flex-wrap items-center gap-3 p-5">
+                <span class="min-w-0 flex-1"><span class="block font-bold text-slate-900">${n}</span><span class="text-xs text-slate-500">${area} · ${cupos} ${cupos === 1 ? 'cupo' : 'cupos'}</span></span>
+                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ${nivel[niv]}">${niv}</span>
+                <i class="fas fa-chevron-down text-xs text-slate-400 transition group-open:rotate-180"></i>
+            </summary>
+            <div class="space-y-3 border-t border-slate-100 p-5 text-sm">
+                <p class="text-slate-600">${rol}</p>
+                ${nota ? `<p class="rounded-xl bg-sky-50 px-3 py-2 text-xs text-sky-900"><i class="fas fa-circle-info mr-1"></i>${nota}</p>` : ''}
+                <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Documentos obligatorios</p><ul class="mt-1 space-y-1">${docs.map((d) => `<li class="text-slate-700"><i class="fas fa-file-pdf mr-1.5 text-red-400"></i>${d}</li>`).join('')}</ul></div>
+                <a href="../admin/05-catalogo-detalle.html" class="inline-block text-xs font-semibold text-emerald-700 hover:underline">Ver rol, actividades y requisitos del cargo</a>
+            </div>
+        </details>`).join('');
+</script>
+</body>
+</html>

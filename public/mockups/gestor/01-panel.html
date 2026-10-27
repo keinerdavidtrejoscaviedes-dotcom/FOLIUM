@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Panel · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="completo" data-rol="gestor" data-mockup="GTH-01|Panel del Gestor de Talento Humano|HU-002, HU-021 · réplica de panel.blade.php"
+      data-estados="normal:Gestor vigente,finalizada:Asignación finalizada,sin-rol:Sin rol en TH">
+<div id="contenido">
+    <!-- Bienvenida (igual a panel.blade.php) -->
+    <section class="relative isolate overflow-hidden bg-[#064C3D] text-white">
+        <div class="folium-dots absolute inset-0 -z-10" aria-hidden="true"></div>
+        <i class="fas fa-leaf absolute -right-8 -top-6 -z-10 rotate-12 text-[11rem] text-white/5" aria-hidden="true"></i>
+        <div class="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 sm:pt-14">
+            <p class="entrada text-sm font-semibold uppercase tracking-[.2em] text-[#34D399]">FOLIUM · Talento Humano</p>
+            <h1 class="entrada mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl" style="animation-delay: 60ms">Hola, Laura</h1>
+            <p class="entrada mt-2 max-w-2xl text-emerald-50/85" style="animation-delay: 120ms">
+                Este es tu espacio en FOLIUM. Aquí encontrarás las secciones del proceso de Talento Humano que corresponden a tu rol.
+            </p>
+            <div class="entrada mt-5 flex flex-wrap gap-2" style="animation-delay: 180ms">
+                <span data-estado="normal finalizada" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/20"><i class="fas fa-id-badge text-[#34D399]"></i> Aprendiz</span>
+                <span data-estado="normal" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/20"><i class="fas fa-id-badge text-[#34D399]"></i> Gestor de Talento Humano <span class="font-normal text-emerald-100/80">· por tu cargo vigente en la Fase XXXV</span></span>
+                <span data-estado="sin-rol" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/20"><i class="fas fa-circle-exclamation text-amber-300"></i> Sin rol en Talento Humano</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="relative z-10 mx-auto -mt-14 max-w-6xl px-4 pb-16 sm:px-6">
+        <!-- Sin rol (igual a panel.blade.php) -->
+        <div data-estado="sin-rol" class="entrada rounded-3xl bg-white p-8 text-center shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70 sm:p-12">
+            <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#E8F3EF] text-2xl text-[#064C3D]"><i class="fas fa-user-lock" aria-hidden="true"></i></span>
+            <h2 class="mt-5 text-xl font-bold text-[#064C3D]">Aún no tienes un rol en Talento Humano</h2>
+            <p class="mx-auto mt-2 max-w-md text-slate-600">Para usar FOLIUM, solicita al instructor líder de SENA Empresa que te asigne un rol en la aplicación Talento Humano.</p>
+            <a href="../admin/01-presentacion.html" class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#043A2F]"><i class="fas fa-arrow-left"></i> Volver a la presentación</a>
+        </div>
+
+        <!-- Asignación finalizada (HU-032, esc. 3) -->
+        <div data-estado="finalizada" class="entrada rounded-3xl bg-white p-6 shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-start gap-4">
+                <span class="grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-xl text-slate-500"><i class="fas fa-flag-checkered"></i></span>
+                <div class="min-w-0 flex-1">
+                    <h2 class="font-bold text-slate-900">Tu asignación como Gestor de Talento Humano finalizó</h2>
+                    <p class="mt-1 text-sm text-slate-600">La Fase XXXV se cerró el 11/12/2026. Ya no tienes acceso a la convocatoria ni a las funciones del cargo; la información que registraste se conserva.</p>
+                </div>
+                <a href="#" class="rounded-full px-4 py-2 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-[#E8F3EF]"><i class="fas fa-clock-rotate-left mr-1"></i> Mi historial</a>
+            </div>
+        </div>
+
+        <div data-estado="normal">
+            <!-- Etapa actual del proceso -->
+            <div class="entrada rounded-3xl bg-white p-6 shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-600">Convocatoria Fase XXXVI</p>
+                        <h2 class="mt-1 text-lg font-extrabold text-[#064C3D]">Etapa actual: validación de la selección</h2>
+                        <p class="text-sm text-slate-500">Del 13/10 al 24/10/2026 · luego publicas el acta el 28/10/2026</p>
+                    </div>
+                    <a href="11-acta.html" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-4 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Ver el acta <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <ol id="pasos" class="mt-5 grid gap-2 sm:grid-cols-4 lg:grid-cols-8"></ol>
+            </div>
+
+            <!-- Alertas de plazos (HU-021, esc. 4) -->
+            <section id="alertas" class="mt-5 scroll-mt-6 space-y-2">
+                <div class="flex flex-wrap items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <i class="fas fa-hourglass-half mt-0.5 text-amber-500"></i>
+                    <div class="min-w-0 flex-1"><p class="font-semibold">La validación de la selección termina en 2 días (24/10/2026)</p><p class="mt-0.5">Faltan 30 cargos por validar y 3 aprendices por reubicar. Los decide el Instructor Líder; tú publicas el acta después.</p></div>
+                    <a href="11-acta.html" class="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600">Ver pendientes</a>
+                </div>
+                <div class="flex flex-wrap items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <i class="fas fa-envelope-circle-check mt-0.5 text-amber-500"></i>
+                    <div class="min-w-0 flex-1"><p class="font-semibold">1 citación de entrevista no se entregó por correo</p><p class="mt-0.5">jdmora@soy.sena.edu.co · buzón lleno. Avisa al aprendiz por otro medio.</p></div>
+                </div>
+                <div class="flex flex-wrap items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+                    <i class="fas fa-handshake mt-0.5 text-sky-500"></i>
+                    <div class="min-w-0 flex-1"><p class="font-semibold">Tú también entregas tu cargo</p><p class="mt-0.5">Como saliente, haces el empalme grupal de Gestores de Talento Humano con los entrantes de la Fase XXXVI.</p></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Secciones -->
+        <div data-estado="normal finalizada" class="mt-8">
+            <h2 data-estado="normal" class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Como Gestor de Talento Humano</h2>
+            <div data-estado="normal" id="secciones-gestor" class="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+            <h2 class="mt-8 text-xs font-bold uppercase tracking-[.18em] text-slate-400">Como aprendiz</h2>
+            <div id="secciones-aprendiz" class="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+        </div>
+
+        <p class="mt-10 text-center text-sm text-slate-500">
+            <a href="../admin/01-presentacion.html" class="font-semibold text-[#064C3D] hover:underline"><i class="fas fa-seedling mr-1"></i> Ver la presentación de FOLIUM</a>
+        </p>
+    </section>
+</div>
+
+<script>
+    const pasos = [['Fichas', 1], ['Cargos', 1], ['Cronograma', 1], ['Convocatoria', 1], ['Prueba', 1], ['Entrevistas', 1], ['Selección', 0.5], ['Acta', 0]];
+    document.getElementById('pasos').innerHTML = pasos.map(([t, v], i) => `
+        <li class="flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold ${v === 1 ? 'bg-[#E8F3EF] text-[#064C3D]' : v ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-200' : 'bg-slate-50 text-slate-400'}">
+            <span class="grid h-5 w-5 place-items-center rounded-full ${v === 1 ? 'bg-[#064C3D] text-[#34D399]' : v ? 'bg-amber-400 text-white' : 'bg-slate-200 text-slate-500'} text-[10px]">${v === 1 ? '<i class="fas fa-check"></i>' : i + 1}</span>${t}
+        </li>`).join('');
+
+    // Mismo diseño de tarjeta de panel.blade.php, ahora con el estado de cada sección
+    const tarjeta = ([icono, titulo, texto, url, estado, color], i) => `
+        <a href="${url}" class="entrada group relative flex h-full flex-col rounded-3xl bg-white p-6 shadow-lg shadow-[#064C3D]/5 ring-1 ring-slate-200/70 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#064C3D]/10 hover:ring-[#34D399]/60" style="animation-delay: ${200 + i * 60}ms">
+            <div class="flex items-start justify-between gap-3">
+                <span class="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8F3EF] text-lg text-[#064C3D] transition duration-300 group-hover:bg-[#064C3D] group-hover:text-[#34D399]"><i class="fas ${icono}" aria-hidden="true"></i></span>
+                <span class="rounded-full ${color} px-3 py-1 text-xs font-medium">${estado}</span>
+            </div>
+            <h2 class="mt-5 font-bold text-slate-900">${titulo}</h2>
+            <p class="mt-1.5 text-sm leading-relaxed text-slate-600">${texto}</p>
+        </a>`;
+    const listo = 'bg-emerald-100 text-emerald-800', curso = 'bg-amber-100 text-amber-800', luego = 'bg-slate-100 text-slate-500';
+    document.getElementById('secciones-gestor').innerHTML = [
+        ['fa-layer-group', 'Fichas y cargos de la fase', 'Registra las fichas que ingresan y activa los cargos de la fase.', '02-fichas.html', '3 fichas · 42 cargos', listo],
+        ['fa-bullhorn', 'Convocatoria y cronograma', 'Elabora el cronograma y publica la convocatoria.', '05-convocatoria.html', 'Cerrada', listo],
+        ['fa-file-signature', 'Postulaciones', 'Revisa a los aspirantes y analiza sus hojas de vida.', '06-postulantes.html', '61 analizadas', listo],
+        ['fa-brain', 'Prueba psicotécnica', 'Habilita la prueba, define el plazo y verifica que todos la presenten.', '08-prueba.html', '61 de 61', listo],
+        ['fa-comments', 'Entrevistas', 'Elige a los evaluadores y programa las entrevistas.', '10-entrevistas.html', '24 programadas', listo],
+        ['fa-user-check', 'Acta de seleccionados', 'Revisa y publica el acta generada por el sistema.', '11-acta.html', 'Esperando validación', curso],
+        ['fa-handshake', 'Empalmes', 'Acta de recibimiento, inventario del cargo y visto bueno.', '12-empalmes.html', 'Enero de 2027', luego],
+        ['fa-link', 'Vinculación', 'Consolidado de quién quedó vinculado a su cargo.', '14-vinculacion.html', 'Enero de 2027', luego],
+        ['fa-book-open', 'Catálogo de cargos', 'Rol, actividades, responsabilidades y requisitos de cada cargo.', '15-catalogo.html', 'Consulta', luego],
+    ].map(tarjeta).join('');
+    document.getElementById('secciones-aprendiz').innerHTML = [
+        ['fa-signature', 'Mi empalme', 'Entrega tu cargo de Gestor de Talento Humano a los entrantes.', '#', 'Enero de 2027', luego],
+        ['fa-clock-rotate-left', 'Mi historial', 'Tus cargos en SENA Empresa, fase a fase.', '#', 'Consulta', luego],
+    ].map(tarjeta).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar Sesión • SENA Empresa ERP</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+    <style>
+        /* Mismos colores del login del ERP (resources/views/login.blade.php) */
+        .fondo-login {
+            font-family: 'Nunito', 'Open Sans', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgba(57, 169, 0, .15), transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 50, 77, .3), transparent 50%),
+                        linear-gradient(135deg, #00131E 0%, #001A29 50%, #002336 100%);
+        }
+        .banner-login { background: linear-gradient(135deg, rgba(0, 26, 41, .95) 0%, rgba(0, 35, 54, .95) 100%); border-right: 4px solid #39A900; }
+        .banner-login::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(98, 227, 29, .12), transparent 60%); pointer-events: none; }
+        .boton-sena { background: linear-gradient(135deg, #001A29 0%, #002D44 100%); border: 2px solid #39A900; box-shadow: 0 6px 20px rgba(0, 26, 41, .35); transition: all .3s ease; }
+        .boton-sena:hover { background: linear-gradient(135deg, #39A900 0%, #2b8000 100%); border-color: #62E31D; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(57, 169, 0, .45); }
+        .campo-login:focus { border-color: #39A900; box-shadow: 0 0 0 .25rem rgba(57, 169, 0, .18); outline: none; }
+        .grupo-login:focus-within .icono-login { color: #39A900; }
+    </style>
+</head>
+<body data-layout="ninguno" data-mockup="ADM-02|Iniciar sesión|HU-001 · RNF-001, RNF-013" data-estados="normal:Normal,error:Datos incorrectos,sicefa:SICEFA no responde,expirada:Sesión expirada">
+<div id="contenido" class="fondo-login flex min-h-screen items-center justify-center p-5">
+    <div class="w-full max-w-[960px] overflow-hidden rounded-[24px] border border-white/10 bg-white shadow-[0_25px_60px_rgba(0,0,0,.45)]">
+        <div class="grid lg:grid-cols-12">
+            <!-- Banner -->
+            <div class="banner-login relative flex flex-col justify-between p-10 text-white lg:col-span-5 lg:p-[50px_40px]">
+                <div class="relative">
+                    <a href="01-presentacion.html" class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/85 hover:text-white">
+                        <i class="fas fa-arrow-left"></i> Volver a FOLIUM
+                    </a>
+                    <div class="mb-3 mt-2 flex items-center">
+                        <span class="mr-3 grid h-[58px] w-[58px] place-items-center rounded-full bg-white p-2 text-2xl text-[#39A900] shadow-sm"><i class="fas fa-seedling"></i></span>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">SENA EMPRESA</h3>
+                            <span class="text-sm font-semibold text-[#62E31D]">Plataforma ERP Integrada</span>
+                        </div>
+                    </div>
+                    <p class="mb-6 leading-relaxed text-white/50">
+                        Ingresa con tu usuario y contraseña de SICEFA. FOLIUM los valida en línea y te muestra las funciones de tu rol, tu cargo y tus designaciones.
+                    </p>
+                </div>
+                <div class="relative border-t border-white/20 pt-6">
+                    <ul class="space-y-2 text-sm text-white/50">
+                        <li><i class="fas fa-check-circle mr-2 text-[#62E31D]"></i> Procesos Estratégicos, Misionales y de Apoyo</li>
+                        <li><i class="fas fa-check-circle mr-2 text-[#62E31D]"></i> Control de Inventarios, Compras y Ventas</li>
+                        <li><i class="fas fa-check-circle mr-2 text-[#62E31D]"></i> Gestión de Talento Humano y Turnos</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <div class="flex flex-col justify-between bg-white p-10 lg:col-span-7 lg:p-[50px_40px]">
+                <div>
+                    <div class="mb-6 text-center lg:text-left">
+                        <h2 class="text-2xl font-extrabold text-[#001A29]">Iniciar sesión</h2>
+                        <p class="mt-1 text-sm text-slate-500">Usa la cuenta de SICEFA del Centro de Formación.</p>
+                    </div>
+
+                    <div data-estado="normal error" class="mb-3 flex items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-sm text-sky-900 shadow-sm">
+                        <i class="fas fa-info-circle text-sky-500"></i> Inicia sesión para continuar a <strong>Talento Humano (FOLIUM)</strong>.
+                    </div>
+                    <div data-estado="error" class="mb-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800 shadow-sm" role="alert">
+                        <p class="flex items-center gap-2 font-bold"><i class="fas fa-exclamation-triangle text-red-500"></i> No pudimos iniciar tu sesión</p>
+                        <ul class="mt-1 list-disc pl-6"><li>El usuario o la contraseña no coinciden con los registrados en SICEFA.</li></ul>
+                    </div>
+                    <div data-estado="sicefa" class="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-900 shadow-sm" role="alert">
+                        <p class="flex items-center gap-2 font-bold"><i class="fas fa-plug-circle-xmark text-amber-500"></i> SICEFA no responde en este momento</p>
+                        <p class="mt-1">No es posible validar tu usuario. La información ya registrada en FOLIUM está segura y el Administrador ya fue avisado. Intenta de nuevo en unos minutos.</p>
+                    </div>
+                    <div data-estado="expirada" class="mb-3 flex items-center gap-2 rounded-xl bg-[#E8F3EF] px-3 py-2 text-sm text-[#064C3D] shadow-sm" role="status">
+                        <i class="fas fa-clock"></i> Tu sesión se cerró tras 30 minutos de inactividad. Vuelve a ingresar.
+                    </div>
+
+                    <form data-ir="03-tablero.html" novalidate>
+                        <div class="grupo-login mb-3" data-campo>
+                            <label for="usuario" class="mb-1 block text-sm font-semibold text-slate-500">Correo Electrónico / Usuario</label>
+                            <div class="relative">
+                                <i class="fas fa-envelope icono-login absolute left-4 top-1/2 -translate-y-1/2 text-[#888]"></i>
+                                <input id="usuario" value="yina@senaempresa.edu.co" data-obligatorio class="campo-login w-full rounded-xl border-[1.5px] border-[#e0e0e0] py-3 pl-11 pr-4 text-[15px]" placeholder="ejemplo@sena.edu.co o usuario">
+                            </div>
+                        </div>
+                        <div class="grupo-login mb-3" data-campo>
+                            <div class="mb-1 flex items-center justify-between">
+                                <label for="clave" class="text-sm font-semibold text-slate-500">Contraseña</label>
+                                <a href="#" class="text-sm font-semibold text-[#39A900]" onclick="aviso('info', 'Por favor contacte al Administrador del Sistema ERP o Soporte TIC.'); return false;">¿Olvidaste tu contraseña?</a>
+                            </div>
+                            <div class="relative">
+                                <i class="fas fa-lock icono-login absolute left-4 top-1/2 -translate-y-1/2 text-[#888]"></i>
+                                <input id="clave" type="password" value="12345678" data-obligatorio class="campo-login w-full rounded-xl border-[1.5px] border-[#e0e0e0] py-3 pl-11 pr-11 text-[15px]" placeholder="••••••••">
+                                <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#888]" aria-label="Mostrar contraseña"
+                                        onclick="const c=document.getElementById('clave'); c.type=c.type==='password'?'text':'password'; this.firstElementChild.classList.toggle('fa-eye-slash')"><i class="far fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <label class="mb-4 flex items-center gap-2 text-sm text-slate-500">
+                            <input type="checkbox" class="accent-[#39A900]"> Recordar mi sesión en este dispositivo
+                        </label>
+                        <button class="boton-sena flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-3.5 text-[15px] font-bold text-white">
+                            <i class="fas fa-right-to-bracket text-[#62E31D]"></i> <span>Iniciar Sesión en SENA Empresa</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mt-6 border-t pt-3 text-center">
+                    <p class="text-sm text-slate-500">Centro de Formación Agroindustrial <strong>"La Angostura"</strong><br>SENA Empresa © 2026 • Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

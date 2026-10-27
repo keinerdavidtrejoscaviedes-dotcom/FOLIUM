@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Satisfacción del empalme · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="satisfaccion" data-mockup="APR-09|Formulario de satisfacción del empalme|HU-054 · RF-013 · RN-027"
+      data-estados="formulario:Habilitado,faltantes:Preguntas sin responder,enviado:Enviado,bloqueado:Acta sin firmas">
+<div id="contenido" class="mx-auto max-w-2xl">
+    <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Satisfacción del empalme</h1>
+    <p class="mt-1 text-sm text-slate-600">Líder de U. F. Productiva Cacao · con María José Ospina. Lo diligencian ambos aprendices.</p>
+
+    <div data-estado="bloqueado" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-lock mb-2 block text-3xl text-slate-300"></i>
+        <p class="font-semibold text-slate-700">Primero debe firmarse el acta de recibimiento</p>
+        <p class="mt-1 text-sm text-slate-500">Falta la firma de Jorge Iván Cuéllar (instructor del área).</p>
+        <a href="08-empalme.html#estado=instructor" class="mt-4 inline-flex rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white">Ver mi empalme</a>
+    </div>
+    <div data-estado="enviado" class="mt-6 rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#E8F3EF] text-3xl text-[#064C3D]"><i class="fas fa-face-smile"></i></span>
+        <p class="mt-5 font-semibold text-slate-800">¡Gracias! Formulario enviado el 14/01/2027</p>
+        <p class="mt-1 text-sm text-slate-500">Cuando María José también lo envíe, el Gestor de Talento Humano podrá dar el visto bueno y quedarás vinculado a tu cargo.</p>
+    </div>
+
+    <form id="encuesta" data-estado="formulario faltantes" novalidate class="mt-6 space-y-3" data-ok="Formulario enviado." data-estado-destino="enviado">
+        <div data-estado="faltantes" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Responde las preguntas resaltadas.</div>
+        <div id="preguntas" class="space-y-3"></div>
+        <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
+            <label for="pendiente" class="block font-semibold text-slate-800">¿Qué quedó pendiente después del empalme?</label>
+            <textarea id="pendiente" rows="3" class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-base"></textarea>
+        </div>
+        <button class="w-full rounded-full bg-[#064C3D] px-6 py-3 text-sm font-semibold text-white sm:w-auto"><i class="fas fa-paper-plane mr-1"></i> Enviar</button>
+    </form>
+</div>
+<script>
+    const PREGUNTAS = ['La información que recibí sobre el cargo fue clara y actualizada.', 'El inventario entregado coincide con lo que encontré.', 'Conocí las fechas de presentación de evidencias del cargo.', 'El tiempo del empalme fue suficiente.', 'El Gestor de Talento Humano acompañó el proceso.'];
+    document.addEventListener('estado', ({ detail }) => {
+        const falta = detail === 'faltantes';
+        document.getElementById('preguntas').innerHTML = PREGUNTAS.map((p, i) => {
+            const vacia = falta && i >= 3;
+            return `<fieldset class="rounded-3xl bg-white p-5 shadow-sm ring-1 ${vacia ? 'ring-red-300' : 'ring-slate-200/70'}">
+                <legend class="sr-only">${p}</legend>
+                <p class="font-semibold text-slate-800">${i + 1}. ${p}</p>
+                <div class="mt-3 grid grid-cols-5 gap-2 text-center text-sm">${[1, 2, 3, 4, 5].map((v) => `<label class="rounded-2xl p-2.5 ring-1 ${vacia ? 'ring-red-200' : 'ring-slate-200'} has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="q${i}" value="${v}" ${falta && i < 3 && v === 4 ? 'checked' : ''} class="sr-only">${v}${v === 1 ? '<span class="block text-[10px]">Nada</span>' : v === 5 ? '<span class="block text-[10px]">Mucho</span>' : ''}</label>`).join('')}</div>
+            </fieldset>`;
+        }).join('');
+    });
+    document.getElementById('encuesta').addEventListener('submit', (e) => {
+        const sin = PREGUNTAS.some((p, i) => !document.querySelector(`input[name="q${i}"]:checked`));
+        if (sin) { e.preventDefault(); e.stopImmediatePropagation(); cambiarEstado('faltantes'); }
+    });
+</script>
+</body>
+</html>

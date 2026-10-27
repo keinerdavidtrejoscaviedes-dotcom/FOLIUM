@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cronograma · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="cronograma" data-mockup="GTH-04|Cronograma del proceso de selección|HU-020, HU-021 · RF-003 · RN-006, RN-033"
+      data-estados="borrador:Borrador,errores:Con errores,prerrequisitos:Faltan prerrequisitos,enviado:Enviado,rechazado:Rechazado,aprobado:Aprobado">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Cronograma del proceso de selección</h1>
+            <p class="mt-1 text-sm text-slate-600">Define la fecha o el rango de cada etapa. El Instructor Líder lo aprueba y desde ahí rigen los plazos y las alertas.</p>
+        </div>
+        <span id="estado-chip" class="rounded-full px-3 py-1 text-xs font-semibold"></span>
+    </div>
+
+    <!-- Mensajes -->
+    <div data-estado="errores" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <p class="font-semibold"><i class="fas fa-circle-exclamation mr-1"></i> El cronograma no se envió. Revisa estas etapas:</p>
+        <ul class="mt-1 list-disc pl-6"><li>Entrevistas técnica y psicológica: sin fecha.</li><li>Prueba psicotécnica: la fecha debe ser posterior al cierre de la convocatoria.</li><li>Apertura de la convocatoria: las fechas del cronograma no pueden ser anteriores a hoy.</li></ul>
+    </div>
+    <div data-estado="prerrequisitos" class="mt-4 space-y-2" role="alert">
+        <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"><i class="fas fa-lock mt-0.5 text-red-500"></i><span>La activación de cargos es prerrequisito del cronograma. <a href="03-activacion.html" class="font-semibold underline">Activar cargos</a></span></div>
+        <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"><i class="fas fa-user-tie mt-0.5 text-red-500"></i><span>No hay un Instructor Líder designado para aprobar el cronograma. El Administrador fue avisado.</span></div>
+        <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"><i class="fas fa-brain mt-0.5 text-red-500"></i><span>Debe existir al menos un psicólogo activo para iniciar el proceso de selección. El Administrador fue avisado.</span></div>
+    </div>
+    <div data-estado="enviado" class="mt-4 flex items-start gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900" role="status">
+        <i class="fas fa-paper-plane mt-0.5"></i><span>Enviado a aprobación el 20/08/2026 a las 4:12 p. m. Mientras el Instructor Líder lo revisa no se puede modificar.</span>
+    </div>
+    <div data-estado="rechazado" class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+        <p class="font-semibold"><i class="fas fa-rotate-left mr-1 text-amber-500"></i> El Instructor Líder devolvió el cronograma para ajustes (22/08/2026)</p>
+        <p class="mt-1">Motivo: «Las entrevistas coinciden con la semana de EXPOSENA. Muévelas a partir del 1 de octubre».</p>
+    </div>
+    <div data-estado="aprobado" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]" role="status">
+        <i class="fas fa-circle-check"></i><span class="flex-1"><strong>Aprobado por Yina (Líder de la estrategia) el 25/08/2026.</strong> Ya está en el calendario, es visible para los aprendices de las fichas habilitadas y se les notificó por correo.</span>
+        <a href="05-convocatoria.html" class="rounded-full bg-[#064C3D] px-3 py-1 text-xs font-semibold text-white hover:bg-[#043A2F]">Publicar la convocatoria</a>
+    </div>
+
+    <div class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <form novalidate class="space-y-4" onsubmit="return false">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Etapas</h2>
+                <ol id="etapas" class="mt-4 space-y-3"></ol>
+            </section>
+            <div data-estado="borrador errores prerrequisitos rechazado" class="flex flex-wrap justify-end gap-2 pb-4">
+                <button type="button" data-accion data-ok="Cronograma guardado como borrador." data-ok-tipo="info" class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-white"><i class="fas fa-floppy-disk mr-1"></i> Guardar borrador</button>
+                <button type="button" data-titulo-confirmar="¿Enviar a aprobación?" data-confirmar="El Instructor Líder recibirá el cronograma en sus aprobaciones pendientes. Mientras lo revisa no podrás modificarlo." data-ok="Cronograma enviado al Instructor Líder." data-estado-destino="enviado"
+                        class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-paper-plane mr-1"></i> Enviar a aprobación</button>
+            </div>
+        </form>
+
+        <aside class="space-y-4">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Así lo verán los aprendices</h2>
+                <ol id="vista" class="relative mt-4 space-y-3 border-l-2 border-[#E8F3EF] pl-5 text-sm"></ol>
+            </section>
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Historial</h2>
+                <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                    <li><i class="fas fa-pen mr-1 text-slate-400"></i>Borrador creado · 18/08/2026 · Laura Cuéllar</li>
+                    <li data-estado="enviado rechazado aprobado"><i class="fas fa-paper-plane mr-1 text-slate-400"></i>Enviado · 20/08/2026 · Juan Esteban Rojas</li>
+                    <li data-estado="rechazado aprobado"><i class="fas fa-rotate-left mr-1 text-amber-500"></i>Devuelto con motivo · 22/08/2026 · Yina</li>
+                    <li data-estado="aprobado"><i class="fas fa-paper-plane mr-1 text-slate-400"></i>Reenviado · 23/08/2026 · Laura Cuéllar</li>
+                    <li data-estado="aprobado"><i class="fas fa-circle-check mr-1 text-emerald-600"></i>Aprobado · 25/08/2026 · Yina</li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<script>
+    // [etapa, rango, inicio, fin]
+    const ETAPAS = [
+        ['Apertura de la convocatoria', false, '2026-09-01'],
+        ['Cierre de la convocatoria', false, '2026-09-12'],
+        ['Entrega de hojas de vida', true, '2026-09-01', '2026-09-12'],
+        ['Entrega de propuestas de trabajo', true, '2026-09-01', '2026-09-12'],
+        ['Prueba psicotécnica', true, '2026-09-22', '2026-09-29'],
+        ['Entrevistas técnica y psicológica', true, '2026-10-01', '2026-10-10'],
+        ['Validación de la selección y reubicaciones', true, '2026-10-13', '2026-10-24'],
+        ['Publicación del acta de seleccionados', false, '2026-10-28'],
+        ['Empalme', true, '2027-01-11', '2027-01-22'],
+    ];
+    const chip = { borrador: ['Borrador', 'bg-slate-100 text-slate-600'], errores: ['Borrador', 'bg-slate-100 text-slate-600'], prerrequisitos: ['Borrador', 'bg-slate-100 text-slate-600'], enviado: ['Enviado a aprobación', 'bg-sky-100 text-sky-800'], rechazado: ['Devuelto para ajustes', 'bg-amber-100 text-amber-800'], aprobado: ['Aprobado', 'bg-emerald-100 text-emerald-800'] };
+    const campo = 'rounded-xl border bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40 disabled:bg-slate-50 disabled:text-slate-500';
+    const f = (iso) => iso ? iso.split('-').reverse().join('/') : '';
+
+    const pintar = (estado) => {
+        const soloLectura = estado === 'enviado' || estado === 'aprobado';
+        const errores = { 5: 'Sin fecha', 4: 'La fecha de la prueba psicotécnica debe ser posterior al cierre de la convocatoria', 0: 'Las fechas del cronograma no pueden ser anteriores a hoy' };
+        document.getElementById('etapas').innerHTML = ETAPAS.map(([nombre, rango, ini, fin], i) => {
+            let a = ini, b = fin;
+            if (estado === 'borrador' && i >= 6) a = b = '';
+            if (estado === 'errores') { if (i === 5) a = b = ''; if (i === 4) { a = '2026-09-10'; b = '2026-09-15'; } if (i === 0) a = '2026-08-14'; }
+            if (estado === 'rechazado' && i === 5) { a = '2026-09-28'; b = '2026-10-03'; }
+            const error = estado === 'errores' && errores[i];
+            const borde = error ? 'border-red-400' : (estado === 'rechazado' && i === 5 ? 'border-amber-400' : 'border-slate-200');
+            return `<li class="rounded-2xl p-3 ring-1 ${error ? 'ring-red-200 bg-red-50/40' : 'ring-slate-200'}">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#064C3D] text-xs font-bold text-white">${i + 1}</span>
+                    <label class="flex-1 text-sm font-semibold text-slate-700">${nombre} <span class="text-red-500">*</span></label>
+                    <div class="flex items-center gap-2">
+                        <input type="date" value="${a}" aria-label="${rango ? 'Desde' : 'Fecha'}" ${soloLectura ? 'disabled' : ''} class="${campo} ${borde}">
+                        ${rango ? `<span class="text-xs text-slate-400">a</span><input type="date" value="${b}" aria-label="Hasta" ${soloLectura ? 'disabled' : ''} class="${campo} ${borde}">` : ''}
+                    </div>
+                </div>
+                ${error ? `<p class="mt-2 pl-9 text-xs font-semibold text-red-600">${error}</p>` : ''}
+            </li>`;
+        }).join('');
+        document.getElementById('vista').innerHTML = ETAPAS.map(([nombre, rango, ini, fin], i) => `
+            <li class="relative"><span class="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-[#064C3D] ring-4 ring-white"></span>
+                <p class="font-semibold text-slate-700">${nombre}</p><p class="text-xs text-slate-500">${f(ini)}${rango ? ' – ' + f(fin) : ''}</p></li>`).join('');
+        const [texto, color] = chip[estado];
+        const c = document.getElementById('estado-chip');
+        c.textContent = texto;
+        c.className = 'rounded-full px-3 py-1 text-xs font-semibold ' + color;
+    };
+    document.addEventListener('estado', ({ detail }) => pintar(detail));
+</script>
+</body>
+</html>

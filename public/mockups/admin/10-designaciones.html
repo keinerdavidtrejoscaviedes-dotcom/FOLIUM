@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Designaciones · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="designaciones" data-mockup="ADM-10|Designaciones de instructores|HU-009, HU-010, HU-011 · RN-033, RN-034"
+      data-estados="normal:Normal,sin-lider:Sin Líder de la estrategia">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Designaciones</h1>
+            <p class="mt-1 text-sm text-slate-600">Las funciones de los instructores en el proceso. Se asignan a la función, no a la persona.</p>
+        </div>
+        <button type="button" data-abrir="#modal-asignar" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 transition hover:bg-[#043A2F]">
+            <i class="fas fa-plus" aria-hidden="true"></i> Nueva designación
+        </button>
+    </div>
+
+    <!-- Condiciones mínimas (HU-011, RN-033) -->
+    <div data-estado="sin-lider" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+        <i class="fas fa-triangle-exclamation text-amber-500" aria-hidden="true"></i>
+        <span class="min-w-0 flex-1"><strong>No hay un Líder de la estrategia vigente.</strong> Sin esta designación no se puede enviar el cronograma a aprobación ni iniciar el proceso de selección.</span>
+        <button type="button" data-abrir="#modal-asignar" class="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600">Asignar designación</button>
+    </div>
+
+    <!-- Resumen por función -->
+    <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex items-center gap-3"><span class="grid h-10 w-10 place-items-center rounded-xl bg-[#064C3D] text-[#34D399]"><i class="fas fa-user-tie"></i></span>
+                <div><p class="text-xs text-slate-500">Líder de la estrategia</p><p class="text-xl font-extrabold text-[#064C3D]"><span data-estado="normal">1</span><span data-estado="sin-lider" class="text-amber-600">0</span></p></div></div>
+        </div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex items-center gap-3"><span class="grid h-10 w-10 place-items-center rounded-xl bg-[#E8F3EF] text-[#064C3D]"><i class="fas fa-chalkboard-user"></i></span>
+                <div><p class="text-xs text-slate-500">Instructor de Talento Humano</p><p class="text-xl font-extrabold text-[#064C3D]">1</p></div></div>
+        </div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex items-center gap-3"><span class="grid h-10 w-10 place-items-center rounded-xl bg-[#E8F3EF] text-[#064C3D]"><i class="fas fa-screwdriver-wrench"></i></span>
+                <div><p class="text-xs text-slate-500">Instructores técnicos</p><p class="text-xl font-extrabold text-[#064C3D]">7</p></div></div>
+        </div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex items-center gap-3"><span class="grid h-10 w-10 place-items-center rounded-xl bg-sky-50 text-sky-700"><i class="fas fa-brain"></i></span>
+                <div><p class="text-xs text-slate-500">Psicólogos activos (SICEFA)</p><p class="text-xl font-extrabold text-[#064C3D]">2</p></div></div>
+        </div>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="mt-6 flex flex-wrap gap-2" data-tabs="designaciones" role="tablist">
+        <button type="button" data-tab="vigentes" aria-selected="true" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition">Vigentes <span class="ml-1 text-xs opacity-70">9</span></button>
+        <button type="button" data-tab="historial" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition">Historial <span class="ml-1 text-xs opacity-70">6</span></button>
+        <button type="button" data-tab="psicologos" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition">Psicólogos <span class="ml-1 text-xs opacity-70">2</span></button>
+    </div>
+
+    <!-- Vigentes -->
+    <div data-panel="vigentes" data-grupo="designaciones" class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr>
+                        <th class="px-4 py-3 font-semibold">Instructor</th>
+                        <th class="px-4 py-3 font-semibold">Designación</th>
+                        <th class="hidden px-4 py-3 font-semibold lg:table-cell">Vigencia</th>
+                        <th class="hidden px-4 py-3 font-semibold xl:table-cell">Asignada</th>
+                        <th class="px-4 py-3"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody id="filas-vigentes" class="divide-y divide-slate-100"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Historial -->
+    <div data-panel="historial" data-grupo="designaciones" class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr><th class="px-4 py-3 font-semibold">Instructor</th><th class="px-4 py-3 font-semibold">Designación</th><th class="px-4 py-3 font-semibold">Periodo</th><th class="hidden px-4 py-3 font-semibold lg:table-cell">Motivo del retiro</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-600">
+                    <tr><td class="px-4 py-3 font-semibold text-slate-800">Rubiela Ortiz Castro</td><td class="px-4 py-3">Instructor técnico · Producción Ganadera</td><td class="px-4 py-3">Fase XXXIV – Fase XXXV</td><td class="hidden px-4 py-3 lg:table-cell">Reasignada a Diana Patricia Losada</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold text-slate-800">Fabián Andrés Motta</td><td class="px-4 py-3">Instructor técnico · Procesamiento de Alimentos</td><td class="px-4 py-3">Fase XXXV</td><td class="hidden px-4 py-3 lg:table-cell">Vigencia por fase terminada</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold text-slate-800">Jhon Freddy Puentes</td><td class="px-4 py-3">Instructor técnico · Gestión de Mercados</td><td class="px-4 py-3">Fase XXXIII – Fase XXXV</td><td class="hidden px-4 py-3 lg:table-cell">Traslado a otro centro</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold text-slate-800">Claudia Liliana Ramos</td><td class="px-4 py-3">Instructor de Talento Humano</td><td class="px-4 py-3">Fase XXXII – Fase XXXIV</td><td class="hidden px-4 py-3 lg:table-cell">Reasignada a Yina</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold text-slate-800">Fabián Andrés Motta</td><td class="px-4 py-3">Instructor técnico · Procesamiento de Alimentos</td><td class="px-4 py-3">Fase XXXIV</td><td class="hidden px-4 py-3 lg:table-cell">Vigencia por fase terminada</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold text-slate-800">Nelson Javier Polo</td><td class="px-4 py-3">Instructor técnico · Prevención y Control Ambiental</td><td class="px-4 py-3">Fase XXXIII</td><td class="hidden px-4 py-3 lg:table-cell">Fin de contrato</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Psicólogos -->
+    <div data-panel="psicologos" data-grupo="designaciones" class="mt-4 space-y-3">
+        <div class="flex items-start gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900">
+            <i class="fas fa-circle-info mt-0.5" aria-hidden="true"></i>
+            <span>Los psicólogos no reciben designación: su rol <strong>Psicólogo</strong> viene de SICEFA y los habilita como evaluadores psicológicos. Esta lista es de solo consulta.</span>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+            <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70">
+                <span class="grid h-10 w-10 place-items-center rounded-full bg-sky-100 text-sm font-bold text-sky-800">AC</span>
+                <div class="min-w-0"><p class="font-semibold text-slate-800">Adriana Carolina Muñoz</p><p class="truncate text-xs text-slate-500">psicologia1@sena.edu.co · Activa en SICEFA</p></div>
+            </div>
+            <div class="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70">
+                <span class="grid h-10 w-10 place-items-center rounded-full bg-sky-100 text-sm font-bold text-sky-800">MF</span>
+                <div class="min-w-0"><p class="font-semibold text-slate-800">Mauricio Fernando Quintero</p><p class="truncate text-xs text-slate-500">psicologia2@sena.edu.co · Activo en SICEFA</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: nueva designación (HU-009) -->
+    <dialog id="modal-asignar" aria-labelledby="titulo-asignar" class="m-auto w-[min(94vw,36rem)] rounded-3xl p-0 shadow-2xl">
+        <form novalidate class="p-6" data-ok="Designación asignada. El instructor ya ve sus funciones en FOLIUM.">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 id="titulo-asignar" class="text-lg font-bold text-slate-900">Nueva designación</h2>
+                    <p class="text-sm text-slate-500">Un instructor puede tener varias designaciones a la vez.</p>
+                </div>
+                <button type="button" data-cerrar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            </div>
+
+            <div class="mt-5 space-y-4">
+                <div data-campo>
+                    <label for="instructor" class="mb-1 block text-sm font-semibold text-slate-700">Instructor <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                        <input id="instructor" list="instructores" data-obligatorio placeholder="Busca por nombre o documento…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">
+                        <datalist id="instructores">
+                            <option value="Carlos Andrés Medina · CC 7.712.045"></option><option value="Diana Patricia Losada · CC 36.299.118"></option>
+                            <option value="Jorge Iván Cuéllar · CC 12.135.770"></option><option value="Hernán Darío Silva · CC 1.075.233.410"></option>
+                        </datalist>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-500">Los instructores y sus correos vienen de SICEFA.</p>
+                </div>
+
+                <fieldset>
+                    <legend class="mb-2 text-sm font-semibold text-slate-700">Designación <span class="text-red-500">*</span></legend>
+                    <div class="grid gap-2">
+                        <label class="flex items-start gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]">
+                            <input type="radio" name="tipo" value="lider" class="mt-1 accent-[#064C3D]">
+                            <span><span class="block text-sm font-semibold text-slate-700">Líder de la estrategia</span><span class="text-xs text-slate-500">Aprueba el cronograma, valida la selección y usa el submódulo del Instructor Líder.</span></span>
+                        </label>
+                        <label class="flex items-start gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]">
+                            <input type="radio" name="tipo" value="th" class="mt-1 accent-[#064C3D]">
+                            <span><span class="block text-sm font-semibold text-slate-700">Instructor de Talento Humano</span><span class="text-xs text-slate-500">Activa cargos con el Gestor, analiza hojas de vida y valida la selección.</span></span>
+                        </label>
+                        <label class="flex items-start gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]">
+                            <input type="radio" name="tipo" value="tecnico" checked class="mt-1 accent-[#064C3D]">
+                            <span class="flex-1"><span class="block text-sm font-semibold text-slate-700">Instructor técnico</span><span class="text-xs text-slate-500">Realiza la entrevista técnica de su programa.</span>
+                                <select aria-label="Programa de formación" class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                                    <option>Gestión Agroempresarial</option><option>Gestión de la Producción Agrícola</option><option>Producción Ganadera</option><option>Procesamiento de Alimentos</option><option>Prevención y Control Ambiental</option><option>Análisis y Desarrollo de Software</option>
+                                </select>
+                            </span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="vigencia" class="mb-1 block text-sm font-semibold text-slate-700">Vigencia <span class="text-red-500">*</span></label>
+                        <select id="vigencia" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Indefinida</option><option>Solo la Fase XXXVI</option></select>
+                    </div>
+                    <div>
+                        <label for="fecha" class="mb-1 block text-sm font-semibold text-slate-700">Desde</label>
+                        <input id="fecha" type="date" value="2026-10-21" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-check mr-1"></i> Asignar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Modal: reasignar (HU-010) -->
+    <dialog id="modal-reasignar" aria-labelledby="titulo-reasignar" class="m-auto w-[min(94vw,32rem)] rounded-3xl p-0 shadow-2xl">
+        <form novalidate class="p-6" data-ok="Designación reasignada. El historial conserva a quien la ejercía.">
+            <h2 id="titulo-reasignar" class="text-lg font-bold text-slate-900">Reasignar designación</h2>
+            <p class="mt-1 text-sm text-slate-500">La función pasa a otro instructor sin cambiar el proceso. Quien la ejercía queda en el historial.</p>
+            <div class="mt-4 flex items-center gap-3 rounded-2xl bg-[#E8F3EF]/60 p-3 text-sm">
+                <span class="grid h-9 w-9 place-items-center rounded-full bg-[#064C3D] text-xs font-bold text-white">CM</span>
+                <div class="flex-1"><p class="font-semibold text-slate-800">Carlos Andrés Medina</p><p class="text-xs text-slate-500">Instructor técnico · Gestión Agroempresarial</p></div>
+                <i class="fas fa-arrow-right text-[#064C3D]"></i>
+            </div>
+            <div class="mt-4 space-y-4">
+                <div data-campo>
+                    <label for="nuevo-instructor" class="mb-1 block text-sm font-semibold text-slate-700">Nuevo instructor <span class="text-red-500">*</span></label>
+                    <input id="nuevo-instructor" list="instructores" data-obligatorio placeholder="Busca por nombre o documento…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">
+                </div>
+                <div data-campo>
+                    <label for="motivo-reasignar" class="mb-1 block text-sm font-semibold text-slate-700">Motivo <span class="text-red-500">*</span></label>
+                    <textarea id="motivo-reasignar" rows="2" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Reasignar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Modal: retirar (HU-010) -->
+    <dialog id="modal-retirar" aria-labelledby="titulo-retirar" class="m-auto w-[min(94vw,30rem)] rounded-3xl p-0 shadow-2xl">
+        <form novalidate class="p-6" data-ok="Designación retirada. Quedó en el historial.">
+            <h2 id="titulo-retirar" class="text-lg font-bold text-slate-900">¿Retirar la designación?</h2>
+            <p class="mt-1 text-sm text-slate-600"><strong>Hernán Darío Silva</strong> dejará de ser Instructor técnico de Análisis y Desarrollo de Software. Se conserva el historial.</p>
+            <div class="mt-4" data-campo>
+                <label for="motivo-retiro" class="mb-1 block text-sm font-semibold text-slate-700">Motivo del retiro <span class="text-red-500">*</span></label>
+                <textarea id="motivo-retiro" rows="2" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-700">Retirar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Modal: retiro bloqueado por pendientes (RN-034) -->
+    <dialog id="modal-bloqueado" aria-labelledby="titulo-bloqueado" class="m-auto w-[min(94vw,32rem)] rounded-3xl p-0 shadow-2xl">
+        <div class="p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-amber-50 text-xl text-amber-500"><i class="fas fa-hand"></i></span>
+            <h2 id="titulo-bloqueado" class="mt-4 text-lg font-bold text-slate-900">No se puede retirar todavía</h2>
+            <p class="mt-1 text-sm text-slate-600"><strong>Jorge Iván Cuéllar</strong> tiene pendientes en la convocatoria de la Fase XXXVI. Reasigna la designación o espera a que los complete.</p>
+            <ul class="mt-4 divide-y divide-slate-100 rounded-2xl ring-1 ring-slate-200 text-sm">
+                <li class="flex items-center gap-3 px-4 py-3"><i class="fas fa-comments w-4 text-center text-amber-500"></i><span class="flex-1">Entrevistas técnicas sin calificar</span><span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">4</span></li>
+                <li class="flex items-center gap-3 px-4 py-3"><i class="fas fa-arrows-rotate w-4 text-center text-amber-500"></i><span class="flex-1">Comité de reubicación en curso (aprendices por reubicar)</span><span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">3</span></li>
+            </ul>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Entendido</button>
+                <button type="button" data-cerrar onclick="setTimeout(() => document.getElementById('modal-reasignar').showModal(), 50)" class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Reasignar</button>
+            </div>
+        </div>
+    </dialog>
+</div>
+
+<script>
+    const designaciones = [
+        ['Yina', 'yina@senaempresa.edu.co', 'Líder de la estrategia', null, 'Indefinida', '02/02/2026 · Sistema (puesta en marcha)', 'lider'],
+        ['Yina', 'yina@senaempresa.edu.co', 'Instructor de Talento Humano', null, 'Indefinida', '02/02/2026 · Sistema (puesta en marcha)'],
+        ['Carlos Andrés Medina', 'camedina@sena.edu.co', 'Instructor técnico', 'Gestión Agroempresarial', 'Indefinida', '10/03/2026 · Yina'],
+        ['Diana Patricia Losada', 'dplosada@sena.edu.co', 'Instructor técnico', 'Producción Ganadera', 'Indefinida', '10/03/2026 · Yina'],
+        ['Jorge Iván Cuéllar', 'jicuellar@sena.edu.co', 'Instructor técnico', 'Gestión de la Producción Agrícola', 'Fase XXXVI', '15/09/2026 · Yina', 'pendientes'],
+        ['Luz Marina Vargas', 'lmvargas@sena.edu.co', 'Instructor técnico', 'Procesamiento de Alimentos', 'Fase XXXVI', '15/09/2026 · Yina'],
+        ['Óscar Fernando Perdomo', 'ofperdomo@sena.edu.co', 'Instructor técnico', 'Prevención y Control Ambiental', 'Indefinida', '10/03/2026 · Yina'],
+        ['Paola Andrea Trujillo', 'patrujillo@sena.edu.co', 'Instructor técnico', 'Coordinación en Sistemas Integrados de Gestión', 'Indefinida', '10/03/2026 · Yina'],
+        ['Hernán Darío Silva', 'hdsilva@sena.edu.co', 'Instructor técnico', 'Análisis y Desarrollo de Software', 'Fase XXXVI', '15/09/2026 · Yina'],
+    ];
+    const chip = { 'Líder de la estrategia': 'bg-[#064C3D] text-white', 'Instructor de Talento Humano': 'bg-emerald-100 text-emerald-800', 'Instructor técnico': 'bg-slate-100 text-slate-600' };
+    const iniciales = (n) => n.split(' ').slice(0, 2).map((p) => p[0]).join('');
+    document.getElementById('filas-vigentes').innerHTML = designaciones.map(([nombre, correo, tipo, programa, vigencia, asignada, marca]) => `
+        <tr class="transition hover:bg-[#E8F3EF]/40" ${marca === 'lider' ? 'data-estado="normal"' : ''}>
+            <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#E8F3EF] text-xs font-bold text-[#064C3D]">${iniciales(nombre)}</span>
+                    <div class="min-w-0"><p class="font-semibold text-slate-800">${nombre}</p><p class="truncate text-xs text-slate-500">${correo}</p></div>
+                </div>
+            </td>
+            <td class="px-4 py-3">
+                <span class="whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${chip[tipo]}">${tipo}</span>
+                ${programa ? `<p class="mt-1 text-xs text-slate-500">${programa}</p>` : ''}
+            </td>
+            <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">${vigencia}</td>
+            <td class="hidden px-4 py-3 text-xs text-slate-500 xl:table-cell">${asignada}</td>
+            <td class="px-4 py-3 text-right">
+                <div class="flex justify-end gap-1">
+                    <button type="button" data-abrir="#modal-reasignar" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#064C3D]" title="Reasignar" aria-label="Reasignar"><i class="fas fa-right-left"></i></button>
+                    <button type="button" data-abrir="${marca === 'pendientes' ? '#modal-bloqueado' : '#modal-retirar'}" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600" title="Retirar" aria-label="Retirar"><i class="fas fa-user-minus"></i></button>
+                </div>
+            </td>
+        </tr>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Validar selección · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="lider" data-activo="aprobaciones" data-mockup="INS-03|Validar la selección de un cargo|HU-035, HU-038 · RF-010 · RN-005, RN-019 a RN-021, RN-069"
+      data-estados="propuesta:Propuesta,ajuste:Ajuste sin justificación,empate:Empate por resolver,vacante:Nadie alcanza el umbral,validado:Validada por mí,validado-th:Validada por el Instructor de TH">
+<div id="contenido">
+    <a href="01-aprobaciones.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Aprobaciones pendientes</a>
+    <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Propuesta de selección · Fase XXXVI</p>
+            <h1 id="cargo" class="mt-1 text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Gestor de Talento Humano</h1>
+        </div>
+        <div class="flex flex-wrap gap-2 text-xs">
+            <span id="cupos" class="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 ring-1 ring-slate-200">2 cupos</span>
+            <span class="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 ring-1 ring-slate-200">Umbral 120 de 200</span>
+            <span id="politica" class="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 ring-1 ring-slate-200">Si nadie alcanza: mayor puntaje</span>
+        </div>
+    </div>
+
+    <div id="aviso" class="mt-4"></div>
+
+    <section class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="border-b border-slate-100 px-6 py-4">
+            <h2 class="font-bold text-[#064C3D]">Candidatos por jerarquía de preferencia</h2>
+            <p class="mt-1 text-xs text-slate-500">Primero los de 1.ª opción por puntaje total; si quedan cupos, los de 2.ª y luego 3.ª. Total = prueba psicotécnica + entrevista (promedio de los evaluadores).</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr><th class="w-10 px-4 py-3"><span class="sr-only">Elegir</span></th><th class="px-4 py-3 font-semibold">Aspirante</th><th class="px-4 py-3 text-center font-semibold">Opción</th><th class="px-4 py-3 text-center font-semibold">Prueba</th><th class="px-4 py-3 text-center font-semibold">Entrevista</th><th class="px-4 py-3 text-center font-semibold">Total</th><th class="px-4 py-3 font-semibold">Propuesta</th></tr>
+                </thead>
+                <tbody id="candidatos" class="divide-y divide-slate-100"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Decisión -->
+    <form id="decision" novalidate class="mt-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70" data-ok="Selección del cargo validada. Quedó en la auditoría con la designación Líder de la estrategia." data-estado-destino="validado">
+        <h2 class="font-bold text-[#064C3D]">Tu decisión</h2>
+        <p class="mt-1 text-sm text-slate-600">Valida la propuesta tal como está o cambia los candidatos marcados arriba. Todo ajuste exige justificación.</p>
+        <div class="mt-4" data-campo>
+            <label for="justificacion" class="mb-1 block text-sm font-semibold text-slate-700">Justificación <span id="obligatoria" class="font-normal text-slate-400">(obligatoria si ajustas)</span></label>
+            <textarea id="justificacion" rows="3" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+            <p data-error hidden class="mt-1 text-xs font-semibold text-red-600">Todo ajuste a la selección requiere justificación</p>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <p class="text-xs text-slate-500"><i class="fas fa-clock-rotate-left mr-1"></i>Se registra con tu designación y, si ajustas, el valor anterior, el nuevo y la justificación.</p>
+            <button class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-check mr-1"></i> Validar</button>
+        </div>
+    </form>
+
+    <!-- Ya validado -->
+    <section id="validada" class="mt-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+        <h2 class="font-bold text-[#064C3D]">Validación</h2>
+        <p id="texto-validada" class="mt-2 text-sm text-slate-600"></p>
+        <p class="mt-2 text-xs text-slate-400"><i class="fas fa-lock mr-1"></i>Un cargo se valida una sola vez: ya no se puede volver a validar ni ajustar.</p>
+    </section>
+</div>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+    const CASOS = {
+        gth: { cargo: 'Gestor de Talento Humano', cupos: 2, candidatos: [
+            ['Paula Díaz Rivera', 1, 82, 82, true], ['Sergio Medina Ortiz', 1, 80, 78, true], ['Daniel Felipe Ortiz', 1, 71, 76],
+            ['Juliana Andrea Mora', 2, 79, 75], ['Camilo Andrés Vargas', 3, 85, 86, false, 'Seleccionado en su 1.ª opción'],
+        ] },
+        pecuario: { cargo: 'Gestor Pecuario', cupos: 1, candidatos: [['Óscar David Lara', 1, 74, 73, 'empate'], ['Brayan Felipe Cuéllar', 1, 77, 70, 'empate'], ['Laura Sofía Puentes', 3, 70, 69]] },
+        sebi: { cargo: 'Líder Semillero SEBI', cupos: 1, candidatos: [['Natalia Polanía', 1, 55, 58], ['Kevin Ortiz', 2, 51, 60]] },
+    };
+    const pintar = (estado) => {
+        const caso = estado === 'empate' ? CASOS.pecuario : estado === 'vacante' ? CASOS.sebi : CASOS.gth;
+        const cerrado = estado === 'validado' || estado === 'validado-th';
+        $('cargo').textContent = caso.cargo;
+        $('cupos').textContent = caso.cupos + (caso.cupos === 1 ? ' cupo' : ' cupos');
+        $('politica').textContent = estado === 'vacante' ? 'Si nadie alcanza: declarar vacante' : 'Si nadie alcanza: mayor puntaje';
+        $('candidatos').innerHTML = caso.candidatos.map(([n, op, prueba, entrevista, propuesto, nota], i) => {
+            const total = prueba + entrevista;
+            const elegido = estado === 'ajuste' ? (i === 0 || i === 3) : propuesto === true;
+            const fila = propuesto === 'empate' ? 'bg-red-50/50' : elegido ? 'bg-emerald-50/60' : '';
+            return `<tr class="${fila}">
+                <td class="px-4 py-3"><input type="checkbox" ${elegido ? 'checked' : ''} ${cerrado || nota ? 'disabled' : ''} aria-label="Elegir a ${n}" class="h-4 w-4 accent-[#064C3D]"></td>
+                <td class="px-4 py-3"><a href="05-aspirante.html" class="font-semibold text-slate-800 hover:text-[#064C3D] hover:underline">${n}</a>${nota ? `<p class="text-xs text-slate-400">${nota}</p>` : ''}</td>
+                <td class="px-4 py-3 text-center"><span class="inline-grid h-6 w-6 place-items-center rounded-full ${op === 1 ? 'bg-[#064C3D] text-white' : op === 2 ? 'bg-emerald-500 text-white' : 'bg-[#34D399] text-[#043A2F]'} text-xs font-bold">${op}</span></td>
+                <td class="px-4 py-3 text-center text-slate-600">${prueba}</td>
+                <td class="px-4 py-3 text-center text-slate-600">${entrevista} <span class="text-[11px] text-slate-400">· 3 ev.</span></td>
+                <td class="px-4 py-3 text-center font-extrabold ${total >= 120 ? 'text-[#064C3D]' : 'text-red-600'}">${total}</td>
+                <td class="px-4 py-3">${propuesto === 'empate' ? '<span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700">Empate</span>' : propuesto === true ? '<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">Seleccionado</span>' : total < 120 ? '<span class="text-xs text-red-600">Bajo el umbral</span>' : ''}</td>
+            </tr>`;
+        }).join('');
+
+        const avisos = {
+            ajuste: ['border-red-200 bg-red-50 text-red-700', 'fa-circle-exclamation', 'Cambiaste a Sergio Medina Ortiz por Juliana Andrea Mora (2.ª opción). <strong>Todo ajuste a la selección requiere justificación.</strong>'],
+            empate: ['border-red-200 bg-red-50 text-red-800', 'fa-scale-unbalanced', '<strong>Empate por resolver:</strong> dos candidatos de 1.ª opción con 147 puntos. Elige uno y escribe la justificación.'],
+            vacante: ['border-slate-200 bg-slate-50 text-slate-700', 'fa-ban', 'Ningún candidato alcanza el umbral de 120. Según la política de la convocatoria, el sistema propone <strong>declarar el cargo vacante</strong>.'],
+        }[estado];
+        $('aviso').innerHTML = avisos ? `<div class="flex items-start gap-3 rounded-2xl border ${avisos[0]} px-4 py-3 text-sm" role="alert"><i class="fas ${avisos[1]} mt-0.5"></i><span>${avisos[2]}</span></div>` : '';
+
+        $('decision').hidden = cerrado;
+        $('validada').hidden = !cerrado;
+        $('texto-validada').innerHTML = estado === 'validado-th'
+            ? '<i class="fas fa-circle-check mr-1 text-emerald-600"></i>Validada por <strong>Paola Andrea Trujillo</strong> con la designación Instructor de Talento Humano el 19/10/2026 a las 3:40 p. m., sin ajustes.'
+            : '<i class="fas fa-circle-check mr-1 text-emerald-600"></i>Validada por <strong>ti</strong> con la designación Líder de la estrategia el 21/10/2026 a las 11:05 a. m.';
+        const just = $('justificacion');
+        const exige = estado === 'ajuste' || estado === 'empate';
+        just.toggleAttribute('data-obligatorio', exige);
+        just.classList.toggle('border-red-400', estado === 'ajuste');
+        just.closest('[data-campo]').querySelector('[data-error]').hidden = estado !== 'ajuste';
+        $('obligatoria').textContent = exige ? '(obligatoria)' : '(obligatoria si ajustas)';
+    };
+    document.addEventListener('estado', ({ detail }) => pintar(detail));
+    // Cambiar a mano los candidatos convierte la validación en un ajuste
+    $('candidatos').addEventListener('change', () => {
+        $('justificacion').setAttribute('data-obligatorio', '');
+        $('obligatoria').textContent = '(obligatoria)';
+    });
+</script>
+</body>
+</html>

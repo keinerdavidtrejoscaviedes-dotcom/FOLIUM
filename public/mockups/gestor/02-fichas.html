@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fichas de la fase · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="fichas" data-mockup="GTH-02|Fichas de la fase|HU-017, HU-018 · RF-018 · RN-038, RN-039"
+      data-estados="seleccion:Seleccionar,confirmada:Confirmada,sin-seleccion:Sin fichas marcadas,publicada:Convocatoria publicada,sicefa:SICEFA no responde,vacio:Sin fichas en SICEFA">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Fichas de la fase</h1>
+            <p class="mt-1 text-sm text-slate-600">Elige las fichas que ingresan a la Fase XXXVI. Sus aprendices podrán ver la convocatoria y sus programas definen los cargos propuestos.</p>
+        </div>
+        <button type="button" data-accion data-ok="Fichas actualizadas desde SICEFA." data-ok-tipo="info" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-white"><i class="fas fa-rotate"></i> Actualizar desde SICEFA</button>
+    </div>
+
+    <!-- Mensajes de cada estado -->
+    <div data-estado="confirmada" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]" role="status">
+        <i class="fas fa-circle-check"></i><span class="flex-1"><strong>Fichas asociadas a la fase correctamente:</strong> 3 fichas y 64 aprendices.</span>
+        <a href="03-activacion.html" class="rounded-full bg-[#064C3D] px-3 py-1 text-xs font-semibold text-white hover:bg-[#043A2F]">Ir a la activación de cargos</a>
+    </div>
+    <div data-estado="sin-seleccion" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">
+        <i class="fas fa-circle-exclamation mr-1"></i> Debe seleccionar al menos una ficha para la fase
+    </div>
+    <div data-estado="publicada" class="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+        <i class="fas fa-lock mt-0.5 text-amber-500"></i><span>La convocatoria ya fue publicada; no se pueden modificar las fichas de la fase.</span>
+    </div>
+    <div data-estado="sicefa" class="mt-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <i class="fas fa-plug-circle-xmark mt-0.5 text-red-500"></i>
+        <div><p class="font-semibold">No fue posible obtener las fichas desde SICEFA. Intente más tarde.</p><p class="mt-0.5">Las fichas ya asociadas a la fase no cambiaron. El Administrador fue avisado.</p></div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900">
+        <i class="fas fa-filter"></i>
+        <span class="flex-1">Solo se muestran fichas de <strong>nivel tecnólogo</strong> y <strong>modalidad presencial</strong>: SENA Empresa no trabaja con fichas técnicas, de auxiliar, de operario ni virtuales.</span>
+        <span class="text-xs text-sky-700">SICEFA · consultado hoy 10:35 a. m.</span>
+    </div>
+
+    <!-- Sin fichas tecnólogo (HU-017, esc. 9) -->
+    <div data-estado="vacio" class="mt-4 rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-folder-open mb-2 block text-3xl text-slate-300"></i>
+        <p class="font-semibold text-slate-700">No hay fichas tecnólogo presenciales disponibles en SICEFA</p>
+        <p class="mt-1 text-sm text-slate-500">Cuando SICEFA registre las fichas que ingresan, aparecerán aquí.</p>
+    </div>
+
+    <!-- Listado -->
+    <div data-estado="seleccion confirmada sin-seleccion publicada sicefa">
+        <div class="mt-4 grid gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 sm:grid-cols-[minmax(0,1fr)_14rem]">
+            <label class="relative"><span class="sr-only">Buscar</span><i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                <input type="search" placeholder="Número de ficha o programa…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></label>
+            <select aria-label="Mostrar" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todas las fichas</option><option>Solo las seleccionadas</option><option>Sin programa registrado</option></select>
+        </div>
+
+        <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                        <tr>
+                            <th class="w-12 px-4 py-3"><span class="sr-only">Seleccionar</span></th>
+                            <th class="px-4 py-3 font-semibold">Ficha</th>
+                            <th class="px-4 py-3 font-semibold">Programa de formación</th>
+                            <th class="px-4 py-3 text-center font-semibold">Aprendices</th>
+                            <th class="hidden px-4 py-3 font-semibold lg:table-cell">Instructor líder de la ficha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fichas" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-4 py-3">
+                <p class="text-sm text-slate-600"><strong id="total-fichas">3</strong> fichas seleccionadas · <strong id="total-aprendices">64</strong> aprendices</p>
+                <button type="button" id="confirmar" class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F] disabled:cursor-not-allowed disabled:opacity-50"><i class="fas fa-check mr-1"></i> Confirmar selección</button>
+            </div>
+        </div>
+
+        <!-- Aprendices de las fichas (tras confirmar) -->
+        <section data-estado="confirmada publicada" class="mt-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="font-bold text-[#064C3D]">Aprendices asociados a la fase</h2>
+                <div class="flex flex-wrap gap-1.5" data-tabs="aprendices">
+                    <button type="button" data-tab="f1" aria-selected="true" class="rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-slate-200">2902114 · 24</button>
+                    <button type="button" data-tab="f2" class="rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-slate-200">2902187 · 21</button>
+                    <button type="button" data-tab="f3" class="rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-slate-200">2902230 · 19</button>
+                </div>
+            </div>
+            <ul data-panel="f1" data-grupo="aprendices" class="mt-4 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3" id="aprendices-f1"></ul>
+            <ul data-panel="f2" data-grupo="aprendices" class="mt-4 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3" id="aprendices-f2"></ul>
+            <ul data-panel="f3" data-grupo="aprendices" class="mt-4 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3" id="aprendices-f3"></ul>
+        </section>
+    </div>
+
+    <!-- Modal: registrar programa manualmente (HU-018) -->
+    <dialog id="modal-programa" aria-labelledby="titulo-programa" class="m-auto w-[min(94vw,30rem)] rounded-3xl p-0 shadow-2xl">
+        <form novalidate class="p-6" data-ok="Programa registrado. La ficha 2902301 ya se puede seleccionar.">
+            <h2 id="titulo-programa" class="text-lg font-bold text-slate-900">Registrar el programa de la ficha</h2>
+            <p class="mt-1 text-sm text-slate-600">SICEFA no entregó el programa de la ficha <strong>2902301</strong>. Regístralo para poder usarla en la activación de cargos y en la convocatoria.</p>
+            <div class="mt-4" data-campo>
+                <label for="programa" class="mb-1 block text-sm font-semibold text-slate-700">Programa de formación <span class="text-red-500">*</span></label>
+                <select id="programa" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">
+                    <option value="">Selecciona…</option><option>Gestión Agroempresarial · SOFIA 723179</option><option>Gestión de la Producción Agrícola · SOFIA 722148</option><option>Producción Ganadera · SOFIA 723106</option><option>Procesamiento de Alimentos · SOFIA 228118</option><option>Prevención y Control Ambiental · SOFIA 222319</option>
+                </select>
+                <p data-error hidden class="mt-1 text-xs font-semibold text-red-600">Este campo es obligatorio</p>
+            </div>
+            <p class="mt-3 text-xs text-slate-500"><i class="fas fa-clock-rotate-left mr-1"></i>El registro manual queda en la auditoría.</p>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Registrar</button>
+            </div>
+        </form>
+    </dialog>
+</div>
+
+<script>
+    const fichas = [
+        ['2902114', 'Gestión Agroempresarial', 24, 'Carlos Andrés Medina', true],
+        ['2902187', 'Gestión de la Producción Agrícola', 21, 'Jorge Iván Cuéllar', true],
+        ['2902230', 'Producción Ganadera', 19, 'Diana Patricia Losada', true],
+        ['2902245', 'Procesamiento de Alimentos', 18, 'Luz Marina Vargas', false],
+        ['2902263', 'Análisis y Desarrollo de Software', 22, 'Hernán Darío Silva', false],
+        ['2902301', null, 16, 'Óscar Fernando Perdomo', false],
+    ];
+    const pintar = (estado) => {
+        const bloqueada = estado === 'publicada';
+        const ninguna = estado === 'sin-seleccion';
+        document.getElementById('fichas').innerHTML = fichas.map(([ficha, programa, aprendices, instructor, marcada]) => `
+            <tr class="transition hover:bg-[#E8F3EF]/40">
+                <td class="px-4 py-3"><input type="checkbox" aria-label="Seleccionar ficha ${ficha}" data-aprendices="${aprendices}" class="h-4 w-4 accent-[#064C3D]" ${marcada && !ninguna ? 'checked' : ''} ${bloqueada || !programa ? 'disabled' : ''}></td>
+                <td class="px-4 py-3"><p class="font-semibold text-slate-800">${ficha}</p><p class="text-xs text-slate-500">Tecnólogo · Presencial</p></td>
+                <td class="px-4 py-3">${programa ? `<span class="text-slate-700">${programa}</span>` : `
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800"><i class="fas fa-triangle-exclamation"></i> Sin programa en SICEFA</span>
+                    ${bloqueada ? '' : '<button type="button" data-abrir="#modal-programa" class="ml-1 text-xs font-semibold text-emerald-700 hover:underline">Registrar programa</button>'}`}</td>
+                <td class="px-4 py-3 text-center font-semibold text-slate-700">${aprendices}</td>
+                <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">${instructor}</td>
+            </tr>`).join('');
+        document.getElementById('confirmar').disabled = bloqueada;
+        contar();
+    };
+    const contar = () => {
+        const marcadas = [...document.querySelectorAll('#fichas input:checked')];
+        document.getElementById('total-fichas').textContent = marcadas.length;
+        document.getElementById('total-aprendices').textContent = marcadas.reduce((s, c) => s + Number(c.dataset.aprendices), 0);
+    };
+    document.getElementById('fichas').addEventListener('change', (e) => {
+        // Retirar una ficha ya asociada pide confirmación (HU-017, esc. 6)
+        if (!e.target.checked && Number(e.target.dataset.aprendices) && document.location.hash.includes('confirmada')) {
+            preguntar('¿Retirar la ficha de la fase?', 'Se retirarán la ficha y sus aprendices, y se recalculará la propuesta de cargos.', true, () => aviso('success', 'Ficha retirada de la fase. La propuesta de cargos se recalculó.'));
+        }
+        contar();
+    });
+    document.getElementById('confirmar').addEventListener('click', () => {
+        cambiarEstado(document.querySelectorAll('#fichas input:checked').length ? 'confirmada' : 'sin-seleccion');
+    });
+    document.addEventListener('estado', ({ detail }) => pintar(detail));
+
+    const nombres = ['Ana María Rojas', 'Brayan Stiven Cuéllar', 'Camila Andrea Ruiz', 'Daniel Felipe Ortiz', 'Erika Johana Vargas', 'Fabián Camilo Perdomo', 'Gabriela Losada', 'Héctor Iván Silva', 'Isabela Trujillo'];
+    ['f1', 'f2', 'f3'].forEach((f, j) => {
+        document.getElementById('aprendices-' + f).innerHTML = nombres.slice(j, j + 6).map((n) => `<li class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2"><span class="grid h-7 w-7 place-items-center rounded-full bg-[#E8F3EF] text-[10px] font-bold text-[#064C3D]">${n.split(' ').map((p) => p[0]).slice(0, 2).join('')}</span><span class="truncate text-slate-700">${n}</span></li>`).join('')
+            + '<li class="px-3 py-2 text-xs text-slate-400">… y los demás aprendices de la ficha</li>';
+    });
+</script>
+</body>
+</html>

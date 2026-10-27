@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi empalme · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="empalme" data-mockup="APR-08|Mi empalme: acta, inventario, visita y firmas|HU-052, HU-053, HU-057 · RF-013, RF-021 · RN-024 a RN-026, RN-055, RN-059"
+      data-estados="saliente:Saliente ajusta inventario,saliente-error:Ítem incompleto,entrante:Entrante verifica,visita:Confirmar visita,visita-error:Visita sin participantes,sin-visita:Firmar sin visita,firmar:Firmar,instructor:Falta el instructor,inicial:Inventario inicial,grupal:Empalme grupal">
+<div id="contenido" class="mx-auto max-w-3xl">
+    <p id="perspectiva" class="mb-3 inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800"></p>
+    <h1 id="titulo" class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Mi empalme</h1>
+    <p id="subtitulo" class="mt-1 text-sm text-slate-600"></p>
+
+    <!-- Pasos -->
+    <ol id="pasos" class="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-6"></ol>
+
+    <!-- Empalme grupal (HU-052, esc. 3) -->
+    <section data-estado="grupal" class="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+        <h2 class="font-bold text-[#064C3D]">Una sola acta para todo el equipo</h2>
+        <p class="mt-1 text-sm text-slate-600">El Equipo Ambiental entrega junto al Líder Subsistema Ambiental entrante. El acta la firman los 4 salientes y la receptora.</p>
+        <ul class="mt-4 space-y-2 text-sm">
+            <li class="flex items-center gap-2"><i class="fas fa-circle-check text-emerald-600"></i><span class="flex-1">Daniela Fernanda Cortés <span class="text-xs text-slate-400">· saliente (tú)</span></span><span class="firma text-[#064C3D]">Daniela</span></li>
+            <li class="flex items-center gap-2"><i class="fas fa-circle-check text-emerald-600"></i><span class="flex-1">Miguel Ángel Tovar <span class="text-xs text-slate-400">· saliente</span></span><span class="firma text-[#064C3D]">Miguel</span></li>
+            <li class="flex items-center gap-2"><i class="fas fa-circle-check text-emerald-600"></i><span class="flex-1">Yesica Lorena Castro <span class="text-xs text-slate-400">· saliente</span></span><span class="firma text-[#064C3D]">Yesica</span></li>
+            <li class="flex items-center gap-2"><i class="far fa-circle text-slate-300"></i><span class="flex-1">Duván Esteban Ríos <span class="text-xs text-slate-400">· saliente</span></span><span class="text-xs text-amber-600">Pendiente</span></li>
+            <li class="flex items-center gap-2"><i class="far fa-circle text-slate-300"></i><span class="flex-1">Camila Andrea Ruiz <span class="text-xs text-slate-400">· receptora</span></span><span class="text-xs text-amber-600">Pendiente</span></li>
+        </ul>
+    </section>
+
+    <!-- Inventario -->
+    <section data-estado="saliente saliente-error entrante inicial" class="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="titulo-inventario" class="font-bold text-[#064C3D]">Inventario del cargo</h2>
+            <a href="../admin/09-plantilla-versiones.html" class="text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-file-lines mr-1"></i>Ver el acta completa</a>
+        </div>
+        <p id="ayuda-inventario" class="mt-1 text-sm text-slate-600"></p>
+        <div data-estado="saliente-error" class="mt-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Un implemento agregado no tiene cantidad ni estado. Los demás se conservaron.</div>
+        <div id="inventario" class="mt-4 space-y-2"></div>
+        <button type="button" data-estado="saliente saliente-error inicial" id="agregar" class="mt-3 rounded-xl bg-[#E8F3EF] px-4 py-2 text-sm font-semibold text-[#064C3D]"><i class="fas fa-plus mr-1"></i> Agregar implemento</button>
+        <div class="mt-5 flex justify-end">
+            <button type="button" id="guardar-inventario" class="rounded-full bg-[#064C3D] px-6 py-3 text-sm font-semibold text-white"></button>
+        </div>
+    </section>
+
+    <!-- Visita (HU-057) -->
+    <section data-estado="visita visita-error" class="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+        <h2 class="font-bold text-[#064C3D]">Visita a la unidad productiva</h2>
+        <p class="mt-1 text-sm text-slate-600">Recorran juntos la unidad de cacao antes de firmar el acta.</p>
+        <div data-estado="visita-error" class="mt-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Registre los participantes de la visita</div>
+        <form id="form-visita" novalidate class="mt-4 space-y-4" data-ok="Visita confirmada. Ya pueden firmar el acta." data-estado-destino="firmar">
+            <div><label for="fecha-visita" class="mb-1 block text-sm font-semibold text-slate-700">Fecha de la visita <span class="text-red-500">*</span></label><input id="fecha-visita" type="date" value="2027-01-12" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base"></div>
+            <fieldset><legend class="mb-2 text-sm font-semibold text-slate-700">Participantes <span class="text-red-500">*</span></legend>
+                <div id="participantes" class="space-y-2 text-base"></div></fieldset>
+            <button class="w-full rounded-full bg-[#064C3D] px-6 py-3 text-sm font-semibold text-white sm:w-auto"><i class="fas fa-location-dot mr-1"></i> Confirmar visita</button>
+        </form>
+    </section>
+
+    <!-- Firma -->
+    <section data-estado="firmar sin-visita instructor" class="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+        <h2 class="font-bold text-[#064C3D]">Firma del acta de recibimiento</h2>
+        <div data-estado="sin-visita" class="mt-3 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert"><i class="fas fa-location-dot mt-0.5 text-amber-500"></i><span>Antes de firmar deben confirmar la visita a la unidad productiva. <button type="button" onclick="cambiarEstado('visita')" class="font-semibold underline">Confirmar visita</button></span></div>
+        <div data-estado="instructor" class="mt-3 flex items-start gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900"><i class="fas fa-hourglass-half mt-0.5"></i><span>Ustedes ya firmaron. El acta queda <strong>pendiente de firmas</strong> hasta que firme Jorge Iván Cuéllar (instructor del área), a quien le avisamos por correo.</span></div>
+        <ul id="firmas" class="mt-4 space-y-2 text-sm"></ul>
+        <div data-estado="firmar sin-visita" class="mt-5">
+            <p class="text-sm font-semibold text-slate-700">Tu firma</p>
+            <div class="mt-2 grid h-32 place-items-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-sm text-slate-400"><span><i class="fas fa-signature mr-1"></i>Firma aquí con el dedo o el mouse</span></div>
+            <label class="mt-3 flex items-start gap-2 text-sm text-slate-600"><input type="checkbox" class="mt-1 accent-[#064C3D]"> Revisé el acta y el inventario y estoy de acuerdo con lo que recibo.</label>
+            <button type="button" id="firmar" class="mt-4 w-full rounded-full bg-[#064C3D] px-6 py-3 text-sm font-semibold text-white sm:w-auto"><i class="fas fa-pen-nib mr-1"></i> Firmar acta</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+    const VIGENTE = [['Machete', 4, 'Bueno'], ['Tijeras de poda', 4, 'Bueno'], ['Bomba de espalda 20 L', 2, 'Regular'], ['Botas de caucho (pares)', 4, 'Bueno'], ['Carretilla', 1, 'Bueno']];
+    const BASE_RIEGO = [['Motobomba 2 HP', 1, 'Bueno'], ['Manguera 1"', 6, 'Bueno'], ['Medidor de caudal', 1, 'Regular'], ['Llave de paso 2"', 4, 'Bueno']];
+    const PASOS = ['Acta', 'Inventario', 'Visita', 'Firmas', 'Satisfacción', 'Visto bueno'];
+    const nivel = { saliente: 1, 'saliente-error': 1, entrante: 1, inicial: 1, visita: 2, 'visita-error': 2, 'sin-visita': 2, firmar: 3, instructor: 3, grupal: 3 };
+    const estadoSel = (v, rojo) => `<select aria-label="Estado" class="w-full min-w-0 rounded-xl border ${rojo ? 'border-red-400' : 'border-slate-200'} bg-white px-2 py-2 text-sm">${['', 'Bueno', 'Regular', 'Malo'].map((e) => `<option ${e === v ? 'selected' : ''}>${e || 'Estado…'}</option>`).join('')}</select>`;
+
+    const filaEditable = ([n, c, e], rojo) => `
+        <div class="grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-2 rounded-2xl p-2 ring-1 sm:grid-cols-[minmax(0,1fr)_4.5rem_7rem_auto] ${rojo ? 'ring-red-300 bg-red-50/40' : 'ring-slate-200'}">
+            <input value="${n}" aria-label="Implemento" placeholder="Implemento" class="col-span-3 min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm sm:col-span-1">
+            <input type="number" min="0" value="${c}" aria-label="Cantidad" class="w-full min-w-0 rounded-xl border ${rojo ? 'border-red-400' : 'border-slate-200'} bg-white px-2 py-2 text-sm">
+            ${estadoSel(e, rojo)}
+            <button type="button" data-quitar class="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-red-600" aria-label="Retirar"><i class="fas fa-xmark"></i></button>
+        </div>`;
+    const filaVerificar = ([n, c, e], i) => {
+        const dif = i === 1;
+        return `<div class="rounded-2xl p-3 ring-1 ${dif ? 'ring-amber-300 bg-amber-50/40' : 'ring-slate-200'}">
+            <div class="flex flex-wrap items-center gap-2"><span class="flex-1 font-semibold text-slate-800">${n}</span><span class="text-xs text-slate-500">${c} · ${e}</span></div>
+            <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <label class="flex items-center justify-center gap-2 rounded-xl p-2.5 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF] has-[:checked]:ring-[#064C3D]"><input type="radio" name="v${i}" ${dif ? '' : 'checked'} class="accent-[#064C3D]"> Coincide</label>
+                <label class="flex items-center justify-center gap-2 rounded-xl p-2.5 ring-1 ring-slate-200 has-[:checked]:bg-amber-100 has-[:checked]:ring-amber-400"><input type="radio" name="v${i}" ${dif ? 'checked' : ''} class="accent-amber-500"> Diferencia</label>
+            </div>
+            ${dif ? '<input value="Recibo 3 de 4: una tijera está dañada" aria-label="Detalle de la diferencia" class="mt-2 w-full rounded-xl border border-amber-300 bg-white px-3 py-2 text-sm">' : ''}
+        </div>`;
+    };
+
+    document.addEventListener('estado', ({ detail }) => {
+        const inicial = detail === 'inicial', grupal = detail === 'grupal';
+        const saliente = detail === 'saliente' || detail === 'saliente-error';
+        $('perspectiva').innerHTML = saliente ? '<i class="fas fa-eye"></i> Vista de María José Ospina · aprendiz saliente'
+            : inicial ? '<i class="fas fa-eye"></i> Vista de Óscar David Lara · entrante de un cargo nuevo'
+            : grupal ? '<i class="fas fa-eye"></i> Vista de Daniela Cortés · integrante saliente del Equipo Ambiental'
+            : '<i class="fas fa-eye"></i> Vista de Santiago Rojas Polanía · aprendiz entrante';
+        $('subtitulo').textContent = inicial ? 'Líder de riego · cargo activado por primera vez, sin saliente.'
+            : grupal ? 'Equipo Ambiental → Líder Subsistema Ambiental · empalme grupal.'
+            : saliente ? 'Entregas el cargo Líder de U. F. Productiva Cacao a Santiago Rojas Polanía.'
+            : 'Recibes el cargo Líder de U. F. Productiva Cacao de María José Ospina.';
+        const n = nivel[detail] ?? 1;
+        $('pasos').innerHTML = PASOS.map((p, i) => `<li class="flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-[11px] font-semibold ${i < n ? 'bg-[#E8F3EF] text-[#064C3D]' : i === n ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-200' : 'bg-slate-50 text-slate-400'}"><span class="grid h-4 w-4 shrink-0 place-items-center rounded-full ${i < n ? 'bg-[#064C3D] text-[#34D399]' : i === n ? 'bg-amber-400 text-white' : 'bg-slate-200'} text-[9px]">${i < n ? '<i class="fas fa-check"></i>' : i + 1}</span>${p}</li>`).join('');
+
+        $('titulo-inventario').textContent = inicial ? 'Inventario inicial del cargo' : saliente ? 'Inventario que entregas' : 'Verifica lo que recibes';
+        $('ayuda-inventario').textContent = inicial ? 'Precargamos la lista base del área agrícola. Ajústala a lo que realmente hay; el Gestor de Talento Humano la validará.'
+            : saliente ? 'Precargamos el inventario vigente del cargo (el que recibiste). Agrega o retira implementos e indica cantidad y estado reales.'
+            : 'Revisa cada implemento con María José. Si algo no coincide, márcalo: quedará como novedad documentada.';
+        if (saliente || inicial) {
+            const lista = (inicial ? BASE_RIEGO : VIGENTE).map((f) => filaEditable(f, false));
+            if (detail === 'saliente-error') lista.push(filaEditable(['Tijera podadora telescópica', '', ''], true));
+            $('inventario').innerHTML = '<div class="hidden grid-cols-[minmax(0,1fr)_4.5rem_7rem_auto] gap-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400 sm:grid"><span>Implemento</span><span>Cant.</span><span>Estado</span><span></span></div>' + lista.join('');
+        } else if (detail === 'entrante') {
+            $('inventario').innerHTML = VIGENTE.map(filaVerificar).join('');
+        }
+        $('guardar-inventario').innerHTML = inicial ? '<i class="fas fa-floppy-disk mr-1"></i> Guardar inventario' : saliente ? '<i class="fas fa-floppy-disk mr-1"></i> Guardar inventario' : '<i class="fas fa-check-double mr-1"></i> Guardar verificación';
+
+        const ninguno = detail === 'visita-error';
+        $('participantes').innerHTML = ['María José Ospina · saliente', 'Santiago Rojas Polanía · entrante', 'Jorge Iván Cuéllar · instructor del área'].map((p, i) => `<label class="flex items-center gap-3 rounded-xl p-3 ring-1 ${ninguno ? 'ring-red-300' : 'ring-slate-200'}"><input type="checkbox" ${!ninguno && i < 2 ? 'checked' : ''} class="h-5 w-5 accent-[#064C3D]"> ${p}</label>`).join('');
+
+        const instr = detail === 'instructor';
+        $('firmas').innerHTML = [['María José Ospina', 'Saliente', detail === 'firmar' || instr], ['Santiago Rojas Polanía (tú)', 'Entrante', instr], ['Jorge Iván Cuéllar', 'Instructor del área', false]]
+            .map(([nombre, rol, ok]) => `<li class="flex items-center gap-2"><i class="${ok ? 'fas fa-circle-check text-emerald-600' : 'far fa-circle text-slate-300'}"></i><span class="flex-1">${nombre} <span class="text-xs text-slate-400">· ${rol}</span></span>${ok ? `<span class="firma text-[#064C3D]">${nombre.split(' ')[0]}</span>` : '<span class="text-xs text-amber-600">Pendiente</span>'}</li>`).join('');
+    });
+
+    $('guardar-inventario').addEventListener('click', () => {
+        const e = location.hash.split('=')[1];
+        if (e === 'saliente') return aviso('success', 'Inventario guardado en el acta y en el inventario vigente del cargo. La plantilla del área no cambia.');
+        if (e === 'saliente-error') return;
+        if (e === 'inicial') return aviso('success', 'Inventario inicial guardado. Queda pendiente de validación por el Gestor de Talento Humano.');
+        aviso('warning', 'Verificación guardada con 1 novedad: «Tijeras de poda». Se avisó al Gestor de Talento Humano.');
+        cambiarEstado('visita');
+    });
+    $('firmar').addEventListener('click', () => {
+        if (location.hash.includes('sin-visita')) return aviso('error', 'La confirmación de la visita a la unidad productiva es prerrequisito de la firma.');
+        aviso('success', 'Firmaste el acta el 13/01/2027 a las 10:24 a. m.');
+        cambiarEstado('instructor');
+    });
+    // Sin participantes no se confirma la visita (HU-057, esc. 5)
+    $('form-visita').addEventListener('submit', (e) => {
+        if (!$('participantes').querySelector('input:checked')) { e.preventDefault(); e.stopImmediatePropagation(); cambiarEstado('visita-error'); }
+    });
+    $('agregar').addEventListener('click', () => $('inventario').insertAdjacentHTML('beforeend', filaEditable(['', '', ''], false)));
+    document.addEventListener('click', (e) => { const q = e.target.closest('[data-quitar]'); if (q) q.parentElement.remove(); });
+</script>
+</body>
+</html>

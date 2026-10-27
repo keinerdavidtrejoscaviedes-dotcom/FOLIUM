@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Convocatoria · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="convocatoria" data-mockup="GTH-05|Convocatoria con requisitos por cargo|HU-022, HU-023 · RF-004 · RN-007, RN-040, RN-047, RN-048"
+      data-estados="borrador:Borrador,errores:No se pudo publicar,sin-cronograma:Sin cronograma aprobado,publicada:Publicada,cerrada:Cerrada">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Convocatoria Fase XXXVI</h1>
+            <p class="mt-1 text-sm text-slate-600">Cada cargo solo lo verán los aprendices de las fichas habilitadas cuyo programa es compatible con él.</p>
+        </div>
+        <span data-estado="borrador errores sin-cronograma" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Borrador</span>
+        <span data-estado="publicada" class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800"><span class="mr-1 inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>Abierta hasta el 12/09/2026</span>
+        <span data-estado="cerrada" class="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">Cerrada el 12/09/2026</span>
+    </div>
+
+    <!-- Mensajes -->
+    <div data-estado="sin-cronograma" class="mt-4 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <i class="fas fa-lock mt-0.5 text-red-500"></i><span>El cronograma aprobado es prerrequisito para publicar la convocatoria. <a href="04-cronograma.html#estado=enviado" class="font-semibold underline">Ver el cronograma</a></span>
+    </div>
+    <div data-estado="errores" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <p class="font-semibold"><i class="fas fa-circle-exclamation mr-1"></i> La convocatoria no se publicó</p>
+        <ul class="mt-1 list-disc pl-6">
+            <li>Configure el umbral mínimo y la política de selección (seleccionar al de mayor puntaje o declarar vacante).</li>
+            <li>Las fechas de la convocatoria deben coincidir con el cronograma aprobado.</li>
+            <li>Cargos con datos incompletos: <strong>Líder Unidad de Lácteos</strong> (sin documentos obligatorios), <strong>Equipo de Sanidad</strong> (sin perfil compatible).</li>
+        </ul>
+    </div>
+    <div data-estado="publicada" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]" role="status">
+        <i class="fas fa-circle-check"></i><span class="flex-1"><strong>Convocatoria publicada el 01/09/2026.</strong> Se envió por correo con el enlace a FOLIUM a los 64 aprendices de las fichas habilitadas. 38 ya se postularon.</span>
+    </div>
+    <div data-estado="cerrada" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700" role="status">
+        <i class="fas fa-door-closed"></i><span class="flex-1"><strong>Convocatoria cerrada:</strong> 61 postulaciones completas. Ya puedes analizar las hojas de vida.</span>
+        <a href="06-postulantes.html" class="rounded-full bg-[#064C3D] px-3 py-1 text-xs font-semibold text-white hover:bg-[#043A2F]">Ir a postulantes</a>
+    </div>
+
+    <form novalidate class="mt-6 space-y-4" onsubmit="return false">
+        <!-- Datos generales -->
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <h2 class="font-bold text-[#064C3D]">Datos generales</h2>
+            <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                <div><p class="mb-1 text-sm font-semibold text-slate-700">Fase destino</p><p class="rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">Fase XXXVI</p></div>
+                <div><label for="apertura" class="mb-1 block text-sm font-semibold text-slate-700">Apertura <span class="text-red-500">*</span></label><input id="apertura" type="date" value="2026-09-01" data-bloquear class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-50"></div>
+                <div><label for="cierre" class="mb-1 block text-sm font-semibold text-slate-700">Cierre <span class="text-red-500">*</span></label><input id="cierre" type="date" value="2026-09-12" data-bloquear class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-50">
+                    <p class="mt-1 text-xs text-slate-500"><i class="fas fa-calendar-check mr-1 text-emerald-600"></i>Igual al cronograma aprobado</p></div>
+            </div>
+            <p class="mb-1 mt-4 text-sm font-semibold text-slate-700">Fichas habilitadas</p>
+            <div class="flex flex-wrap gap-2 text-xs">
+                <span class="rounded-full bg-[#E8F3EF] px-3 py-1 font-semibold text-[#064C3D]">2902114 · Gestión Agroempresarial · 24</span>
+                <span class="rounded-full bg-[#E8F3EF] px-3 py-1 font-semibold text-[#064C3D]">2902187 · Producción Agrícola · 21</span>
+                <span class="rounded-full bg-[#E8F3EF] px-3 py-1 font-semibold text-[#064C3D]">2902230 · Producción Ganadera · 19</span>
+                <a href="02-fichas.html" class="px-2 py-1 font-semibold text-emerald-700 hover:underline">Fichas de la fase</a>
+            </div>
+        </section>
+
+        <!-- Reglas de selección -->
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <h2 class="font-bold text-[#064C3D]">Reglas de selección</h2>
+            <p class="mt-1 text-sm text-slate-600">El puntaje total es la suma de la prueba psicotécnica (0 a 100) y la entrevista (0 a 100). No verás los puntajes de los aspirantes.</p>
+            <div class="mt-4 grid gap-4 lg:grid-cols-3">
+                <div>
+                    <label for="umbral" class="mb-1 block text-sm font-semibold text-slate-700">Umbral mínimo de aprobación <span class="text-red-500">*</span></label>
+                    <div class="flex items-center gap-2"><input id="umbral" type="number" min="0" max="200" value="120" data-bloquear class="w-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:bg-slate-50"><span class="text-sm text-slate-500">de 200</span></div>
+                </div>
+                <fieldset id="politica">
+                    <legend class="mb-1 text-sm font-semibold text-slate-700">Si nadie alcanza el umbral <span class="text-red-500">*</span></legend>
+                    <label class="flex items-center gap-2 text-sm text-slate-600"><input type="radio" name="politica" checked data-bloquear class="accent-[#064C3D]"> Seleccionar al de mayor puntaje</label>
+                    <label class="mt-1 flex items-center gap-2 text-sm text-slate-600"><input type="radio" name="politica" data-bloquear class="accent-[#064C3D]"> Declarar el cargo vacante</label>
+                </fieldset>
+                <fieldset>
+                    <legend class="mb-1 text-sm font-semibold text-slate-700">Perfil incompatible al postularse</legend>
+                    <label class="flex items-center gap-2 text-sm text-slate-600"><input type="radio" name="perfil" checked data-bloquear class="accent-[#064C3D]"> Advertir y pedir confirmación</label>
+                    <label class="mt-1 flex items-center gap-2 text-sm text-slate-600"><input type="radio" name="perfil" data-bloquear class="accent-[#064C3D]"> Impedir la selección del cargo</label>
+                </fieldset>
+            </div>
+        </section>
+
+        <!-- Cargos -->
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="font-bold text-[#064C3D]">Cargos de la convocatoria</h2>
+                    <p class="mt-1 text-sm text-slate-600">Solo los 42 cargos activados. El perfil compatible se propone desde el catálogo.</p>
+                </div>
+                <span class="text-sm text-slate-600"><strong id="completos">40</strong> de 42 completos</span>
+            </div>
+            <ul id="cargos" class="mt-4 space-y-2"></ul>
+        </section>
+
+        <div data-estado="borrador errores sin-cronograma" class="flex flex-wrap justify-end gap-2 pb-4">
+            <button type="button" data-accion data-ok="Convocatoria guardada como borrador." data-ok-tipo="info" class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-white"><i class="fas fa-floppy-disk mr-1"></i> Guardar borrador</button>
+            <button type="button" id="publicar" class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-bullhorn mr-1"></i> Publicar</button>
+        </div>
+    </form>
+
+    <!-- Modal: habilitar otro programa (HU-023) -->
+    <dialog id="modal-programa" aria-labelledby="titulo-programa" class="m-auto w-[min(94vw,32rem)] rounded-3xl p-0 shadow-2xl">
+        <form novalidate class="p-6" data-ok="Programa habilitado para el cargo con su justificación.">
+            <h2 id="titulo-programa" class="text-lg font-bold text-slate-900">Habilitar otro programa</h2>
+            <p class="mt-1 text-sm text-slate-600">Cargo: <strong data-titulo-modal>Líder de Gestión Documental</strong></p>
+            <div id="aviso-compatibles" class="mt-3 hidden rounded-2xl bg-amber-50 px-3 py-2 text-sm text-amber-900"><i class="fas fa-triangle-exclamation mr-1 text-amber-500"></i>Hay fichas compatibles con este cargo en la fase.</div>
+            <div class="mt-4" data-campo>
+                <label for="otro-programa" class="mb-1 block text-sm font-semibold text-slate-700">Programa <span class="text-red-500">*</span></label>
+                <select id="otro-programa" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option value="">Selecciona…</option><option>Gestión Agroempresarial · ficha 2902114</option><option>Producción Agrícola · ficha 2902187</option><option>Producción Ganadera · ficha 2902230</option></select>
+            </div>
+            <div class="mt-4" data-campo>
+                <label for="justificacion" class="mb-1 block text-sm font-semibold text-slate-700">Justificación <span class="text-red-500">*</span></label>
+                <textarea id="justificacion" rows="3" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+                <p data-error hidden class="mt-1 text-xs font-semibold text-red-600">La justificación es obligatoria para habilitar otros programas</p>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Guardar</button>
+            </div>
+        </form>
+    </dialog>
+</div>
+
+<script>
+    const nivelChip = { Gerente: 'bg-[#043A2F] text-white', Gestor: 'bg-[#064C3D] text-white', 'Líder': 'bg-emerald-100 text-emerald-800', Equipo: 'bg-slate-100 text-slate-600' };
+    const campo = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40 disabled:bg-slate-50';
+    const CARGOS = [
+        { nombre: 'Gestor de Talento Humano', nivel: 'Gestor', cupos: 2, perfiles: ['Gestión Agroempresarial'], abierto: true, curso: true },
+        { nombre: 'Líder de Gestión Documental', nivel: 'Líder', cupos: 1, perfiles: [], excepcion: ['Gestión Agroempresarial', 'En la fase no ingresa ficha del tecnólogo SIG; el cargo es necesario para la auditoría interna.'] },
+        { nombre: 'Líder Unidad de Lácteos', nivel: 'Líder', cupos: 1, perfiles: ['Producción Ganadera'], falta: 'Sin documentos obligatorios' },
+        { nombre: 'Equipo de Sanidad', nivel: 'Equipo', cupos: 3, perfiles: [], falta: 'Sin perfil compatible' },
+        { nombre: 'Gerente Administrativo', nivel: 'Gerente', cupos: 1, perfiles: ['Gestión Agroempresarial'] },
+    ];
+    const pintar = (estado) => {
+        const lectura = estado === 'publicada' || estado === 'cerrada';
+        document.querySelectorAll('[data-bloquear]').forEach((c) => { c.disabled = lectura; });
+        const errores = estado === 'errores';
+        document.getElementById('umbral').value = errores ? '' : '120';
+        document.getElementById('umbral').classList.toggle('border-red-400', errores);
+        document.getElementById('politica').querySelectorAll('input').forEach((r, i) => { r.checked = !errores && i === 0; });
+        document.getElementById('cierre').classList.toggle('border-red-400', errores);
+        if (errores) document.getElementById('cierre').value = '2026-09-15'; else document.getElementById('cierre').value = '2026-09-12';
+        document.getElementById('completos').textContent = lectura ? 42 : 40;
+        document.getElementById('cargos').innerHTML = CARGOS.map((c) => {
+            const incompleto = c.falta && !lectura;
+            return `<li class="rounded-2xl ring-1 ${incompleto && errores ? 'ring-red-300' : 'ring-slate-200'}">
+                <details ${c.abierto ? 'open' : ''} class="group">
+                    <summary class="flex cursor-pointer list-none flex-wrap items-center gap-3 px-4 py-3">
+                        <i class="fas fa-chevron-right text-xs text-slate-400 transition group-open:rotate-90"></i>
+                        <span class="flex-1 font-semibold text-slate-800">${c.nombre}</span>
+                        <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold ${nivelChip[c.nivel]}">${c.nivel}</span>
+                        <span class="text-xs text-slate-500">${c.cupos} ${c.cupos === 1 ? 'cupo' : 'cupos'}</span>
+                        ${incompleto ? `<span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700"><i class="fas fa-circle-exclamation mr-1"></i>${c.falta}</span>` : '<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800"><i class="fas fa-check mr-1"></i>Completo</span>'}
+                    </summary>
+                    <div class="grid gap-4 border-t border-slate-100 p-4 sm:grid-cols-2">
+                        <div class="sm:col-span-2"><label class="mb-1 block text-sm font-semibold text-slate-700">Descripción del cargo</label>
+                            <textarea rows="2" ${lectura ? 'disabled' : ''} class="${campo}">${c.nombre === 'Gestor de Talento Humano' ? 'Gestionar las actividades de selección, coordinación, control y desarrollo del Talento Humano de SENA Empresa.' : 'Tomada del Manual de Roles y Responsabilidades (GTH-M-001).'}</textarea></div>
+                        <div><label class="mb-1 block text-sm font-semibold text-slate-700">Titulación requerida</label><input value="Tecnólogo en formación" ${lectura ? 'disabled' : ''} class="${campo}"></div>
+                        <div><label class="mb-1 block text-sm font-semibold text-slate-700">Competencias mínimas</label><input value="Comunicación asertiva, trabajo en equipo, manejo de ofimática" ${lectura ? 'disabled' : ''} class="${campo}"></div>
+                        <div>
+                            <p class="mb-1 text-sm font-semibold text-slate-700">Perfil del tecnólogo compatible <span class="text-red-500">*</span></p>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${c.perfiles.map((p) => `<span class="rounded-full bg-[#E8F3EF] px-2.5 py-0.5 text-xs font-semibold text-[#064C3D]">${p}</span>`).join('') || (c.excepcion ? '' : '<span class="text-xs text-red-600">Ninguna ficha de la fase es compatible</span>')}
+                                ${c.excepcion ? `<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800"><i class="fas fa-unlock mr-1"></i>${c.excepcion[0]} · excepción</span>` : ''}
+                            </div>
+                            ${c.excepcion ? `<p class="mt-2 rounded-xl bg-amber-50 p-2 text-xs text-amber-900"><strong>Justificación:</strong> ${c.excepcion[1]}</p>` : ''}
+                            ${c.nombre === 'Líder de Gestión Documental' ? '<p class="mt-2 text-xs text-slate-500"><i class="fas fa-circle-info mr-1"></i>Si en la fase hubiera una ficha SIG, solo sus aprendices podrían postularse (RN-047).</p>' : ''}
+                            ${lectura ? '' : `<button type="button" data-abrir="#modal-programa" data-titulo="${c.nombre}" data-compatibles="${c.perfiles.length ? 1 : 0}" class="mt-2 text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-plus mr-1"></i>Habilitar otro programa</button>`}
+                        </div>
+                        <div>
+                            <p class="mb-1 text-sm font-semibold text-slate-700">Documentos obligatorios <span class="text-red-500">*</span></p>
+                            ${c.falta === 'Sin documentos obligatorios' && !lectura ? '<p class="text-xs text-red-600">Marca al menos la hoja de vida y la propuesta de trabajo.</p>' : ''}
+                            ${[['Hoja de vida (modelo de Talento Humano) con soportes', c.falta !== 'Sin documentos obligatorios'], ['Certificados', c.falta !== 'Sin documentos obligatorios'], ['Propuesta de trabajo para este cargo', c.falta !== 'Sin documentos obligatorios'], ...(c.curso ? [['Soporte del curso virtual «Gestión del talento humano» (del catálogo)', true]] : [])].map(([d, v]) => `<label class="mt-1 flex items-start gap-2 text-sm text-slate-600"><input type="checkbox" ${v ? 'checked' : ''} ${lectura ? 'disabled' : ''} class="mt-0.5 accent-[#064C3D]"> ${d}</label>`).join('')}
+                        </div>
+                    </div>
+                </details>
+            </li>`;
+        }).join('') + '<li class="px-4 py-2 text-xs text-slate-400">… y 37 cargos más, todos completos</li>';
+    };
+    document.addEventListener('estado', ({ detail }) => pintar(detail));
+    document.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-compatibles]');
+        if (b) document.getElementById('aviso-compatibles').classList.toggle('hidden', b.dataset.compatibles !== '1');
+    });
+    document.getElementById('publicar').addEventListener('click', () => {
+        // Con cargos incompletos no se publica (HU-022, esc. 3); el estado «Publicada» muestra el resultado exitoso
+        if (location.hash.split('=')[1] !== 'sin-cronograma') cambiarEstado('errores');
+    });
+</script>
+</body>
+</html>

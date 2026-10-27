@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Entrevistas · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="entrevistas" data-mockup="GTH-10|Programación de entrevistas|HU-021 esc. 2, HU-027 · RF-008 · RN-013, RN-015"
+      data-estados="agenda:Agenda,errores:Citación con errores,abierta:Convocatoria abierta">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Entrevistas</h1>
+            <p class="mt-1 text-sm text-slate-600">Equivalente digital del Formato de Programación de Entrevistas (GTH-F-004). Técnica y psicológica pueden ser simultáneas.</p>
+        </div>
+        <div data-estado="agenda errores" class="flex flex-wrap gap-2">
+            <button type="button" data-titulo-confirmar="¿Enviar el cronograma de entrevistas?" data-confirmar="Se enviará por correo a los 57 aspirantes citados y a los 6 evaluadores." data-ok="Cronograma de entrevistas enviado a 57 aspirantes y 6 evaluadores." class="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-white"><i class="fas fa-paper-plane"></i> Enviar cronograma</button>
+            <button type="button" data-abrir="#modal-citacion" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-plus"></i> Programar entrevista</button>
+        </div>
+    </div>
+
+    <!-- Convocatoria abierta (HU-021, esc. 2) -->
+    <div data-estado="abierta" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-2xl text-slate-400"><i class="fas fa-lock"></i></span>
+        <p class="mt-4 font-semibold text-slate-800">La convocatoria debe cerrarse primero</p>
+        <p class="mt-1 text-sm text-slate-500">Cierra el 12/09/2026. Después vienen el análisis de hojas de vida y la prueba psicotécnica.</p>
+    </div>
+
+    <div data-estado="agenda errores">
+        <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Aspirantes que presentaron la prueba</p><p class="text-2xl font-extrabold text-[#064C3D]">57</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Citados a entrevista técnica</p><p class="text-2xl font-extrabold text-[#064C3D]">57</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Citados a entrevista psicológica</p><p class="text-2xl font-extrabold text-[#064C3D]">57 <span class="text-sm font-semibold text-slate-400">en 9 grupos</span></p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">No evaluados (bloqueados)</p><p class="text-2xl font-extrabold text-red-600">4</p></div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-2" data-tabs="vista">
+            <button type="button" data-tab="agenda" aria-selected="true" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition"><i class="fas fa-calendar-day mr-1.5"></i>Agenda</button>
+            <button type="button" data-tab="aspirantes" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition"><i class="fas fa-users mr-1.5"></i>Por aspirante</button>
+        </div>
+
+        <div data-panel="agenda" data-grupo="vista" id="agenda" class="mt-4 space-y-4"></div>
+
+        <div data-panel="aspirantes" data-grupo="vista" class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3 font-semibold">Aspirante</th><th class="px-4 py-3 font-semibold">Técnica</th><th class="px-4 py-3 font-semibold">Psicológica</th><th class="px-4 py-3"><span class="sr-only">Acción</span></th></tr></thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr><td class="px-4 py-3 font-semibold text-slate-800">Paula Díaz Rivera</td><td class="px-4 py-3 text-xs text-slate-600">01/10 · 8:00 a. m. · Sala TH</td><td class="px-4 py-3 text-xs text-slate-600">01/10 · 8:00 a. m. · Bienestar (grupo 1)</td><td class="px-4 py-3 text-right"><span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">Citada</span></td></tr>
+                        <tr><td class="px-4 py-3 font-semibold text-slate-800">Camila Andrea Ruiz</td><td class="px-4 py-3 text-xs text-slate-600">02/10 · 9:00 a. m. · Laboratorio ambiental</td><td class="px-4 py-3 text-xs text-slate-600">02/10 · 2:00 p. m. · Bienestar (grupo 4)</td><td class="px-4 py-3 text-right"><span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">Citada</span></td></tr>
+                        <tr><td class="px-4 py-3 font-semibold text-slate-800">Santiago Rojas Polanía</td><td class="px-4 py-3 text-xs text-slate-400">Sin programar</td><td class="px-4 py-3 text-xs text-slate-600">03/10 · 8:00 a. m. · Bienestar (grupo 6)</td><td class="px-4 py-3 text-right"><button type="button" data-abrir="#modal-citacion" class="rounded-full bg-[#064C3D] px-3 py-1 text-xs font-semibold text-white">Programar</button></td></tr>
+                        <tr class="bg-red-50/40"><td class="px-4 py-3 font-semibold text-slate-800">Juan David Mora</td><td class="px-4 py-3 text-xs text-red-600" colspan="2"><i class="fas fa-lock mr-1"></i>No evaluado: la prueba psicotécnica es prerrequisito obligatorio de la entrevista.</td><td class="px-4 py-3 text-right"><span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700">Bloqueado</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: programar entrevista -->
+    <dialog id="modal-citacion" aria-labelledby="titulo-citacion" class="m-auto w-[min(94vw,40rem)] rounded-3xl p-0 shadow-2xl">
+        <form id="form-citacion" novalidate class="max-h-[88vh] overflow-y-auto p-6" data-ok="Entrevista programada. Se envió la citación a los aspirantes y evaluadores.">
+            <div class="flex items-start justify-between gap-3">
+                <h2 id="titulo-citacion" class="text-lg font-bold text-slate-900">Programar entrevista</h2>
+                <button type="button" data-cerrar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div id="errores-citacion" hidden class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                <p class="font-semibold"><i class="fas fa-circle-exclamation mr-1"></i> No se guardó la programación</p>
+                <ul class="mt-1 list-disc pl-6"><li>Asigne al menos un instructor técnico o al Instructor Líder.</li><li>La fecha debe estar dentro del rango de entrevistas del cronograma aprobado (01/10 – 10/10/2026).</li><li>Falta el lugar.</li></ul>
+            </div>
+
+            <fieldset class="mt-4">
+                <legend class="mb-2 text-sm font-semibold text-slate-700">Tipo de entrevista <span class="text-red-500">*</span></legend>
+                <div class="grid gap-2 sm:grid-cols-2">
+                    <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]"><input type="radio" name="tipo" value="tecnica" checked class="accent-[#064C3D]"><span class="text-sm font-semibold text-slate-700"><i class="fas fa-screwdriver-wrench mr-1.5 text-[#064C3D]"></i>Técnica</span></label>
+                    <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]"><input type="radio" name="tipo" value="psicologica" class="accent-[#064C3D]"><span class="text-sm font-semibold text-slate-700"><i class="fas fa-brain mr-1.5 text-[#064C3D]"></i>Psicológica</span></label>
+                </div>
+            </fieldset>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div><label for="modalidad" class="mb-1 block text-sm font-semibold text-slate-700">Modalidad <span class="text-red-500">*</span></label>
+                    <select id="modalidad" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Individual</option><option id="opcion-grupal" disabled>Grupal (solo psicológica)</option></select></div>
+                <div data-campo><label for="lugar" class="mb-1 block text-sm font-semibold text-slate-700">Lugar <span class="text-red-500">*</span></label><input id="lugar" data-obligatorio placeholder="Por ejemplo: Sala de Talento Humano" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></div>
+                <div data-campo><label for="fecha" class="mb-1 block text-sm font-semibold text-slate-700">Fecha <span class="text-red-500">*</span></label><input id="fecha" type="date" data-obligatorio value="2026-10-02" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></div>
+                <div data-campo><label for="hora" class="mb-1 block text-sm font-semibold text-slate-700">Hora <span class="text-red-500">*</span></label><input id="hora" type="time" data-obligatorio value="09:00" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></div>
+            </div>
+
+            <div class="mt-4">
+                <p class="mb-2 text-sm font-semibold text-slate-700">Aspirantes <span class="text-red-500">*</span> <span id="nota-aspirantes" class="font-normal text-slate-400">· uno en modalidad individual</span></p>
+                <ul class="max-h-40 divide-y divide-slate-100 overflow-y-auto rounded-2xl text-sm ring-1 ring-slate-200">
+                    <li class="flex items-center gap-3 px-3 py-2"><input type="checkbox" checked class="accent-[#064C3D]"><span class="flex-1">Santiago Rojas Polanía <span class="text-xs text-slate-400">· Cacao, Gestor Agrícola, Herramientas</span></span></li>
+                    <li class="flex items-center gap-3 px-3 py-2"><input type="checkbox" class="accent-[#064C3D]"><span class="flex-1">Óscar David Lara <span class="text-xs text-slate-400">· Gestor Pecuario, Reproducción, Sanidad</span></span></li>
+                    <li class="flex items-center gap-3 px-3 py-2 opacity-60"><input type="checkbox" disabled class="accent-[#064C3D]"><span class="flex-1">Juan David Mora <span class="text-xs text-red-600">· No evaluado: sin prueba psicotécnica</span></span></li>
+                </ul>
+                <p class="mt-1 text-xs text-slate-500">Los cargos evaluados se toman de las opciones de cada aspirante.</p>
+            </div>
+
+            <div class="mt-4">
+                <p class="mb-2 text-sm font-semibold text-slate-700">Evaluadores <span class="text-red-500">*</span></p>
+                <div id="evaluadores" class="grid gap-2 sm:grid-cols-2 text-sm">
+                    <label class="flex items-center gap-2 rounded-xl px-3 py-2 ring-1 ring-slate-200"><input type="checkbox" data-tecnico class="accent-[#064C3D]"> Yina <span class="text-xs text-slate-400">· Líder</span></label>
+                    <label class="flex items-center gap-2 rounded-xl px-3 py-2 ring-1 ring-slate-200"><input type="checkbox" data-tecnico checked class="accent-[#064C3D]"> Jorge Iván Cuéllar <span class="text-xs text-slate-400">· técnico</span></label>
+                    <label class="flex items-center gap-2 rounded-xl px-3 py-2 ring-1 ring-slate-200"><input type="checkbox" data-tecnico class="accent-[#064C3D]"> Luz Marina Vargas <span class="text-xs text-slate-400">· técnica</span></label>
+                    <label class="flex items-center gap-2 rounded-xl px-3 py-2 ring-1 ring-slate-200"><input type="checkbox" data-psicologo class="accent-[#064C3D]"> Adriana Carolina Muñoz <span class="text-xs text-slate-400">· psicóloga</span></label>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-check mr-1"></i> Guardar y citar</button>
+            </div>
+        </form>
+    </dialog>
+</div>
+
+<script>
+    const dias = [
+        ['Miércoles 1 de octubre', [
+            ['8:00 a. m.', 'Técnica', 'Individual', 'Sala de Talento Humano', 'Paula Díaz Rivera', 'Yina, Carlos Andrés Medina', 'Gestor de Talento Humano · Gerente Administrativo · Líder Escuela Cultura de Paz'],
+            ['8:00 a. m.', 'Psicológica', 'Grupal · 7', 'Oficina de Bienestar', 'Grupo 1 (7 aspirantes)', 'Adriana Carolina Muñoz', 'Varios cargos'],
+            ['9:00 a. m.', 'Técnica', 'Individual', 'Sala de Talento Humano', 'Camilo Andrés Vargas', 'Yina, Carlos Andrés Medina', 'Gerente Administrativo · Contabilidad · Talento Humano'],
+        ]],
+        ['Jueves 2 de octubre', [
+            ['9:00 a. m.', 'Técnica', 'Individual', 'Laboratorio ambiental', 'Camila Andrea Ruiz', 'Jorge Iván Cuéllar, Luz Marina Vargas', 'Líder Subsistema Ambiental · Equipo Ambiental · BPA'],
+            ['2:00 p. m.', 'Psicológica', 'Grupal · 6', 'Oficina de Bienestar', 'Grupo 4 (6 aspirantes)', 'Adriana Carolina Muñoz', 'Varios cargos'],
+        ]],
+    ];
+    document.getElementById('agenda').innerHTML = dias.map(([dia, citas]) => `
+        <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
+            <h2 class="text-sm font-bold text-[#064C3D]"><i class="fas fa-calendar-day mr-1.5 text-emerald-600"></i>${dia}</h2>
+            <ul class="mt-3 space-y-2">${citas.map(([hora, tipo, modalidad, lugar, quien, evaluadores, cargos]) => `
+                <li class="flex flex-col gap-2 rounded-2xl p-3 ring-1 ring-slate-200 sm:flex-row sm:items-center">
+                    <span class="w-24 shrink-0 text-sm font-bold text-slate-800">${hora}</span>
+                    <span class="w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold ${tipo === 'Técnica' ? 'bg-[#E8F3EF] text-[#064C3D]' : 'bg-sky-100 text-sky-800'}"><i class="fas ${tipo === 'Técnica' ? 'fa-screwdriver-wrench' : 'fa-brain'} mr-1"></i>${tipo} · ${modalidad}</span>
+                    <div class="min-w-0 flex-1"><p class="font-semibold text-slate-800">${quien}</p><p class="truncate text-xs text-slate-500">${cargos}</p></div>
+                    <div class="text-xs text-slate-500 sm:w-56"><p><i class="fas fa-location-dot mr-1"></i>${lugar}</p><p class="truncate"><i class="fas fa-user-group mr-1"></i>${evaluadores}</p></div>
+                    <button type="button" data-abrir="#modal-citacion" class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-[#064C3D]" aria-label="Editar"><i class="fas fa-pen"></i></button>
+                </li>`).join('')}</ul>
+        </section>`).join('');
+
+    // Modalidad grupal solo para la entrevista psicológica (HU-027, esc. 5)
+    document.querySelectorAll('input[name="tipo"]').forEach((r) => r.addEventListener('change', () => {
+        const psicologica = document.querySelector('input[name="tipo"]:checked').value === 'psicologica';
+        document.getElementById('opcion-grupal').disabled = !psicologica;
+        if (!psicologica) document.getElementById('modalidad').selectedIndex = 0;
+    }));
+    document.getElementById('modalidad').addEventListener('change', (e) => {
+        document.getElementById('nota-aspirantes').textContent = e.target.selectedIndex ? '· varios en modalidad grupal; cada uno recibe su calificación' : '· uno en modalidad individual';
+    });
+    // Validación de evaluadores (HU-027, esc. 3 y 4)
+    document.getElementById('form-citacion').addEventListener('submit', (e) => {
+        const tecnica = document.querySelector('input[name="tipo"]:checked').value === 'tecnica';
+        const valido = document.querySelector(tecnica ? '[data-tecnico]:checked' : '[data-psicologo]:checked');
+        if (!valido) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const caja = document.getElementById('errores-citacion');
+            caja.querySelector('ul').innerHTML = `<li>${tecnica ? 'Asigne al menos un instructor técnico o al Instructor Líder.' : 'Asigne al menos un Evaluador psicológico.'}</li>`;
+            caja.hidden = false;
+            caja.scrollIntoView({ block: 'nearest' });
+        }
+    }, true);
+    document.addEventListener('estado', ({ detail }) => {
+        const errores = detail === 'errores';
+        document.getElementById('errores-citacion').hidden = !errores;
+        document.getElementById('lugar').classList.toggle('border-red-400', errores);
+        document.getElementById('fecha').classList.toggle('border-red-400', errores);
+        document.getElementById('fecha').value = errores ? '2026-10-14' : '2026-10-02';
+        document.querySelectorAll('[data-tecnico]').forEach((c) => { c.checked = !errores && c.closest('label').textContent.includes('Jorge'); });
+        const modal = document.getElementById('modal-citacion');
+        if (errores && !modal.open) setTimeout(() => modal.showModal(), 100);
+    });
+</script>
+</body>
+</html>

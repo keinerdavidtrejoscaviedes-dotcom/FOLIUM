@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi cargo · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="cargo" data-mockup="APR-10|Mi cargo e historial|HU-055 · RF-014, RF-015 · RN-028 a RN-030"
+      data-estados="asignada:Asignada (empalme pendiente),vigente:Vigente,finalizada:Fase cerrada">
+<div id="contenido" class="mx-auto max-w-3xl">
+    <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Mi cargo</h1>
+
+    <section class="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Fase XXXVI · origen: acta de seleccionados</p>
+                <h2 class="mt-1 text-xl font-extrabold text-[#064C3D]">Líder de U. F. Productiva Cacao</h2>
+                <p class="text-sm text-slate-500">Área Agrícola · jefe inmediato: Gestor Agrícola · unidad: Cacao</p>
+            </div>
+            <span data-estado="asignada" class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">Asignada</span>
+            <span data-estado="vigente" class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Vigente desde 15/01/2027</span>
+            <span data-estado="finalizada" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Finalizada el 18/06/2027</span>
+        </div>
+        <div data-estado="asignada" class="mt-4 flex flex-wrap items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <i class="fas fa-lock mt-0.5 text-amber-500"></i><span class="flex-1">Debe completar el empalme para usar las funciones del cargo.</span>
+            <a href="08-empalme.html#estado=entrante" class="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white">Ir a mi empalme</a>
+        </div>
+        <div data-estado="vigente" class="mt-4 flex items-start gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]">
+            <i class="fas fa-circle-check mt-0.5"></i><span>Quedaste vinculado con el visto bueno del Gestor de Talento Humano. Los demás módulos de FOLIUM ya te reconocen como Líder de la unidad de cacao.</span>
+        </div>
+        <div data-estado="finalizada" class="mt-4 flex items-start gap-3 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700">
+            <i class="fas fa-flag-checkered mt-0.5"></i><span>La fase terminó: ya no tienes las funciones del cargo, pero conservas tu historial. El paz y salvo lo gestiona la Gerencia.</span>
+        </div>
+    </section>
+
+    <section class="mt-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+        <h2 class="font-bold text-[#064C3D]">Mi historial en SENA Empresa</h2>
+        <ol class="relative mt-4 space-y-4 border-l-2 border-[#E8F3EF] pl-5 text-sm">
+            <li class="relative"><span class="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-[#064C3D] ring-4 ring-white"></span><p class="font-semibold text-slate-800">Líder de U. F. Productiva Cacao · Fase XXXVI</p><p class="text-xs text-slate-500">Seleccionado en tu 1.ª opción · empalme con María José Ospina</p></li>
+            <li class="relative"><span class="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-slate-300 ring-4 ring-white"></span><p class="font-semibold text-slate-800">Turnos rutinarios · Fase XXXV</p><p class="text-xs text-slate-500">Sin cargo asignado en FOLIUM</p></li>
+        </ol>
+    </section>
+</div>
+</body>
+</html>

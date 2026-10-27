@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prueba psicotécnica · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="prueba" data-mockup="APR-06|Presentar la prueba psicotécnica|HU-047, HU-056 · RF-007 · RN-013 · RNF-010, RNF-015"
+      data-estados="inicio:Inicio,curso:Respondiendo,pendientes:Preguntas sin responder,enviada:Enviada,ya-presentada:Ya presentada,vencida:Plazo vencido,no-postulado:Sin postulación">
+<div id="contenido" class="mx-auto max-w-2xl">
+    <!-- Inicio -->
+    <section data-estado="inicio" class="rounded-3xl bg-[#064C3D] p-6 text-white sm:p-8">
+        <p class="text-xs font-bold uppercase tracking-[.18em] text-[#34D399]">Habilitada hasta el 29/09/2026 · 6:00 p. m.</p>
+        <h1 class="mt-2 text-2xl font-extrabold">Prueba psicotécnica</h1>
+        <p class="mt-2 text-sm text-emerald-50/85">32 preguntas · unos 40 minutos. Es obligatoria para que te citen a entrevista.</p>
+        <ul class="mt-5 space-y-2 text-sm">
+            <li><i class="fas fa-floppy-disk mr-2 text-[#34D399]"></i>Tus respuestas se guardan mientras avanzas: si se cae la conexión, sigues donde ibas.</li>
+            <li><i class="fas fa-mobile-screen mr-2 text-[#34D399]"></i>Puedes presentarla desde el celular.</li>
+            <li><i class="fas fa-ban mr-2 text-[#34D399]"></i>Solo se envía una vez.</li>
+        </ul>
+        <button type="button" onclick="cambiarEstado('curso')" class="mt-6 w-full rounded-full bg-[#34D399] px-6 py-3 text-sm font-bold text-[#043A2F] hover:bg-emerald-300 sm:w-auto">Comenzar la prueba</button>
+    </section>
+
+    <!-- Respondiendo -->
+    <div data-estado="curso pendientes" class="space-y-4">
+        <div class="sticky top-0 z-10 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex items-center justify-between text-xs"><span class="font-semibold text-slate-700">Pregunta <span id="numero">9</span> de 32</span><span class="text-emerald-700"><i class="fas fa-cloud mr-1"></i>Guardado hace un momento</span></div>
+            <div class="mt-2 h-2 rounded-full bg-slate-100"><div id="barra" class="h-2 rounded-full bg-[#064C3D]" style="width:28%"></div></div>
+        </div>
+        <div data-estado="pendientes" class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Responda todas las preguntas antes de enviar. Te llevamos a la primera pendiente (pregunta 14).</div>
+
+        <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400"><span data-estado="curso">Trabajo en equipo</span><span data-estado="pendientes">Manejo de la presión</span></p>
+            <p class="mt-2 text-lg font-semibold text-slate-800"><span data-estado="curso">Cuando un compañero no cumple su parte del trabajo, hablo con él directamente.</span><span data-estado="pendientes">Faltan dos horas para entregar el informe de la unidad y se daña el computador. ¿Qué haces primero?</span></p>
+            <div data-estado="curso" class="mt-5 grid grid-cols-5 gap-2 text-center text-sm">
+                <label class="rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">1<span class="block text-[10px]">Nunca</span></label>
+                <label class="rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">2</label>
+                <label class="rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">3</label>
+                <label class="rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" checked class="sr-only">4</label>
+                <label class="rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">5<span class="block text-[10px]">Siempre</span></label>
+            </div>
+            <div data-estado="pendientes" class="mt-5 space-y-2">
+                <label class="flex items-center gap-3 rounded-2xl p-4 ring-1 ring-red-200 has-[:checked]:bg-[#E8F3EF]/60 has-[:checked]:ring-[#064C3D]"><input type="radio" name="p14" class="h-4 w-4 accent-[#064C3D]"> Aviso a mi jefe y propongo una alternativa</label>
+                <label class="flex items-center gap-3 rounded-2xl p-4 ring-1 ring-red-200 has-[:checked]:bg-[#E8F3EF]/60 has-[:checked]:ring-[#064C3D]"><input type="radio" name="p14" class="h-4 w-4 accent-[#064C3D]"> Espero a que lo arreglen</label>
+                <label class="flex items-center gap-3 rounded-2xl p-4 ring-1 ring-red-200 has-[:checked]:bg-[#E8F3EF]/60 has-[:checked]:ring-[#064C3D]"><input type="radio" name="p14" class="h-4 w-4 accent-[#064C3D]"> Lo hago a mano y lo paso después</label>
+            </div>
+        </section>
+        <div class="flex items-center justify-between gap-2">
+            <button type="button" class="rounded-full px-5 py-3 text-sm font-semibold text-slate-600 ring-1 ring-slate-200"><i class="fas fa-arrow-left mr-1"></i> Anterior</button>
+            <button type="button" data-estado="curso" onclick="cambiarEstado('pendientes')" class="rounded-full px-4 py-3 text-xs font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30">Enviar prueba</button>
+            <button type="button" data-estado="pendientes" data-titulo-confirmar="¿Enviar la prueba?" data-confirmar="Ya respondiste las 32 preguntas. Después de enviarla no podrás cambiar tus respuestas." data-estado-destino="enviada" class="rounded-full px-4 py-3 text-xs font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30">Enviar prueba</button>
+            <button type="button" class="rounded-full bg-[#064C3D] px-5 py-3 text-sm font-semibold text-white">Siguiente <i class="fas fa-arrow-right ml-1"></i></button>
+        </div>
+    </div>
+
+    <!-- Finales -->
+    <section data-estado="enviada" class="rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#E8F3EF] text-3xl text-[#064C3D]"><i class="fas fa-circle-check"></i></span>
+        <h1 class="mt-5 text-xl font-extrabold text-[#064C3D]">Prueba enviada correctamente</h1>
+        <p class="mt-2 text-sm text-slate-600">28/09/2026 a las 9:12 a. m. Ya pueden citarte a entrevista. Te llegará la citación por correo.</p>
+        <p class="mt-2 text-xs text-slate-400">El resultado lo revisan los evaluadores; no se muestra en tu cuenta.</p>
+        <a href="05-mi-postulacion.html" class="mt-6 inline-flex rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white">Ver mi postulación</a>
+    </section>
+    <section data-estado="ya-presentada" class="rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#E8F3EF] text-3xl text-[#064C3D]"><i class="fas fa-clipboard-check"></i></span>
+        <p class="mt-5 font-semibold text-slate-800">Ya presentó la prueba psicotécnica</p>
+        <p class="mt-1 text-sm text-slate-500">La enviaste el 28/09/2026. No se puede responder dos veces.</p>
+    </section>
+    <section data-estado="vencida" class="rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-red-200">
+        <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-red-50 text-3xl text-red-500"><i class="fas fa-calendar-xmark"></i></span>
+        <p class="mt-5 font-semibold text-slate-800">El plazo para presentar la prueba terminó el 29/09/2026</p>
+        <p class="mt-1 text-sm text-slate-500">Quedaste como «No evaluado» y no podrás ser citado a entrevista. Si tuviste un problema, comunícate con el Gestor de Talento Humano.</p>
+    </section>
+    <section data-estado="no-postulado" class="rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-slate-100 text-3xl text-slate-400"><i class="fas fa-lock"></i></span>
+        <p class="mt-5 font-semibold text-slate-800">La prueba está disponible solo para los aprendices postulados</p>
+        <a href="03-convocatoria.html" class="mt-4 inline-flex rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white">Ver la convocatoria</a>
+    </section>
+</div>
+<script>
+    document.addEventListener('estado', ({ detail }) => {
+        document.getElementById('numero').textContent = detail === 'pendientes' ? 14 : 9;
+        document.getElementById('barra').style.width = detail === 'pendientes' ? '97%' : '28%';
+    });
+</script>
+</body>
+</html>

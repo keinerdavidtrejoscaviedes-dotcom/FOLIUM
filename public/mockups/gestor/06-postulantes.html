@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Postulantes · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="postulantes" data-mockup="GTH-06|Postulantes|HU-024, HU-032 · RF-005, RF-006 · RN-063"
+      data-estados="cerrada:Análisis en curso,abierta:Convocatoria abierta,completo:Todo analizado">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Postulantes</h1>
+            <p class="mt-1 text-sm text-slate-600">Hojas de vida, propuestas de trabajo y estado de cada aspirante. Los resultados de la prueba, las calificaciones y los puntajes no se muestran en este rol.</p>
+        </div>
+        <button type="button" data-accion data-ok="Se descargó postulantes_fase_XXXVI.xlsx" data-ok-tipo="info" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-white"><i class="fas fa-file-excel"></i> Exportar listado</button>
+    </div>
+
+    <div data-estado="abierta" class="mt-4 flex items-start gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900" role="status">
+        <i class="fas fa-door-open mt-0.5"></i><span>La convocatoria está abierta hasta el 12/09/2026. <strong>El análisis de hojas de vida se habilita al cerrar la convocatoria.</strong></span>
+    </div>
+    <div data-estado="completo" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]" role="status">
+        <i class="fas fa-circle-check"></i><span class="flex-1">No hay hojas de vida pendientes de análisis.</span>
+        <a href="08-prueba.html" class="rounded-full bg-[#064C3D] px-3 py-1 text-xs font-semibold text-white hover:bg-[#043A2F]">Habilitar la prueba psicotécnica</a>
+    </div>
+
+    <!-- Resumen -->
+    <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Postulaciones completas</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="cerrada completo">61</span><span data-estado="abierta">38</span></p><p class="text-xs text-slate-400">de 64 aprendices habilitados</p></div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Hojas de vida analizadas</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="cerrada">48</span><span data-estado="completo">61</span><span data-estado="abierta">0</span></p></div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Postulaciones incompletas</p><p class="text-2xl font-extrabold text-amber-600"><span data-estado="cerrada completo">0</span><span data-estado="abierta">5</span></p><p class="text-xs text-slate-400">faltan documentos</p></div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Prueba presentada</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="completo">61</span><span data-estado="cerrada abierta">0</span></p></div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-2" data-tabs="vista" role="tablist">
+        <button type="button" data-tab="aspirantes" aria-selected="true" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition">Aspirantes</button>
+        <button type="button" data-tab="cargos" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition">Por cargo</button>
+    </div>
+
+    <!-- Aspirantes -->
+    <div data-panel="aspirantes" data-grupo="vista">
+        <div class="mt-4 grid gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 sm:grid-cols-[minmax(0,1fr)_11rem_12rem_11rem]">
+            <label class="relative"><span class="sr-only">Buscar</span><i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                <input type="search" placeholder="Aspirante o documento…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></label>
+            <select aria-label="Ficha" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todas las fichas</option><option>2902114</option><option>2902187</option><option>2902230</option></select>
+            <select aria-label="Análisis" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Análisis: todos</option><option>Pendiente</option><option>Registrado</option></select>
+            <select aria-label="Cargo" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Cualquier cargo</option><option>Gestor de Talento Humano</option><option>Gerente Administrativo</option></select>
+        </div>
+        <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                        <tr><th class="px-4 py-3 font-semibold">Aspirante</th><th class="px-4 py-3 font-semibold">Cargos en orden de preferencia</th><th class="hidden px-4 py-3 font-semibold md:table-cell">Documentos</th><th class="px-4 py-3 font-semibold">Hoja de vida</th><th class="hidden px-4 py-3 font-semibold lg:table-cell">Prueba</th><th class="px-4 py-3"><span class="sr-only">Abrir</span></th></tr>
+                    </thead>
+                    <tbody id="aspirantes" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
+                <span>1–8 de 61 aspirantes</span>
+                <div class="flex gap-1"><a class="pointer-events-none rounded-lg px-3 py-1.5 font-semibold text-slate-300"><i class="fas fa-chevron-left mr-1"></i>Anterior</a><a href="#" class="rounded-lg px-3 py-1.5 font-semibold text-[#064C3D] hover:bg-[#E8F3EF]">Siguiente<i class="fas fa-chevron-right ml-1"></i></a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Por cargo -->
+    <div data-panel="cargos" data-grupo="vista" class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr><th class="px-4 py-3 font-semibold">Cargo</th><th class="px-4 py-3 text-center font-semibold">Cupos</th><th class="px-4 py-3 text-center font-semibold">1.ª opción</th><th class="px-4 py-3 text-center font-semibold">2.ª opción</th><th class="px-4 py-3 text-center font-semibold">3.ª opción</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    <tr><td class="px-4 py-3 font-semibold">Gerente Administrativo</td><td class="px-4 py-3 text-center">1</td><td class="px-4 py-3 text-center">4</td><td class="px-4 py-3 text-center">3</td><td class="px-4 py-3 text-center">2</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold">Gestor de Talento Humano</td><td class="px-4 py-3 text-center">2</td><td class="px-4 py-3 text-center">6</td><td class="px-4 py-3 text-center">4</td><td class="px-4 py-3 text-center">1</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold">Líder de U. F. Productiva Cacao</td><td class="px-4 py-3 text-center">1</td><td class="px-4 py-3 text-center">3</td><td class="px-4 py-3 text-center">2</td><td class="px-4 py-3 text-center">2</td></tr>
+                    <tr class="bg-amber-50/60"><td class="px-4 py-3 font-semibold">Líder de riego <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">Sin postulantes</span></td><td class="px-4 py-3 text-center">1</td><td class="px-4 py-3 text-center">0</td><td class="px-4 py-3 text-center">0</td><td class="px-4 py-3 text-center">0</td></tr>
+                    <tr><td class="px-4 py-3 text-slate-400" colspan="5">… y 38 cargos más</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const aspirantes = [
+        ['Paula Díaz Rivera', '2902114', ['Gestor de Talento Humano', 'Gerente Administrativo', 'Líder Escuela Cultura de Paz'], 'Registrado', 'Yina'],
+        ['Camilo Andrés Vargas', '2902114', ['Gerente Administrativo', 'Gestor de contabilidad y finanzas', 'Gestor de Talento Humano'], 'Registrado', 'Laura Cuéllar'],
+        ['Sergio Medina Ortiz', '2902187', ['Gestor de Talento Humano', 'Gestor Agrícola', 'Líder de riego'], 'Registrado', 'Juan Esteban Rojas'],
+        ['Camila Andrea Ruiz', '2902187', ['Líder Subsistema Ambiental', 'Equipo Ambiental', 'Líder de BPA'], 'Pendiente'],
+        ['Santiago Rojas Polanía', '2902187', ['Líder de U. F. Productiva Cacao', 'Gestor Agrícola', 'Líder de herramientas'], 'Pendiente'],
+        ['Laura Sofía Puentes', '2902230', ['Líder Unidad de Lácteos', 'Equipo de Sanidad', 'Gestor Pecuario'], 'Registrado', 'Laura Cuéllar'],
+        ['Óscar David Lara', '2902230', ['Gestor Pecuario', 'Líder de reproducción', 'Equipo de Sanidad'], 'Pendiente'],
+        ['Juliana Andrea Mora', '2902114', ['Gerente Administrativo', 'Gestor de Talento Humano', 'Líder Community Manager'], 'Registrado', 'Yina'],
+    ];
+    const pintar = (estado) => {
+        document.getElementById('aspirantes').innerHTML = aspirantes.map(([nombre, ficha, opciones, analisis, quien]) => {
+            const a = estado === 'abierta' ? 'Bloqueado' : estado === 'completo' ? 'Registrado' : analisis;
+            const chipA = { Registrado: 'bg-emerald-100 text-emerald-800', Pendiente: 'bg-amber-100 text-amber-800', Bloqueado: 'bg-slate-100 text-slate-500' }[a];
+            const prueba = estado === 'completo' ? '<span class="text-xs font-semibold text-emerald-700"><i class="fas fa-check mr-1"></i>Presentada</span>' : '<span class="text-xs text-slate-400">Sin habilitar</span>';
+            return `<tr class="transition hover:bg-[#E8F3EF]/40">
+                <td class="px-4 py-3"><p class="font-semibold text-slate-800">${nombre}</p><p class="text-xs text-slate-500">Ficha ${ficha}</p></td>
+                <td class="px-4 py-3"><ol class="space-y-0.5 text-xs text-slate-600">${opciones.map((o, i) => `<li><span class="mr-1 inline-grid h-4 w-4 place-items-center rounded-full bg-[#064C3D] text-[9px] font-bold text-white">${i + 1}</span>${o}</li>`).join('')}</ol></td>
+                <td class="hidden px-4 py-3 md:table-cell"><span class="text-xs font-semibold text-emerald-700"><i class="fas fa-circle-check mr-1"></i>Completos</span></td>
+                <td class="px-4 py-3"><span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ${chipA}">${a === 'Bloqueado' ? 'Al cerrar' : a}</span>${a === 'Registrado' && quien ? `<p class="mt-0.5 text-[11px] text-slate-400">por ${estado === 'completo' && !quien ? 'Laura Cuéllar' : quien}</p>` : ''}</td>
+                <td class="hidden px-4 py-3 lg:table-cell">${prueba}</td>
+                <td class="px-4 py-3 text-right"><a href="07-postulante.html#estado=${a === 'Pendiente' ? 'pendiente' : a === 'Bloqueado' ? 'abierta' : 'registrado'}" class="inline-flex items-center gap-1.5 rounded-full ${a === 'Pendiente' ? 'bg-[#064C3D] text-white hover:bg-[#043A2F]' : 'text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'} px-3 py-1.5 text-xs font-semibold">${a === 'Pendiente' ? '<i class="fas fa-pen"></i> Analizar' : '<i class="fas fa-eye"></i> Ver'}</a></td>
+            </tr>`;
+        }).join('');
+    };
+    document.addEventListener('estado', ({ detail }) => pintar(detail));
+</script>
+</body>
+</html>

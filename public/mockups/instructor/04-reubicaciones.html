@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reubicaciones · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="lider" data-activo="reubicaciones" data-mockup="INS-04|Reubicación de no seleccionados (comité)|HU-036, HU-050 · RF-011 · RN-022, RN-049"
+      data-estados="normal:Caso por decidir,incompatible:No compatible sin justificación,sin-participantes:Sin participantes,sin-vacantes:Sin cupos vacantes,registrada:Registrada,vacio:Sin casos">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Reubicaciones</h1>
+            <p class="mt-1 text-sm text-slate-600">Aprendices que no quedaron en ninguna de sus 3 opciones. Registra la decisión del comité (instructores y psicólogos que evaluaron).</p>
+        </div>
+    </div>
+
+    <div data-estado="vacio" class="mt-6 rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-circle-check mb-2 block text-3xl text-emerald-500"></i>
+        <p class="font-semibold text-slate-700">No hay aprendices pendientes de reubicación</p>
+    </div>
+
+    <div data-estado="normal incompatible sin-participantes sin-vacantes registrada" class="mt-6 grid gap-4 xl:grid-cols-[18rem_minmax(0,1fr)]">
+        <!-- Casos -->
+        <aside class="space-y-2">
+            <p class="px-1 text-xs font-bold uppercase tracking-[.18em] text-slate-400">Por reubicar · 3</p>
+            <button type="button" class="block w-full rounded-2xl bg-[#064C3D] p-4 text-left text-white shadow-md">
+                <p class="font-semibold">Óscar David Lara</p><p class="text-xs text-emerald-100">Ficha 2902230 · Producción Ganadera · 134 pts</p>
+                <span data-estado="registrada" class="mt-2 inline-block rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold">Reubicado</span>
+            </button>
+            <button type="button" class="block w-full rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200/70 hover:ring-[#34D399]"><p class="font-semibold text-slate-800">Natalia Polanía</p><p class="text-xs text-slate-500">Ficha 2902114 · Gestión Agroempresarial · 113 pts</p></button>
+            <button type="button" class="block w-full rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200/70 hover:ring-[#34D399]"><p class="font-semibold text-slate-800">Kevin Ortiz</p><p class="text-xs text-slate-500">Ficha 2902187 · Producción Agrícola · 111 pts</p></button>
+        </aside>
+
+        <div class="space-y-4">
+            <!-- Caso -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-extrabold text-[#064C3D]">Óscar David Lara</h2>
+                        <p class="text-sm text-slate-500">Ficha 2902230 · Producción Ganadera · <a href="05-aspirante.html" class="font-semibold text-emerald-700 hover:underline">ver ficha completa</a></p>
+                    </div>
+                    <div class="text-right"><p class="text-xs text-slate-400">Puntaje total</p><p class="text-3xl font-extrabold text-[#064C3D]">134</p></div>
+                </div>
+                <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Prueba psicotécnica</p><p class="text-lg font-extrabold text-[#064C3D]">68 <span class="text-xs font-semibold text-slate-400">/ 100</span></p><p class="text-xs text-slate-500">Perfil: metódico, trabajo en equipo</p></div>
+                    <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Entrevista técnica</p><p class="text-lg font-extrabold text-[#064C3D]">66 <span class="text-xs font-semibold text-slate-400">· Apto</span></p><p class="text-xs text-slate-500">«Buen manejo de riego y registros»</p></div>
+                    <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Entrevista psicológica</p><p class="text-lg font-extrabold text-[#064C3D]">Apto</p><p class="text-xs text-slate-500">«Comunicación asertiva, algo tímido»</p></div>
+                </div>
+                <p class="mt-4 text-xs font-semibold text-slate-500">Sus opciones (todas cubiertas por puntajes mayores)</p>
+                <div class="mt-1 flex flex-wrap gap-2 text-xs">
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600">1. Gestor Pecuario</span><span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600">2. Líder de reproducción</span><span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600">3. Equipo de Sanidad</span>
+                </div>
+            </section>
+
+            <!-- Registrada -->
+            <section data-estado="registrada" class="rounded-3xl bg-[#E8F3EF] p-6 text-[#064C3D]">
+                <p class="font-bold"><i class="fas fa-circle-check mr-1"></i>Reubicado en Líder de riego</p>
+                <p class="mt-1 text-sm">Comité del 22/10/2026: Yina, Jorge Iván Cuéllar, Diana Patricia Losada y Adriana Carolina Muñoz. Se incluirá en el acta de seleccionados y se notificó al aprendiz por correo.</p>
+            </section>
+
+            <!-- Decisión -->
+            <form data-estado="normal incompatible sin-participantes sin-vacantes" novalidate class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70" data-ok="Reubicación registrada. Se notificó al aprendiz." data-estado-destino="registrada">
+                <h2 class="font-bold text-[#064C3D]">Decisión del comité</h2>
+                <div data-estado="incompatible sin-participantes" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">
+                    <i class="fas fa-circle-exclamation mr-1"></i>
+                    <span data-estado="incompatible">La reubicación en un cargo no compatible requiere justificación</span>
+                    <span data-estado="sin-participantes">Registre los participantes de la reunión de reubicación</span>
+                </div>
+
+                <p class="mb-2 mt-4 text-sm font-semibold text-slate-700">Cargo con cupos vacantes <span class="text-red-500">*</span></p>
+                <div data-estado="sin-vacantes" class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+                    <p class="font-semibold"><i class="fas fa-circle-info mr-1"></i>No hay cargos con cupos vacantes</p>
+                    <label class="mt-3 flex items-center gap-2"><input type="radio" name="cargo" checked class="accent-[#064C3D]"> Registrar «Sin cargo asignado» con justificación</label>
+                </div>
+                <div data-estado="normal incompatible sin-participantes" class="space-y-2">
+                    <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Compatibles con Producción Ganadera</p>
+                    <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]"><input type="radio" name="cargo" class="accent-[#064C3D]"><span class="flex-1 text-sm font-semibold text-slate-700">Equipo de mantenimiento de cercos</span><span class="text-xs text-slate-500">1 cupo vacante</span></label>
+                    <p class="pt-2 text-xs font-bold uppercase tracking-wider text-slate-400">Otros cargos vacantes</p>
+                    <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]"><input type="radio" name="cargo" checked class="accent-[#064C3D]"><span class="flex-1 text-sm font-semibold text-slate-700">Líder de riego <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">No compatible</span></span><span class="text-xs text-slate-500">1 cupo vacante</span></label>
+                    <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/50 has-[:checked]:ring-[#064C3D]"><input type="radio" name="cargo" class="accent-[#064C3D]"><span class="flex-1 text-sm font-semibold text-slate-700">Líder Semillero SEBI <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">No compatible</span></span><span class="text-xs text-slate-500">1 cupo vacante</span></label>
+                    <p class="text-xs text-slate-400">Los cargos con todos sus cupos cubiertos no se muestran.</p>
+                </div>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <fieldset>
+                        <legend class="mb-2 text-sm font-semibold text-slate-700">Participantes de la reunión <span class="text-red-500">*</span></legend>
+                        <div id="participantes" class="space-y-1.5 text-sm"></div>
+                    </fieldset>
+                    <div>
+                        <label for="fecha" class="mb-1 block text-sm font-semibold text-slate-700">Fecha de la reunión <span class="text-red-500">*</span></label>
+                        <input id="fecha" type="date" value="2026-10-22" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="mt-4" data-campo>
+                    <label for="justificacion" class="mb-1 block text-sm font-semibold text-slate-700">Justificación <span class="text-red-500">*</span></label>
+                    <textarea id="justificacion" rows="3" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-floppy-disk mr-1"></i> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const personas = ['Yina · Líder', 'Jorge Iván Cuéllar · técnico', 'Diana Patricia Losada · técnica', 'Adriana Carolina Muñoz · psicóloga', 'Luz Marina Vargas · técnica'];
+    document.addEventListener('estado', ({ detail }) => {
+        const ninguno = detail === 'sin-participantes';
+        document.getElementById('participantes').innerHTML = personas.map((p, i) => `<label class="flex items-center gap-2"><input type="checkbox" ${!ninguno && i < 4 ? 'checked' : ''} class="accent-[#064C3D]"> ${p}</label>`).join('');
+        const j = document.getElementById('justificacion');
+        j.value = ['normal', 'sin-participantes'].includes(detail) ? 'Tiene experiencia en riego en la unidad de pastos; el cargo quedó vacante y la unidad lo necesita.' : '';
+        j.classList.toggle('border-red-400', detail === 'incompatible');
+        j.toggleAttribute('data-obligatorio', detail !== 'sin-participantes');
+        document.getElementById('participantes').classList.toggle('text-red-600', ninguno);
+    });
+</script>
+</body>
+</html>

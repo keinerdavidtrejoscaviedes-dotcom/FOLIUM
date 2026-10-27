@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vinculación · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="vinculacion" data-mockup="GTH-14|Vinculación del personal|HU-031 · RF-014 · RN-028"
+      data-estados="curso:En empalme,inicio:Fase iniciada con pendientes">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Vinculación</h1>
+            <p class="mt-1 text-sm text-slate-600">Un aprendiz queda vinculado cuando su empalme se cierra con tu visto bueno: su asignación pasa a «vigente» y se le habilitan las funciones del cargo.</p>
+        </div>
+    </div>
+
+    <div data-estado="inicio" class="mt-4 flex flex-wrap items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+        <i class="fas fa-triangle-exclamation mt-0.5 text-amber-500"></i>
+        <div class="flex-1"><p class="font-semibold">La Fase XXXVI inició hoy (25/01/2027) y hay 5 aprendices pendientes de vinculación</p><p class="mt-0.5">No pueden usar las funciones de su cargo hasta que su empalme se cierre.</p></div>
+        <a href="12-empalmes.html" class="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600">Ver empalmes</a>
+    </div>
+
+    <div class="mt-6 grid gap-3 sm:grid-cols-4">
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">En el acta</p><p class="text-2xl font-extrabold text-[#064C3D]">61</p></div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Vinculados</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="curso">21</span><span data-estado="inicio">56</span></p></div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Empalme en curso</p><p class="text-2xl font-extrabold text-amber-600"><span data-estado="curso">40</span><span data-estado="inicio">5</span></p></div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Avance</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="curso">34 %</span><span data-estado="inicio">92 %</span></p></div>
+    </div>
+
+    <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3 font-semibold">Aprendiz</th><th class="px-4 py-3 font-semibold">Cargo</th><th class="px-4 py-3 text-center font-semibold">Acta publicada</th><th class="px-4 py-3 text-center font-semibold">Empalme cerrado</th><th class="px-4 py-3 font-semibold">Asignación</th></tr></thead>
+                <tbody id="filas" class="divide-y divide-slate-100"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="mt-4 flex items-start gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-xs text-slate-600"><i class="fas fa-circle-info mt-0.5"></i>La inducción (misión, visión, políticas y recorrido por las unidades) la organiza otra área por fuera de FOLIUM y no es requisito para la vinculación.</p>
+</div>
+
+<script>
+    const filas = [
+        ['Camilo Andrés Vargas', 'Gerente Administrativo', true, true],
+        ['Santiago Rojas Polanía', 'Líder de U. F. Productiva Cacao', true, 'curso'],
+        ['Paula Díaz Rivera', 'Gestor de Talento Humano', true, 'curso'],
+        ['Sergio Medina Ortiz', 'Gestor de Talento Humano', true, 'curso'],
+        ['Camila Andrea Ruiz', 'Líder Subsistema Ambiental', true, false],
+        ['Óscar David Lara', 'Líder de riego · reubicado', true, false],
+    ];
+    document.addEventListener('estado', ({ detail }) => {
+        document.getElementById('filas').innerHTML = filas.map(([n, c, acta, empalme]) => {
+            const cerrado = empalme === true || (detail === 'inicio' && empalme === 'curso');
+            return `<tr class="${!cerrado && detail === 'inicio' ? 'bg-amber-50/50' : ''}">
+                <td class="px-4 py-3 font-semibold text-slate-800">${n}</td><td class="px-4 py-3 text-slate-600">${c}</td>
+                <td class="px-4 py-3 text-center"><i class="fas fa-circle-check text-emerald-600"></i></td>
+                <td class="px-4 py-3 text-center">${cerrado ? '<i class="fas fa-circle-check text-emerald-600"></i>' : '<i class="fas fa-hourglass-half text-amber-500"></i>'}</td>
+                <td class="px-4 py-3"><span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ${cerrado ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'}">${cerrado ? 'Vigente' : 'Asignada'}</span></td>
+            </tr>`;
+        }).join('') + '<tr><td class="px-4 py-3 text-xs text-slate-400" colspan="5">… y 55 aprendices más</td></tr>';
+    });
+</script>
+</body>
+</html>

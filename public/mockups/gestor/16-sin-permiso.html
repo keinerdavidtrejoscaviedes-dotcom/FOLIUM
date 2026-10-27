@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sin permiso · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="simple" data-rol="gestor" data-mockup="GTH-16|Acceso denegado|HU-032 esc. 2 y 4 · RNF-002 · válida para todos los roles"
+      data-estados="permiso:Sin permiso,otra-fase:Convocatoria de otra fase">
+<div id="contenido">
+    <div class="relative isolate mx-auto max-w-xl overflow-hidden rounded-3xl bg-white p-8 text-center shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70 sm:p-12">
+        <i class="fas fa-shield-halved absolute -bottom-6 -right-4 -z-10 text-[9rem] text-slate-50"></i>
+        <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-red-50 text-2xl text-red-500"><i class="fas fa-lock"></i></span>
+        <p class="mt-5 text-xs font-bold uppercase tracking-[.2em] text-slate-400">Error 403</p>
+        <h1 class="mt-1 text-2xl font-extrabold text-[#064C3D]">No tiene permisos para realizar esta acción</h1>
+        <p data-estado="permiso" class="mx-auto mt-3 max-w-md text-slate-600">Los resultados de la prueba psicotécnica y las calificaciones de entrevista solo los consultan los evaluadores, el Instructor Líder y el Instructor de Talento Humano.</p>
+        <p data-estado="otra-fase" class="mx-auto mt-3 max-w-md text-slate-600">Solo puedes operar la convocatoria de la fase de tu asignación. Esta convocatoria pertenece a la Fase XXXIV.</p>
+        <a href="01-panel.html" class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-arrow-left"></i> Volver a mi panel</a>
+        <p class="mt-6 text-xs text-slate-400">El intento quedó registrado en la auditoría.</p>
+    </div>
+</div>
+</body>
+</html>

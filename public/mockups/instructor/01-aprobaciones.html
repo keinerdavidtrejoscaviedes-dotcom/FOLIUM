@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aprobaciones pendientes · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="lider" data-activo="aprobaciones" data-mockup="INS-01|Aprobaciones pendientes del Líder|HU-034, HU-035, HU-037 · RF-020 · RN-069"
+      data-estados="seleccion:Selección por validar,cronograma:Cronograma por aprobar,vacio:Sin pendientes">
+<div id="contenido">
+    <div class="flex items-center gap-4">
+        <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#064C3D] text-xl text-[#34D399] shadow-lg shadow-[#064C3D]/20"><i class="fas fa-clipboard-check"></i></span>
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Aprobaciones pendientes</h1>
+            <p class="mt-0.5 text-sm text-slate-600">Lo que espera tu decisión como Instructor Líder.</p>
+        </div>
+    </div>
+
+    <!-- Sin pendientes -->
+    <div data-estado="vacio" class="mt-6 rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-circle-check mb-2 block text-3xl text-emerald-500"></i>
+        <p class="font-semibold text-slate-700">No tiene aprobaciones pendientes</p>
+        <p class="mt-1 text-sm text-slate-500">Te avisaremos por correo cuando el Gestor envíe un cronograma o el sistema genere la propuesta de selección.</p>
+    </div>
+
+    <div data-estado="seleccion cronograma">
+        <div class="mt-6 grid gap-3 sm:grid-cols-3">
+            <a href="#cronograma" class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 hover:ring-[#34D399]"><p class="text-xs text-slate-500"><i class="fas fa-calendar-days mr-1"></i>Cronogramas por aprobar</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="cronograma">1</span><span data-estado="seleccion">0</span></p></a>
+            <a href="#seleccion" class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 hover:ring-[#34D399]"><p class="text-xs text-slate-500"><i class="fas fa-user-check mr-1"></i>Propuestas de selección por validar</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="seleccion">30</span><span data-estado="cronograma">0</span></p></a>
+            <a href="04-reubicaciones.html" class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 hover:ring-[#34D399]"><p class="text-xs text-slate-500"><i class="fas fa-arrows-rotate mr-1"></i>Aprendices por reubicar</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="seleccion">3</span><span data-estado="cronograma">0</span></p></a>
+        </div>
+
+        <!-- Cronograma (HU-034) -->
+        <section id="cronograma" data-estado="cronograma" class="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <h2 class="font-bold text-[#064C3D]"><i class="fas fa-calendar-days mr-2 text-emerald-600"></i>Cronograma del proceso de selección</h2>
+            <a href="02-cronograma.html" class="mt-4 flex flex-wrap items-center gap-4 rounded-2xl bg-[#E8F3EF]/60 p-4 transition hover:bg-[#E8F3EF]">
+                <span class="grid h-11 w-11 place-items-center rounded-xl bg-[#064C3D] text-[#34D399]"><i class="fas fa-calendar-check"></i></span>
+                <div class="min-w-0 flex-1"><p class="font-semibold text-slate-800">Convocatoria Fase XXXVI · 9 etapas</p><p class="text-xs text-slate-500">Enviado el 20/08/2026 por Juan Esteban Rojas (Gestor de Talento Humano)</p></div>
+                <span class="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">En aprobación</span>
+                <span class="rounded-full bg-[#064C3D] px-4 py-1.5 text-xs font-semibold text-white">Revisar</span>
+            </a>
+        </section>
+
+        <!-- Selección (HU-035) -->
+        <section id="seleccion" data-estado="seleccion" class="mt-6 rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
+                <div>
+                    <h2 class="font-bold text-[#064C3D]"><i class="fas fa-user-check mr-2 text-emerald-600"></i>Propuestas de selección</h2>
+                    <p class="mt-1 text-sm text-slate-500">Calculadas por puntaje total y jerarquía de preferencia. Cada cargo se valida una sola vez: tú o el Instructor de Talento Humano.</p>
+                </div>
+                <div class="flex gap-1.5" data-tabs="filtro">
+                    <button type="button" data-tab="pendientes" aria-selected="true" class="rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-slate-200">Pendientes <span class="opacity-70">30</span></button>
+                    <button type="button" data-tab="validadas" class="rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-slate-200">Validadas <span class="opacity-70">12</span></button>
+                </div>
+            </div>
+            <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3 font-semibold">Cargo</th><th class="px-4 py-3 text-center font-semibold">Cupos</th><th class="px-4 py-3 font-semibold">Propuesta del sistema</th><th class="px-4 py-3 font-semibold">Estado</th><th class="px-4 py-3"><span class="sr-only">Abrir</span></th></tr></thead>
+                    <tbody data-panel="pendientes" data-grupo="filtro" id="pendientes" class="divide-y divide-slate-100"></tbody>
+                    <tbody data-panel="validadas" data-grupo="filtro" id="validadas" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const fila = ([cargo, cupos, propuesta, estado, chip, destino, accion]) => `
+        <tr class="transition hover:bg-[#E8F3EF]/40">
+            <td class="px-4 py-3 font-semibold text-slate-800">${cargo}</td>
+            <td class="px-4 py-3 text-center">${cupos}</td>
+            <td class="px-4 py-3 text-slate-600">${propuesta}</td>
+            <td class="px-4 py-3"><span class="whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${chip}">${estado}</span></td>
+            <td class="px-4 py-3 text-right"><a href="03-seleccion-cargo.html#estado=${destino}" class="inline-flex rounded-full ${accion === 'Validar' ? 'bg-[#064C3D] text-white hover:bg-[#043A2F]' : 'text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'} px-3 py-1.5 text-xs font-semibold">${accion}</a></td>
+        </tr>`;
+    document.getElementById('pendientes').innerHTML = [
+        ['Gestor de Talento Humano', 2, 'Paula Díaz Rivera (164) · Sergio Medina Ortiz (158)', 'Propuesta', 'bg-amber-100 text-amber-800', 'propuesta', 'Validar'],
+        ['Líder de U. F. Productiva Cacao', 1, 'Santiago Rojas Polanía (151)', 'Propuesta', 'bg-amber-100 text-amber-800', 'propuesta', 'Validar'],
+        ['Gestor Pecuario', 1, 'Empate: 2 candidatos con 147 en 1.ª opción', 'Empate por resolver', 'bg-red-100 text-red-700', 'empate', 'Validar'],
+        ['Líder Semillero SEBI', 1, 'Nadie alcanza el umbral (120)', 'Vacante por política', 'bg-slate-100 text-slate-600', 'vacante', 'Validar'],
+        ['Equipo Ambiental', 4, '4 candidatos de 1.ª y 2.ª opción', 'Propuesta', 'bg-amber-100 text-amber-800', 'propuesta', 'Validar'],
+    ].map(fila).join('') + '<tr><td colspan="5" class="px-4 py-3 text-xs text-slate-400">… y 25 cargos más</td></tr>';
+    document.getElementById('validadas').innerHTML = [
+        ['Gerente Administrativo', 1, 'Camilo Andrés Vargas (171)', 'Validada por ti · 20/10', 'bg-emerald-100 text-emerald-800', 'validado', 'Consultar'],
+        ['Líder Subsistema Ambiental', 1, 'Camila Andrea Ruiz (149)', 'Validada por Paola Trujillo (Instructor de TH) · 19/10', 'bg-emerald-100 text-emerald-800', 'validado-th', 'Consultar'],
+        ['Líder Unidad de Lácteos', 1, 'Laura Sofía Puentes (139) · ajustada', 'Ajustada por ti · 19/10', 'bg-sky-100 text-sky-800', 'validado', 'Consultar'],
+    ].map(fila).join('');
+</script>
+</body>
+</html>

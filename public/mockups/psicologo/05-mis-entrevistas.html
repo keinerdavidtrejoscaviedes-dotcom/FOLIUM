@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mis entrevistas · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="psicologo" data-activo="entrevistas" data-mockup="PSI-05|Mis entrevistas psicológicas|HU-042 · RF-008 · RN-018, RN-064"
+      data-estados="curso:Por calificar,terminado:Proceso terminado,vacio:Sin entrevistas">
+<div id="contenido">
+    <div>
+        <p class="text-sm font-semibold text-emerald-700">Hola, Adriana</p>
+        <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Mis entrevistas</h1>
+        <p class="mt-1 text-sm text-slate-600">Entrevistas psicológicas que tienes asignadas en la convocatoria de la Fase XXXVI. Las grupales se califican aspirante por aspirante.</p>
+    </div>
+
+    <div data-estado="vacio" class="mt-6 rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-calendar-xmark mb-2 block text-3xl text-slate-300"></i>
+        <p class="font-semibold text-slate-700">No tiene entrevistas asignadas</p>
+    </div>
+    <div data-estado="terminado" class="mt-4 flex items-start gap-3 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700"><i class="fas fa-flag-checkered mt-0.5"></i><span>El proceso de selección terminó. Solo puedes consultar tus propias calificaciones.</span></div>
+
+    <div data-estado="curso terminado">
+        <div class="mt-6 grid grid-cols-3 gap-3">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Grupos</p><p class="text-2xl font-extrabold text-[#064C3D]">9</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Aspirantes calificados</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="curso">55</span><span data-estado="terminado">57</span> <span class="text-sm text-slate-400">/ 57</span></p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Por calificar</p><p class="text-2xl font-extrabold text-amber-600"><span data-estado="curso">2</span><span data-estado="terminado">0</span></p></div>
+        </div>
+        <div id="grupos" class="mt-4 grid gap-3 md:grid-cols-2"></div>
+    </div>
+</div>
+<script>
+    const grupos = [
+        [9, 'Vie 10 oct · 2:00 p. m.', 6, 4],
+        [8, 'Jue 9 oct · 2:00 p. m.', 6, 6],
+        [4, 'Jue 2 oct · 2:00 p. m.', 6, 6],
+        [1, 'Mié 1 oct · 8:00 a. m.', 7, 7],
+    ];
+    document.addEventListener('estado', ({ detail }) => {
+        document.getElementById('grupos').innerHTML = grupos.map(([g, cuando, total, hechas]) => {
+            const h = detail === 'terminado' ? total : hechas;
+            const completo = h === total;
+            return `<article class="rounded-3xl bg-white p-5 shadow-sm ring-1 ${completo ? 'ring-slate-200/70' : 'ring-amber-200'}">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400"><i class="fas fa-brain mr-1"></i>Psicológica · grupal · ${cuando}</p>
+                <p class="mt-1 text-lg font-bold text-slate-900">Grupo ${g} <span class="text-sm font-normal text-slate-500">· ${total} aspirantes · Oficina de Bienestar</span></p>
+                <div class="mt-3 h-2 rounded-full bg-slate-100"><div class="h-2 rounded-full ${completo ? 'bg-[#064C3D]' : 'bg-amber-400'}" style="width:${h * 100 / total}%"></div></div>
+                <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <span class="text-xs ${completo ? 'text-slate-500' : 'font-semibold text-amber-700'}">${h} de ${total} calificados</span>
+                    <a href="06-calificar-grupal.html#estado=${completo ? (detail === 'terminado' ? 'terminado' : 'guardada') : 'calificar'}" class="rounded-full ${completo ? 'text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-[#E8F3EF]' : 'bg-[#064C3D] text-white hover:bg-[#043A2F]'} px-4 py-1.5 text-xs font-semibold">${completo ? 'Ver calificaciones' : 'Calificar'}</a>
+                </div>
+            </article>`;
+        }).join('') + '<p class="text-xs text-slate-400 md:col-span-2">… y 5 grupos más, todos calificados</p>';
+    });
+</script>
+</body>
+</html>

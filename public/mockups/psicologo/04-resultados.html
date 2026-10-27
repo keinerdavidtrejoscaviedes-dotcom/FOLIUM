@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resultados de la prueba · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="psicologo" data-activo="resultados" data-mockup="PSI-04|Resultados de la prueba psicotécnica|RF-007 · RN-014 · tabla 2.6 de visibilidad · RNF-006"
+      data-estados="normal:Con resultados,sin-resultados:Sin presentadas">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Resultados de la prueba</h1>
+            <p class="mt-1 text-sm text-slate-600">Convocatoria Fase XXXVI · Prueba psicotécnica SENA Empresa, versión 2. Datos personales protegidos (Ley 1581 de 2012).</p>
+        </div>
+        <button type="button" data-accion data-ok="Se descargó resultados_prueba_fase_XXXVI.xlsx" data-ok-tipo="info" class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-white"><i class="fas fa-file-excel"></i> Exportar</button>
+    </div>
+
+    <div data-estado="sin-resultados" class="mt-6 rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-hourglass-start mb-2 block text-3xl text-slate-300"></i>
+        <p class="font-semibold text-slate-700">Aún nadie ha presentado la prueba</p>
+        <p class="mt-1 text-sm text-slate-500">El Gestor de Talento Humano la habilitó del 22/09 al 29/09/2026.</p>
+    </div>
+
+    <div data-estado="normal">
+        <div class="mt-6 grid gap-3 sm:grid-cols-4">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Presentadas</p><p class="text-2xl font-extrabold text-[#064C3D]">61</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Promedio</p><p class="text-2xl font-extrabold text-[#064C3D]">71</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Rango</p><p class="text-2xl font-extrabold text-[#064C3D]">48 – 91</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Abiertas por calificar</p><p class="text-2xl font-extrabold text-amber-600">6</p></div>
+        </div>
+
+        <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3 font-semibold">Aspirante</th><th class="hidden px-4 py-3 font-semibold md:table-cell">Presentada</th><th class="px-4 py-3 font-semibold">Dimensiones</th><th class="px-4 py-3 text-center font-semibold">Puntaje</th><th class="px-4 py-3"><span class="sr-only">Ver</span></th></tr></thead>
+                    <tbody id="filas" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div class="border-t border-slate-100 px-4 py-3 text-sm text-slate-500">1–6 de 61 aspirantes</div>
+        </div>
+    </div>
+
+    <!-- Panel lateral: respuestas -->
+    <div id="cajon-respuestas" data-cajon class="cajon fixed inset-y-0 right-0 z-50 flex w-[min(100vw,30rem)] flex-col bg-white shadow-2xl ring-1 ring-slate-200">
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 p-6">
+            <div><p class="font-bold text-slate-900">Camila Andrea Ruiz</p><p class="text-xs text-slate-500">Presentada el 24/09/2026 11:02 a. m. · 38 minutos · versión 2</p></div>
+            <button type="button" data-cerrar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="flex-1 space-y-4 overflow-y-auto p-6 text-sm">
+            <div class="rounded-2xl bg-[#E8F3EF] p-4"><p class="text-xs text-[#064C3D]">Puntaje</p><p class="text-3xl font-extrabold text-[#064C3D]">68 <span class="text-sm font-semibold text-slate-500">/ 100</span></p><p class="mt-1 text-xs text-amber-700">Provisional: falta calificar 1 respuesta abierta.</p></div>
+            <div class="rounded-2xl p-3 ring-1 ring-slate-200"><p class="font-semibold text-slate-700">1. Observa la secuencia. ¿Qué figura sigue?</p><p class="mt-1 text-emerald-700"><i class="fas fa-check mr-1"></i>Círculo · 3 de 3</p></div>
+            <div class="rounded-2xl p-3 ring-1 ring-slate-200"><p class="font-semibold text-slate-700">2. Cuando un compañero no cumple su parte…</p><p class="mt-1 text-slate-600">4 en la escala · 4 de 5</p></div>
+            <div class="rounded-2xl p-3 ring-1 ring-amber-300 bg-amber-50/40">
+                <p class="font-semibold text-slate-700">4. Describe una situación en la que ayudaste a un compañero…</p>
+                <p class="mt-2 rounded-xl bg-white p-3 text-slate-600 ring-1 ring-slate-200">«En la unidad de cítricos un compañero nuevo no sabía registrar la cosecha; le expliqué el formato y luego revisamos juntos sus registros toda la semana…»</p>
+                <div class="mt-3 flex items-center gap-2"><label for="manual" class="text-xs font-semibold text-slate-700">Tu calificación</label><input id="manual" type="number" min="0" max="5" class="w-20 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm"><span class="text-xs text-slate-400">de 5</span>
+                    <button type="button" data-accion data-ok="Respuesta calificada. El puntaje de la prueba se actualizó." class="ml-auto rounded-full bg-[#064C3D] px-3 py-1.5 text-xs font-semibold text-white">Guardar</button></div>
+            </div>
+            <p class="text-xs text-slate-400">… y 28 respuestas más</p>
+        </div>
+    </div>
+</div>
+<script>
+    const filas = [
+        ['Paula Díaz Rivera', '2902114', '23/09 9:14 a. m.', [88, 84, 74, 80], 82],
+        ['Camilo Andrés Vargas', '2902114', '22/09 7:40 p. m.', [90, 86, 82, 84], 85, false],
+        ['Camila Andrea Ruiz', '2902187', '24/09 11:02 a. m.', [70, 72, 60, null], 68, true],
+        ['Santiago Rojas Polanía', '2902187', '28/09 8:30 a. m.', [78, 76, 70, 74], 75],
+        ['Óscar David Lara', '2902230', '27/09 4:15 p. m.', [66, 74, 62, 70], 68],
+        ['Laura Sofía Puentes', '2902230', '25/09 3:30 p. m.', [72, 70, 68, null], 70, true],
+    ];
+    const colores = ['bg-[#064C3D]', 'bg-emerald-500', 'bg-[#34D399]', 'bg-slate-400'];
+    document.getElementById('filas').innerHTML = filas.map(([n, f, fecha, dims, p, pendiente]) => `
+        <tr class="transition hover:bg-[#E8F3EF]/40">
+            <td class="px-4 py-3"><p class="font-semibold text-slate-800">${n}</p><p class="text-xs text-slate-500">Ficha ${f}</p></td>
+            <td class="hidden px-4 py-3 text-xs text-slate-500 md:table-cell">${fecha}</td>
+            <td class="px-4 py-3"><div class="flex h-8 items-end gap-1" title="Razonamiento, Trabajo en equipo, Presión, Servicio">${dims.map((d, i) => `<span class="w-3 rounded-t ${d === null ? 'bg-amber-200' : colores[i]}" style="height:${d === null ? 20 : d}%"></span>`).join('')}</div></td>
+            <td class="px-4 py-3 text-center"><span class="text-lg font-extrabold text-[#064C3D]">${p}</span>${pendiente ? '<p class="text-[11px] font-semibold text-amber-600">abierta por calificar</p>' : ''}</td>
+            <td class="px-4 py-3 text-right"><button type="button" data-abrir="#cajon-respuestas" class="rounded-full ${pendiente ? 'bg-[#064C3D] text-white' : 'text-slate-600 ring-1 ring-slate-200'} px-3 py-1.5 text-xs font-semibold">${pendiente ? 'Calificar abierta' : 'Ver respuestas'}</button></td>
+        </tr>`).join('');
+</script>
+</body>
+</html>

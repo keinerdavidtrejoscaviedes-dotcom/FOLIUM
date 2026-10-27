@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Empalmes · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="empalmes" data-mockup="GTH-12|Seguimiento de empalmes|HU-029 · RF-013 · RN-057 a RN-060"
+      data-estados="curso:En curso,preparados:Recién generados,sin-acta:Sin acta publicada">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Seguimiento de empalmes</h1>
+            <p class="mt-1 text-sm text-slate-600">El sistema define quién entrega y quién recibe según las asignaciones y la jerarquía del catálogo. Todo saliente debe entregar su cargo.</p>
+        </div>
+        <button type="button" data-estado="preparados curso" data-titulo-confirmar="¿Enviar las citaciones al empalme?" data-confirmar="Cada aprendiz saliente y su receptor recibirán por correo la citación con su empalme." data-ok="Citaciones enviadas a 94 salientes y 58 receptores."
+                class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-paper-plane"></i> Enviar citaciones</button>
+    </div>
+
+    <!-- Sin acta -->
+    <div data-estado="sin-acta" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-2xl text-slate-400"><i class="fas fa-lock"></i></span>
+        <p class="mt-4 font-semibold text-slate-800">El empalme se habilita al publicar el acta de seleccionados</p>
+        <a href="11-acta.html" class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Ir al acta</a>
+    </div>
+
+    <div data-estado="curso preparados">
+        <div data-estado="preparados" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900" role="status">
+            <i class="fas fa-wand-magic-sparkles"></i><span class="flex-1">Se generaron 58 empalmes a partir del acta publicada. Revisa las partes y envía las citaciones.</span>
+        </div>
+
+        <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Empalmes</p><p class="text-2xl font-extrabold text-[#064C3D]">58</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Cerrados</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="curso">21</span><span data-estado="preparados">0</span></p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Listos para visto bueno</p><p class="text-2xl font-extrabold text-emerald-600"><span data-estado="curso">6</span><span data-estado="preparados">0</span></p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Con novedades</p><p class="text-2xl font-extrabold text-red-600"><span data-estado="curso">3</span><span data-estado="preparados">0</span></p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Salientes sin entregar</p><p class="text-2xl font-extrabold text-amber-600"><span data-estado="curso">9</span><span data-estado="preparados">94</span></p></div>
+        </div>
+
+        <!-- Salientes sin empalme (HU-029, esc. 11) -->
+        <div data-estado="curso" class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <p class="font-semibold"><i class="fas fa-triangle-exclamation mr-1 text-amber-500"></i>Pendientes de entrega: 9 salientes aún no abren su empalme</p>
+            <p class="mt-1">Kevin Alejandro Murcia (Líder Unidad de Lácteos), Brayan Stiven Perdomo (Equipo de Sanidad) y 7 más. La Fase XXXV no se puede cerrar con entregas pendientes.</p>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+            <select aria-label="Estado" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todos los estados</option><option>Listos para visto bueno</option><option>Con novedad</option><option>Sin iniciar</option><option>Cerrados</option></select>
+            <select aria-label="Área" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todas las áreas</option><option>Administrativa</option><option>Agrícola</option><option>Pecuaria</option><option>Ambiental</option></select>
+            <select aria-label="Tipo" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Individuales y grupales</option><option>Individuales</option><option>Grupales</option><option>Primer empalme</option></select>
+        </div>
+
+        <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3 font-semibold">Cargo</th><th class="px-4 py-3 font-semibold">Entrega → Recibe</th><th class="px-4 py-3 font-semibold">Avance</th><th class="px-4 py-3 font-semibold">Pendiente</th><th class="px-4 py-3"><span class="sr-only">Abrir</span></th></tr></thead>
+                    <tbody id="empalmes" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
+                <span class="font-semibold">Pasos:</span><span>1 Acta</span><span>2 Inventario</span><span>3 Visita</span><span>4 Firmas</span><span>5 Satisfacción</span><span>6 Visto bueno</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const empalmes = [
+        ['Gestor de Talento Humano', 'Grupal · 2 → 2', 'L. Cuéllar · J. Rojas', 'P. Díaz · S. Medina', '', [1, 1, 1, 1, 0, 0], 'Formulario de satisfacción de J. Rojas', 'completo'],
+        ['Líder de U. F. Productiva Cacao', 'Individual', 'María José Ospina', 'Santiago Rojas Polanía', '', [1, 1, 1, 1, 1, 0], 'Tu visto bueno', 'completo', true],
+        ['Equipo Ambiental', 'Grupal · 4 → 1', '4 salientes', 'Camila Andrea Ruiz', 'Líder Subsistema Ambiental entrante', [1, 0.5, 1, 0, 0, 0], 'Firmas: 3 de 5', 'firmas'],
+        ['Equipo Praderas y Cercos', 'Grupal · 3 → 1', '3 salientes', 'Gestor Pecuario entrante', 'El Líder Bovino no se activó: el gestor custodia el inventario', [1, 1, 0, 0, 0, 0], 'Visita a la unidad', 'firmas'],
+        ['Líder Unidad de Ovinos', 'Reactivación', 'Gestor Pecuario (custodio)', 'Nuevo Líder de Ovinos', 'El cargo vuelve a activarse: entrega el gestor que custodia el inventario', [1, 0, 0, 0, 0, 0], 'Inventario', 'firmas'],
+        ['Líder de riego', 'Primer empalme', '— sin saliente', 'Óscar David Lara', 'Cargo activado por primera vez', [1, 0.5, 0, 0, 0, 0], 'Validar inventario inicial', 'inicial'],
+        ['Gerente Administrativo', 'Individual', 'Valeria Polanía', 'Camilo Andrés Vargas', '', [1, 1, 1, 1, 1, 1], 'Cerrado · vinculado', 'cerrado'],
+    ];
+    document.addEventListener('estado', ({ detail }) => {
+        const nuevos = detail === 'preparados';
+        const paso = (v, i) => `<span title="Paso ${i + 1}" class="grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold ${v === 1 ? 'bg-[#064C3D] text-[#34D399]' : v ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-400'}">${v === 1 ? '<i class="fas fa-check"></i>' : v ? '!' : i + 1}</span>`;
+        document.getElementById('empalmes').innerHTML = empalmes.map(([cargo, tipo, entrega, recibe, nota, pasos, pendiente, destino, listo]) => `
+            <tr class="${listo && !nuevos ? 'bg-emerald-50/50' : ''} transition hover:bg-[#E8F3EF]/40">
+                <td class="px-4 py-3"><p class="font-semibold text-slate-800">${cargo}</p><p class="text-xs text-slate-500">${tipo}</p></td>
+                <td class="px-4 py-3 text-slate-600">${entrega} <i class="fas fa-arrow-right mx-1 text-xs text-[#064C3D]"></i> ${recibe}${nota ? `<p class="mt-1 text-xs text-sky-700"><i class="fas fa-circle-info mr-1"></i>${nota}</p>` : ''}</td>
+                <td class="px-4 py-3"><div class="flex gap-1">${(nuevos ? pasos.map((v, i) => i === 0 ? 1 : 0) : pasos).map(paso).join('')}</div></td>
+                <td class="px-4 py-3 text-xs ${listo && !nuevos ? 'font-semibold text-emerald-700' : 'text-slate-600'}">${nuevos ? 'Citación por enviar' : pendiente}</td>
+                <td class="px-4 py-3 text-right"><a href="13-empalme.html#estado=${destino}" class="inline-flex items-center gap-1.5 rounded-full ${listo && !nuevos ? 'bg-[#064C3D] text-white hover:bg-[#043A2F]' : 'text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'} px-3 py-1.5 text-xs font-semibold">${listo && !nuevos ? 'Dar visto bueno' : 'Abrir'}</a></td>
+            </tr>`).join('');
+    });
+</script>
+</body>
+</html>

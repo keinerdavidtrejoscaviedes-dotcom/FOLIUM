@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Versiones de la plantilla · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="plantillas" data-mockup="ADM-09|Plantillas · versiones y vista previa|HU-008 · RN-054"
+      data-estados="v2:Versión 2 (vigente),v1:Versión 1 (anterior)">
+<div id="contenido">
+    <a href="07-plantillas.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Plantillas de acta</a>
+    <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Plantilla Agrícola</h1>
+            <p class="mt-1 text-sm text-slate-600">Cada versión conserva las actas que se generaron con ella.</p>
+        </div>
+        <a href="08-plantilla-editor.html#estado=usada" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-4 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-pen" aria-hidden="true"></i> Editar</a>
+    </div>
+
+    <div class="mt-6 grid gap-4 xl:grid-cols-[20rem_minmax(0,1fr)]">
+        <!-- Versiones -->
+        <aside class="space-y-3">
+            <button type="button" onclick="cambiarEstado('v2')" class="block w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-200/70 transition hover:ring-[#34D399]">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="font-bold text-slate-900">Versión 2</span>
+                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">Vigente</span>
+                </div>
+                <p class="mt-1 text-xs text-slate-500">12/08/2026 · Yina (Administrador)</p>
+                <p class="mt-2 text-sm text-slate-600"><i class="fas fa-file-lines mr-1 text-slate-400"></i> 14 actas generadas</p>
+                <ul class="mt-3 space-y-1 border-t border-slate-100 pt-3 text-xs text-slate-600">
+                    <li><i class="fas fa-plus mr-1 text-emerald-600"></i> Columna «Ubicación» en el inventario</li>
+                    <li><i class="fas fa-plus mr-1 text-emerald-600"></i> Firma del instructor del área</li>
+                    <li><i class="fas fa-plus mr-1 text-emerald-600"></i> 3 implementos en la lista base</li>
+                </ul>
+                <span data-estado="v2" class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#064C3D]"><i class="fas fa-eye"></i> Viendo esta versión</span>
+            </button>
+            <button type="button" onclick="cambiarEstado('v1')" class="block w-full rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-200/70 transition hover:ring-[#34D399]">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="font-bold text-slate-900">Versión 1</span>
+                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">Reemplazada</span>
+                </div>
+                <p class="mt-1 text-xs text-slate-500">15/07/2026 · Yina (Administrador)</p>
+                <p class="mt-2 text-sm text-slate-600"><i class="fas fa-file-lines mr-1 text-slate-400"></i> 21 actas generadas</p>
+                <span data-estado="v1" class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#064C3D]"><i class="fas fa-eye"></i> Viendo esta versión</span>
+            </button>
+            <p class="px-2 text-xs text-slate-500"><i class="fas fa-lock mr-1"></i> Las versiones anteriores no se pueden modificar ni eliminar.</p>
+        </aside>
+
+        <!-- Vista previa del acta -->
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70 sm:p-10">
+            <div class="flex items-center justify-between gap-3 border-b-2 border-[#064C3D] pb-4">
+                <div class="flex items-center gap-3">
+                    <span class="grid h-12 w-12 place-items-center rounded-full bg-[#E8F3EF] text-xl text-[#064C3D]"><i class="fas fa-seedling"></i></span>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">SENA Empresa · La Angostura</p>
+                        <h2 class="text-lg font-extrabold text-[#064C3D]">Acta de recibimiento del cargo</h2>
+                    </div>
+                </div>
+                <div class="text-right text-xs text-slate-500">
+                    <p>Área Agrícola</p>
+                    <p>Plantilla v<span data-estado="v2">2</span><span data-estado="v1">1</span></p>
+                </div>
+            </div>
+            <span class="mt-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-800">Vista previa · datos de ejemplo</span>
+
+            <h3 class="mt-6 text-sm font-bold uppercase tracking-wider text-[#064C3D]">1. Datos del cargo</h3>
+            <dl class="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+                <div><dt class="text-xs text-slate-400">Cargo</dt><dd class="font-semibold">Líder de Unidad de Formación Productiva Cacao</dd></div>
+                <div><dt class="text-xs text-slate-400">Área funcional</dt><dd class="font-semibold">Agrícola</dd></div>
+                <div><dt class="text-xs text-slate-400">Fases</dt><dd class="font-semibold">XXXV → XXXVI</dd></div>
+            </dl>
+            <h3 class="mt-6 text-sm font-bold uppercase tracking-wider text-[#064C3D]">2. Datos de los aprendices</h3>
+            <dl class="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+                <div><dt class="text-xs text-slate-400">Aprendiz saliente</dt><dd class="font-semibold">María José Ospina</dd></div>
+                <div><dt class="text-xs text-slate-400">Aprendiz entrante</dt><dd class="font-semibold">Santiago Rojas Polanía</dd></div>
+                <div><dt class="text-xs text-slate-400">Fecha del empalme</dt><dd class="font-semibold">__ / __ / ____</dd></div>
+            </dl>
+            <h3 class="mt-6 text-sm font-bold uppercase tracking-wider text-[#064C3D]">3. Unidad productiva</h3>
+            <div class="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                <p><span class="text-xs text-slate-400">Unidad productiva:</span> <span class="font-semibold">Cacao</span></p>
+                <p><span class="text-xs text-slate-400">Visita realizada:</span> ☐ Sí ☐ No</p>
+                <div class="h-12 rounded-xl border border-dashed border-slate-300 sm:col-span-2"></div>
+            </div>
+            <h3 class="mt-6 text-sm font-bold uppercase tracking-wider text-[#064C3D]">4. Información que se entrega</h3>
+            <div class="mt-2 h-16 rounded-xl border border-dashed border-slate-300"></div>
+
+            <h3 class="mt-6 text-sm font-bold uppercase tracking-wider text-[#064C3D]">5. Inventario del cargo</h3>
+            <div class="mt-2 overflow-x-auto rounded-xl ring-1 ring-slate-200">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                        <tr><th class="px-3 py-2">Implemento</th><th class="px-3 py-2">Cantidad</th><th class="px-3 py-2">Estado</th><th data-estado="v2" class="px-3 py-2">Ubicación</th><th class="px-3 py-2">Observación</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr><td class="px-3 py-2">Machete</td><td class="px-3 py-2">4</td><td class="px-3 py-2 text-slate-400">—</td><td data-estado="v2" class="px-3 py-2 text-slate-400">—</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                        <tr><td class="px-3 py-2">Tijeras de poda</td><td class="px-3 py-2">4</td><td class="px-3 py-2 text-slate-400">—</td><td data-estado="v2" class="px-3 py-2 text-slate-400">—</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                        <tr><td class="px-3 py-2">Bomba de espalda 20 L</td><td class="px-3 py-2">2</td><td class="px-3 py-2 text-slate-400">—</td><td data-estado="v2" class="px-3 py-2 text-slate-400">—</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                        <tr><td class="px-3 py-2">Botas de caucho</td><td class="px-3 py-2">4 pares</td><td class="px-3 py-2 text-slate-400">—</td><td data-estado="v2" class="px-3 py-2 text-slate-400">—</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                        <tr><td class="px-3 py-2 text-slate-400" colspan="5">… y los demás implementos de la lista base</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3 class="mt-6 text-sm font-bold uppercase tracking-wider text-[#064C3D]">6. Observaciones</h3>
+            <div class="mt-2 h-12 rounded-xl border border-dashed border-slate-300"></div>
+
+            <h3 class="mt-6 text-sm font-bold uppercase tracking-wider text-[#064C3D]">7. Firmas</h3>
+            <div class="mt-3 grid gap-4 sm:grid-cols-3">
+                <div class="rounded-2xl border border-slate-200 p-4 text-center"><div class="h-12"></div><p class="border-t border-slate-300 pt-2 text-xs font-semibold text-slate-600">Aprendiz saliente</p></div>
+                <div class="rounded-2xl border border-slate-200 p-4 text-center"><div class="h-12"></div><p class="border-t border-slate-300 pt-2 text-xs font-semibold text-slate-600">Aprendiz entrante</p></div>
+                <div data-estado="v2" class="rounded-2xl border border-slate-200 p-4 text-center"><div class="h-12"></div><p class="border-t border-slate-300 pt-2 text-xs font-semibold text-slate-600">Instructor del área</p></div>
+            </div>
+        </article>
+    </div>
+</div>
+</body>
+</html>

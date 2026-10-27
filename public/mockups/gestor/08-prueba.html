@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prueba psicotécnica · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="prueba" data-mockup="GTH-08|Prueba psicotécnica: habilitación y seguimiento|HU-025 · RF-007 · RN-012, RN-013, RN-063"
+      data-estados="habilitar:Habilitar,sin-analisis:Faltan análisis,errores:Plazo no válido,sin-prueba:Sin prueba diseñada,seguimiento:En curso,vencida:Plazo vencido">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Prueba psicotécnica</h1>
+            <p class="mt-1 text-sm text-slate-600">Habilítala a todos los postulados, define el plazo y verifica que la presenten. Solo verás si la presentaron, no sus respuestas ni resultados.</p>
+        </div>
+    </div>
+
+    <!-- Sin prueba (HU-025, esc. 5) -->
+    <div data-estado="sin-prueba" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-slate-200/70">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-2xl text-amber-500"><i class="fas fa-brain"></i></span>
+        <p class="mt-4 font-semibold text-slate-800">No hay una prueba psicotécnica disponible. Solicítela al Evaluador psicológico.</p>
+        <p class="mt-1 text-sm text-slate-500">Psicólogos activos: Adriana Carolina Muñoz y Mauricio Fernando Quintero.</p>
+    </div>
+
+    <!-- Habilitación -->
+    <div data-estado="habilitar sin-analisis errores" class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <form novalidate class="space-y-4" data-confirmar="Se habilitará la prueba a 61 postulantes y se les notificará por correo con el plazo." data-titulo-confirmar="¿Habilitar la prueba?" data-ok="Prueba habilitada a 61 postulantes. Se les envió el aviso por correo." data-estado-destino="seguimiento">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Habilitar la prueba</h2>
+                <div data-estado="errores" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                    <p class="font-semibold"><i class="fas fa-circle-exclamation mr-1"></i> La prueba no se habilitó</p>
+                    <p class="mt-1">El plazo debe estar dentro de las fechas del cronograma aprobado (22/09 – 29/09/2026).</p>
+                </div>
+                <div class="mt-4 space-y-4">
+                    <div>
+                        <label for="prueba" class="mb-1 block text-sm font-semibold text-slate-700">Prueba <span class="text-red-500">*</span></label>
+                        <select id="prueba" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Prueba psicotécnica SENA Empresa · versión 2 · 32 preguntas</option></select>
+                        <p class="mt-1 text-xs text-slate-500">Diseñada por Adriana Carolina Muñoz (Psicóloga) · actualizada el 10/09/2026</p>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div data-campo><label for="desde" class="mb-1 block text-sm font-semibold text-slate-700">Disponible desde <span class="text-red-500">*</span></label><input id="desde" type="datetime-local" value="2026-09-22T07:00" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></div>
+                        <div data-campo><label for="hasta" class="mb-1 block text-sm font-semibold text-slate-700">Plazo hasta <span class="text-red-500">*</span></label><input id="hasta" type="datetime-local" value="2026-09-29T18:00" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                            <p data-error hidden class="mt-1 text-xs font-semibold text-red-600">Defina el plazo para presentar la prueba</p></div>
+                    </div>
+                    <p class="flex items-center gap-2 text-xs text-slate-500"><i class="fas fa-calendar-check text-emerald-600"></i>Cronograma aprobado: prueba psicotécnica del 22/09 al 29/09/2026.</p>
+                </div>
+            </section>
+
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">A quiénes se habilita</h2>
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div class="rounded-2xl bg-[#E8F3EF] p-4"><p class="text-xs text-[#064C3D]">Con análisis de hoja de vida</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="habilitar errores">61</span><span data-estado="sin-analisis">58</span></p></div>
+                    <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Sin análisis (no se habilitan)</p><p class="text-2xl font-extrabold text-slate-500"><span data-estado="habilitar errores">0</span><span data-estado="sin-analisis" class="text-amber-600">3</span></p></div>
+                </div>
+                <div data-estado="sin-analisis" class="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                    <p class="font-semibold"><i class="fas fa-triangle-exclamation mr-1 text-amber-500"></i>No se les habilitará por falta de análisis:</p>
+                    <ul class="mt-2 space-y-1">
+                        <li class="flex justify-between gap-2"><span>Camila Andrea Ruiz · 2902187</span><a href="07-postulante.html" class="text-xs font-semibold underline">Analizar</a></li>
+                        <li class="flex justify-between gap-2"><span>Santiago Rojas Polanía · 2902187</span><a href="07-postulante.html" class="text-xs font-semibold underline">Analizar</a></li>
+                        <li class="flex justify-between gap-2"><span>Óscar David Lara · 2902230</span><a href="07-postulante.html" class="text-xs font-semibold underline">Analizar</a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="flex justify-end pb-4">
+                <button class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-unlock mr-1"></i> Habilitar prueba</button>
+            </div>
+        </form>
+
+        <aside class="space-y-4">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Apoyar el diseño</h2>
+                <p class="mt-2 text-sm text-slate-600">Como parte de tu aprendizaje puedes proponer preguntas al psicólogo. No tendrás acceso a las respuestas ni a los resultados de los aprendices.</p>
+                <a href="../psicologo/03-editor-prueba.html#estado=gestor" class="mt-3 inline-flex items-center gap-2 rounded-full bg-[#E8F3EF] px-4 py-2 text-sm font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-pen-ruler"></i> Proponer preguntas</a>
+                
+            </section>
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Reglas</h2>
+                <ul class="mt-3 space-y-2 text-sm text-slate-600">
+                    <li class="flex gap-2"><i class="fas fa-circle-check mt-0.5 text-emerald-600"></i>Es obligatoria y previa a la entrevista.</li>
+                    <li class="flex gap-2"><i class="fas fa-circle-check mt-0.5 text-emerald-600"></i>Las respuestas se guardan mientras el aprendiz avanza.</li>
+                    <li class="flex gap-2"><i class="fas fa-circle-check mt-0.5 text-emerald-600"></i>Quien no la presente a tiempo queda «No evaluado» y no puede ser citado a entrevista.</li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Seguimiento (HU-025, esc. 6 y 7) -->
+    <div data-estado="seguimiento vencida" class="mt-6 space-y-4">
+        <div data-estado="seguimiento" class="flex flex-wrap items-center gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900">
+            <i class="fas fa-hourglass-half"></i><span class="flex-1">Prueba habilitada del 22/09 al <strong>29/09/2026 a las 6:00 p. m.</strong> Faltan 2 días.</span>
+            <button type="button" data-accion data-ok="Recordatorio enviado por correo a 12 postulantes." class="rounded-full bg-sky-600 px-3 py-1 text-xs font-semibold text-white hover:bg-sky-700"><i class="fas fa-envelope mr-1"></i>Recordar a los pendientes</button>
+        </div>
+        <div data-estado="vencida" class="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+            <i class="fas fa-triangle-exclamation text-amber-500"></i><span class="flex-1">El plazo venció el 29/09/2026. <strong>4 postulantes quedaron «No evaluado»</strong> y no podrán ser citados a entrevista.</span>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">La presentaron</p><p class="text-2xl font-extrabold text-[#064C3D]"><span data-estado="seguimiento">49</span><span data-estado="vencida">57</span></p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Pendientes</p><p class="text-2xl font-extrabold text-amber-600"><span data-estado="seguimiento">12</span><span data-estado="vencida">0</span></p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">No evaluado</p><p class="text-2xl font-extrabold text-red-600"><span data-estado="seguimiento">0</span><span data-estado="vencida">4</span></p></div>
+        </div>
+
+        <div class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3 font-semibold">Postulante</th><th class="px-4 py-3 font-semibold">Ficha</th><th class="px-4 py-3 font-semibold">Estado</th><th class="hidden px-4 py-3 font-semibold sm:table-cell">Fecha</th></tr></thead>
+                    <tbody id="seguimiento" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <p class="border-t border-slate-100 px-4 py-3 text-xs text-slate-500"><i class="fas fa-shield-halved mr-1"></i>Las respuestas, el resultado y el puntaje solo los ven los psicólogos, el Instructor Líder, el Instructor de Talento Humano y el comité de reubicación.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const filas = [
+        ['Paula Díaz Rivera', '2902114', 'Presentada', '23/09/2026 9:14 a. m.'],
+        ['Camilo Andrés Vargas', '2902114', 'Presentada', '22/09/2026 7:40 p. m.'],
+        ['Camila Andrea Ruiz', '2902187', 'Presentada', '24/09/2026 11:02 a. m.'],
+        ['Santiago Rojas Polanía', '2902187', 'Pendiente', ''],
+        ['Óscar David Lara', '2902230', 'En curso', 'guardado: 18 de 32'],
+        ['Juan David Mora', '2902114', 'Pendiente', ''],
+        ['Laura Sofía Puentes', '2902230', 'Presentada', '25/09/2026 3:30 p. m.'],
+    ];
+    const chip = { Presentada: 'bg-emerald-100 text-emerald-800', Pendiente: 'bg-amber-100 text-amber-800', 'En curso': 'bg-sky-100 text-sky-800', 'No evaluado': 'bg-red-100 text-red-700' };
+    document.addEventListener('estado', ({ detail }) => {
+        document.getElementById('seguimiento').innerHTML = filas.map(([n, f, e, d]) => {
+            const estado = detail === 'vencida' && e !== 'Presentada' ? 'No evaluado' : e;
+            return `<tr><td class="px-4 py-3 font-semibold text-slate-800">${n}</td><td class="px-4 py-3 text-slate-600">${f}</td><td class="px-4 py-3"><span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ${chip[estado]}">${estado}</span></td><td class="hidden px-4 py-3 text-xs text-slate-500 sm:table-cell">${estado === 'No evaluado' ? 'Plazo vencido' : d}</td></tr>`;
+        }).join('');
+        const hasta = document.getElementById('hasta');
+        hasta.value = detail === 'errores' ? '2026-10-03T18:00' : '2026-09-29T18:00';
+        hasta.classList.toggle('border-red-400', detail === 'errores');
+    });
+</script>
+</body>
+</html>

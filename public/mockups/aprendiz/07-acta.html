@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Acta de seleccionados · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="acta" data-mockup="APR-07|Acta de seleccionados (consulta)|HU-051 · RF-012 · RN-066"
+      data-estados="publicada:Publicada,no-publicada:Aún no publicada,no-postulante:No es postulante">
+<div id="contenido" class="mx-auto max-w-3xl">
+    <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Acta de seleccionados</h1>
+
+    <div data-estado="no-publicada" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-hourglass-half mb-2 block text-3xl text-slate-300"></i>
+        <p class="font-semibold text-slate-700">El acta de seleccionados aún no ha sido publicada</p>
+        <p class="mt-1 text-sm text-slate-500">Fecha prevista según el cronograma: <strong>28/10/2026</strong>.</p>
+    </div>
+    <div data-estado="no-postulante" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-red-200">
+        <i class="fas fa-lock mb-2 block text-3xl text-red-400"></i>
+        <p class="font-semibold text-slate-700">El acta solo está disponible para los postulantes de la convocatoria</p>
+    </div>
+
+    <article data-estado="publicada" class="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-8">
+        <div class="flex items-center gap-3 border-b-2 border-[#064C3D] pb-4">
+            <span class="grid h-11 w-11 place-items-center rounded-full bg-[#E8F3EF] text-lg text-[#064C3D]"><i class="fas fa-seedling"></i></span>
+            <div><p class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">SENA Empresa · La Angostura</p><h2 class="text-lg font-extrabold text-[#064C3D]">Acta de seleccionados · Fase XXXVI</h2></div>
+        </div>
+        <p class="mt-3 text-xs text-slate-500">Publicada el 28/10/2026 · solo lectura</p>
+        <div class="mt-4 rounded-2xl bg-[#E8F3EF] p-4 text-sm text-[#064C3D]"><i class="fas fa-user-check mr-1"></i>Quedaste seleccionado como <strong>Líder de U. F. Productiva Cacao</strong>.</div>
+        <div class="relative mt-4"><i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i><input type="search" placeholder="Buscar cargo o nombre…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm"></div>
+        <ul class="mt-3 divide-y divide-slate-100 text-sm">
+            <li class="flex flex-wrap justify-between gap-2 py-2.5"><span class="font-semibold text-slate-800">Gerente Administrativo</span><span class="text-slate-600">Camilo Andrés Vargas</span></li>
+            <li class="flex flex-wrap justify-between gap-2 py-2.5"><span class="font-semibold text-slate-800">Gestor de Talento Humano</span><span class="text-slate-600">Paula Díaz Rivera · Sergio Medina Ortiz</span></li>
+            <li class="flex flex-wrap justify-between gap-2 bg-[#E8F3EF]/50 px-2 py-2.5"><span class="font-semibold text-slate-800">Líder de U. F. Productiva Cacao</span><span class="font-semibold text-[#064C3D]">Santiago Rojas Polanía (tú)</span></li>
+            <li class="flex flex-wrap justify-between gap-2 py-2.5"><span class="font-semibold text-slate-800">Líder de riego</span><span class="text-slate-600">Óscar David Lara <span class="ml-1 rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800">Reubicación</span></span></li>
+            <li class="py-2.5 text-xs text-slate-400">… 57 aprendices más</li>
+        </ul>
+        <button type="button" data-accion data-ok="Se descargó acta_seleccionados_fase_XXXVI.pdf" data-ok-tipo="info" class="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+    </article>
+</div>
+</body>
+</html>

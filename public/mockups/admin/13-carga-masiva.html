@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Carga masiva de asignaciones · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="asignaciones" data-mockup="ADM-13|Carga masiva desde Excel|HU-013 · RN-032, RN-068"
+      data-estados="subir:1 · Subir archivo,resumen:2 · Revisar,resultado:3 · Resultado">
+<div id="contenido">
+    <a href="11-asignaciones.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Asignaciones</a>
+    <h1 class="mt-3 text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Carga masiva de asignaciones</h1>
+    <p class="mt-1 text-sm text-slate-600">Carga de una vez a todos los aprendices que ocupan cargos en la fase en curso. Nada se guarda hasta que confirmes.</p>
+
+    <!-- Pasos -->
+    <ol class="mt-6 grid gap-2 sm:grid-cols-3">
+        <li class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-[#064C3D] text-sm font-bold text-white"><span data-estado="subir">1</span><i data-estado="resumen resultado" class="fas fa-check text-[#34D399]"></i></span>
+            <span class="text-sm font-semibold text-slate-700">Descargar y subir la plantilla</span>
+        </li>
+        <li class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
+            <span data-estado="subir" class="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-sm font-bold text-slate-400">2</span>
+            <span data-estado="resumen" class="grid h-9 w-9 place-items-center rounded-full bg-[#064C3D] text-sm font-bold text-white">2</span>
+            <span data-estado="resultado" class="grid h-9 w-9 place-items-center rounded-full bg-[#064C3D] text-sm text-[#34D399]"><i class="fas fa-check"></i></span>
+            <span class="text-sm font-semibold text-slate-700">Revisar las filas</span>
+        </li>
+        <li class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200/70">
+            <span data-estado="subir resumen" class="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-sm font-bold text-slate-400">3</span>
+            <span data-estado="resultado" class="grid h-9 w-9 place-items-center rounded-full bg-[#064C3D] text-sm font-bold text-white">3</span>
+            <span class="text-sm font-semibold text-slate-700">Confirmar la carga</span>
+        </li>
+    </ol>
+
+    <!-- Paso 1: subir -->
+    <div data-estado="subir" class="mt-4 grid gap-4 lg:grid-cols-2">
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8F3EF] text-lg text-[#064C3D]"><i class="fas fa-file-arrow-down"></i></span>
+            <h2 class="mt-4 font-bold text-[#064C3D]">Descarga la plantilla</h2>
+            <p class="mt-1 text-sm text-slate-600">Diligencia una fila por aprendiz con estas columnas:</p>
+            <div class="mt-3 overflow-x-auto rounded-2xl ring-1 ring-slate-200">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#064C3D] text-white"><tr><th class="px-3 py-2">documento</th><th class="px-3 py-2">cargo</th><th class="px-3 py-2">fecha_inicio</th><th class="px-3 py-2">unidad_productiva</th></tr></thead>
+                    <tbody class="text-slate-600"><tr><td class="px-3 py-2">1075276540</td><td class="px-3 py-2">Gestor de Talento Humano</td><td class="px-3 py-2">04/08/2026</td><td class="px-3 py-2">Administración</td></tr></tbody>
+                </table>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">La plantilla incluye una hoja con los nombres exactos de los cargos activos del catálogo.</p>
+            <button type="button" data-accion data-ok="Se descargó plantilla_asignaciones_iniciales.xlsx" data-ok-tipo="info" class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#E8F3EF] px-4 py-2 text-sm font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-download"></i> Descargar plantilla (.xlsx)</button>
+        </section>
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8F3EF] text-lg text-[#064C3D]"><i class="fas fa-file-arrow-up"></i></span>
+            <h2 class="mt-4 font-bold text-[#064C3D]">Sube el archivo diligenciado</h2>
+            <label for="archivo" class="mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center transition hover:border-[#064C3D] hover:bg-[#E8F3EF]/40">
+                <i class="fas fa-cloud-arrow-up text-3xl text-[#064C3D]"></i>
+                <span class="text-sm font-semibold text-slate-700">Arrastra el archivo aquí o haz clic para elegirlo</span>
+                <span class="text-xs text-slate-500">Solo .xlsx · máximo 5 MB</span>
+                <input id="archivo" type="file" accept=".xlsx" class="sr-only" onchange="cambiarEstado('resumen')">
+            </label>
+            <div class="mt-4" data-campo>
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Fase</label>
+                <p class="rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">Fase XXXV · En curso</p>
+            </div>
+            <button type="button" onclick="cambiarEstado('resumen')" class="mt-4 w-full rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-magnifying-glass-chart mr-1"></i> Validar archivo</button>
+        </section>
+    </div>
+
+    <!-- Paso 2: resumen -->
+    <div data-estado="resumen" class="mt-4 space-y-4">
+        <div class="flex flex-wrap items-center gap-3 rounded-2xl bg-white p-4 text-sm shadow-sm ring-1 ring-slate-200/70">
+            <i class="fas fa-file-excel text-xl text-emerald-600"></i>
+            <span class="flex-1"><strong>asignaciones_fase_XXXV.xlsx</strong> · 60 filas · validado el 21/10/2026 10:42 a. m.</span>
+            <button type="button" onclick="cambiarEstado('subir')" class="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"><i class="fas fa-rotate mr-1"></i> Cambiar archivo</button>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Filas en el archivo</p><p class="text-2xl font-extrabold text-[#064C3D]">60</p></div>
+            <div class="rounded-2xl bg-[#E8F3EF] p-4 ring-1 ring-[#34D399]/40"><p class="text-xs text-[#064C3D]">Correctas</p><p class="text-2xl font-extrabold text-[#064C3D]"><i class="fas fa-circle-check mr-1 text-lg"></i>58</p></div>
+            <div class="rounded-2xl bg-red-50 p-4 ring-1 ring-red-200"><p class="text-xs text-red-700">Con error</p><p class="text-2xl font-extrabold text-red-600"><i class="fas fa-circle-xmark mr-1 text-lg"></i>2</p></div>
+        </div>
+
+        <div class="flex flex-wrap gap-2" data-tabs="filas" role="tablist">
+            <button type="button" data-tab="errores" aria-selected="true" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition">Con error <span class="ml-1 text-xs opacity-70">2</span></button>
+            <button type="button" data-tab="correctas" class="rounded-full px-4 py-1.5 text-sm font-semibold ring-1 ring-slate-200 transition">Correctas <span class="ml-1 text-xs opacity-70">58</span></button>
+        </div>
+        <div data-panel="errores" data-grupo="filas" class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3">Fila</th><th class="px-4 py-3">Documento</th><th class="px-4 py-3">Cargo</th><th class="px-4 py-3">Motivo del error</th></tr></thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr><td class="px-4 py-3 font-semibold">14</td><td class="px-4 py-3">1075999000</td><td class="px-4 py-3">Equipo de Calidad</td><td class="px-4 py-3 text-red-600"><i class="fas fa-circle-xmark mr-1"></i>El documento no existe en SICEFA.</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold">37</td><td class="px-4 py-3">1077120334</td><td class="px-4 py-3">Líder Huella de carbono</td><td class="px-4 py-3 text-red-600"><i class="fas fa-circle-xmark mr-1"></i>El cargo está inactivo en el catálogo.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div data-panel="correctas" data-grupo="filas" class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-4 py-3">Fila</th><th class="px-4 py-3">Aprendiz</th><th class="px-4 py-3">Cargo</th><th class="hidden px-4 py-3 sm:table-cell">Inicio</th></tr></thead>
+                <tbody class="divide-y divide-slate-100 text-slate-600">
+                    <tr><td class="px-4 py-3 font-semibold">2</td><td class="px-4 py-3">Laura Valentina Cuéllar</td><td class="px-4 py-3">Gestor de Talento Humano</td><td class="hidden px-4 py-3 sm:table-cell">04/08/2026</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold">3</td><td class="px-4 py-3">Juan Esteban Rojas</td><td class="px-4 py-3">Gestor de Talento Humano</td><td class="hidden px-4 py-3 sm:table-cell">04/08/2026</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold">4</td><td class="px-4 py-3">Valeria Andrea Polanía</td><td class="px-4 py-3">Gerente Administrativo</td><td class="hidden px-4 py-3 sm:table-cell">04/08/2026</td></tr>
+                    <tr><td class="px-4 py-3 font-semibold">5</td><td class="px-4 py-3">Sebastián Trujillo Ramos</td><td class="px-4 py-3">Gerente de Producción</td><td class="hidden px-4 py-3 sm:table-cell">04/08/2026</td></tr>
+                    <tr><td class="px-4 py-3 text-slate-400" colspan="4">… y 54 filas más</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form novalidate class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70"
+              data-confirmar="Se crearán 58 asignaciones en estado «vigente» con origen «carga inicial». Las 2 filas con error no se guardarán." data-titulo-confirmar="¿Confirmar la carga?"
+              data-ok="Carga registrada: 58 asignaciones creadas." data-estado-destino="resultado">
+            <h2 class="font-bold text-[#064C3D]">Confirmar la carga</h2>
+            <div class="mt-3" data-campo>
+                <label for="justificacion" class="mb-1 block text-sm font-semibold text-slate-700">Justificación para toda la carga <span class="text-red-500">*</span></label>
+                <textarea id="justificacion" rows="2" data-obligatorio placeholder="Por ejemplo: puesta en marcha de FOLIUM con la Fase XXXV en curso." class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <p class="text-xs text-slate-500"><i class="fas fa-circle-info mr-1"></i>Puedes corregir las filas con error y subirlas después en otra carga.</p>
+                <button class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-check mr-1"></i> Crear 58 asignaciones</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Paso 3: resultado -->
+    <div data-estado="resultado" class="mt-4 space-y-4">
+        <div class="relative isolate overflow-hidden rounded-3xl bg-[#064C3D] p-8 text-white">
+            <div class="folium-dots absolute inset-0 -z-10"></div>
+            <span class="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-2xl text-[#34D399] ring-1 ring-white/20"><i class="fas fa-circle-check"></i></span>
+            <h2 class="mt-5 text-xl font-extrabold sm:text-2xl">58 asignaciones creadas</h2>
+            <p class="mt-2 max-w-xl text-emerald-50/85">Quedaron en estado «vigente» con origen «carga inicial». Los 2 Gestores de Talento Humano ya tienen su rol. La carga quedó registrada en la auditoría.</p>
+            <div class="mt-6 flex flex-wrap gap-2">
+                <a href="11-asignaciones.html" class="inline-flex items-center gap-2 rounded-full bg-[#34D399] px-5 py-2.5 text-sm font-semibold text-[#043A2F] hover:bg-emerald-300"><i class="fas fa-id-card-clip"></i> Ver asignaciones</a>
+                <a href="18-auditoria.html" class="inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-2.5 text-sm font-semibold hover:bg-white/10"><i class="fas fa-clock-rotate-left"></i> Ver en la auditoría</a>
+            </div>
+        </div>
+        <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="font-bold text-[#064C3D]">Filas rechazadas para corregir</h2>
+                <button type="button" data-accion data-ok="Se descargó filas_rechazadas.xlsx" data-ok-tipo="info" class="rounded-full bg-[#E8F3EF] px-4 py-2 text-xs font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-download mr-1"></i> Descargar filas rechazadas</button>
+            </div>
+            <ul class="mt-3 divide-y divide-slate-100 text-sm">
+                <li class="flex flex-wrap gap-2 py-2.5"><span class="font-semibold">Fila 14</span><span class="text-slate-500">1075999000 · Equipo de Calidad</span><span class="ml-auto text-red-600">El documento no existe en SICEFA.</span></li>
+                <li class="flex flex-wrap gap-2 py-2.5"><span class="font-semibold">Fila 37</span><span class="text-slate-500">1077120334 · Líder Huella de carbono</span><span class="ml-auto text-red-600">El cargo está inactivo en el catálogo.</span></li>
+            </ul>
+        </section>
+    </div>
+</div>
+</body>
+</html>

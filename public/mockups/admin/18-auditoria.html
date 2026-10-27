@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Auditoría · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="auditoria" data-mockup="ADM-18|Auditoría|HU-002 · RF-017 · RN-036 · RNF-005">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Auditoría</h1>
+            <p class="mt-1 text-sm text-slate-600">Quién hizo qué, cuándo y con qué permiso. Nadie puede modificar ni borrar este registro.</p>
+        </div>
+        <button type="button" data-accion data-ok="Se descargó auditoria_folium.csv con 248 registros." data-ok-tipo="info" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-file-csv"></i> Exportar</button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="mt-6 grid gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_11rem_11rem_10rem_10rem]">
+        <label class="relative"><span class="sr-only">Buscar</span><i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+            <input type="search" placeholder="Usuario, acción o registro…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></label>
+        <select aria-label="Módulo" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todas las secciones</option><option>Catálogo de cargos</option><option>Designaciones</option><option>Asignaciones</option><option>Plantillas de acta</option><option>Selección</option><option>Empalmes</option><option>Sesiones</option></select>
+        <select aria-label="Origen del permiso" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Cualquier origen</option><option>Rol</option><option>Designación</option><option>Asignación de cargo</option><option>Sistema</option></select>
+        <input type="date" aria-label="Desde" value="2026-10-01" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+        <input type="date" aria-label="Hasta" value="2026-10-21" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+    </div>
+
+    <!-- Registro -->
+    <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr><th class="px-4 py-3 font-semibold">Fecha y hora</th><th class="px-4 py-3 font-semibold">Usuario</th><th class="px-4 py-3 font-semibold">Acción</th><th class="hidden px-4 py-3 font-semibold md:table-cell">Origen del permiso</th><th class="px-4 py-3"><span class="sr-only">Detalle</span></th></tr>
+                </thead>
+                <tbody id="registro" class="divide-y divide-slate-100"></tbody>
+            </table>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
+            <span>1–8 de 248 registros</span>
+            <div class="flex gap-1">
+                <a class="pointer-events-none rounded-lg px-3 py-1.5 font-semibold text-slate-300"><i class="fas fa-chevron-left mr-1"></i>Anterior</a>
+                <a href="#" class="rounded-lg px-3 py-1.5 font-semibold text-[#064C3D] hover:bg-[#E8F3EF]">Siguiente<i class="fas fa-chevron-right ml-1"></i></a>
+            </div>
+        </div>
+    </div>
+    <p class="mt-4 text-xs text-slate-500"><i class="fas fa-lock mr-1"></i>El registro se conserva como mínimo 5 años.</p>
+</div>
+
+<script>
+    const origen = { 'Rol': 'bg-[#064C3D] text-white', 'Designación': 'bg-emerald-100 text-emerald-800', 'Asignación': 'bg-sky-100 text-sky-800', 'Sistema': 'bg-slate-100 text-slate-600' };
+    const registros = [
+        ['21/10/2026 10:41 a. m.', 'Yina', 'Editó el cargo «Gestor de Talento Humano»', 'Rol', 'Administrador', [['Número de aprendices', '2', '2'], ['Requisito agregado', '—', 'Haber aprobado el curso virtual «Gestión del talento humano» (exige soporte)']]],
+        ['21/10/2026 8:15 a. m.', 'Yina', 'Suspendió la asignación de Brayan Stiven Perdomo (Equipo de Sanidad)', 'Designación', 'Líder de la estrategia', [['Estado', 'Vigente', 'Suspendida'], ['Justificación', '—', 'Inasistencia reiterada a la unidad']]],
+        ['20/10/2026 4:02 p. m.', 'Yina', 'Validó la selección del cargo «Gerente Administrativo»', 'Designación', 'Líder de la estrategia', [['Selección', 'Propuesta', 'Validada sin ajustes']]],
+        ['20/10/2026 9:30 a. m.', 'Juan Esteban Rojas', 'Programó 6 entrevistas psicológicas grupales', 'Asignación', 'Gestor de Talento Humano · Fase XXXV', [['Entrevistas', '18', '24']]],
+        ['18/10/2026 11:10 a. m.', 'Yina', 'Asignó la designación Instructor técnico a Hernán Darío Silva', 'Rol', 'Administrador', [['Programa', '—', 'Análisis y Desarrollo de Software'], ['Vigencia', '—', 'Solo la Fase XXXVI']]],
+        ['12/08/2026 3:25 p. m.', 'Yina', 'Creó la versión 2 de la plantilla Agrícola', 'Rol', 'Administrador', [['Versión vigente', 'v1', 'v2'], ['Columnas', 'Implemento, Cantidad, Estado, Observación', '+ Ubicación']]],
+        ['04/08/2026 9:12 a. m.', 'Sistema', 'Otorgó el rol Gestor de Talento Humano a Laura Valentina Cuéllar', 'Sistema', 'Asignación pasó a «vigente»', [['Roles', 'Aprendiz', 'Aprendiz, Gestor de Talento Humano']]],
+        ['04/08/2026 8:40 a. m.', 'Yina', 'Carga masiva de asignaciones iniciales (58 creadas, 2 rechazadas)', 'Rol', 'Administrador', [['Archivo', '—', 'asignaciones_fase_XXXV.xlsx'], ['Justificación', '—', 'Puesta en marcha de FOLIUM con la Fase XXXV en curso']]],
+    ];
+    document.getElementById('registro').innerHTML = registros.map(([fecha, usuario, accion, tipo, fuente, cambios], i) => `
+        <tr class="cursor-pointer transition hover:bg-[#E8F3EF]/40" onclick="document.getElementById('detalle-${i}').hidden ^= 1; this.querySelector('[data-flecha]').classList.toggle('rotate-180')">
+            <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-500">${fecha}</td>
+            <td class="px-4 py-3 font-semibold text-slate-800">${usuario}</td>
+            <td class="px-4 py-3 text-slate-700">${accion}</td>
+            <td class="hidden px-4 py-3 md:table-cell"><span class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${origen[tipo]}">${tipo}</span><p class="mt-0.5 text-xs text-slate-500">${fuente}</p></td>
+            <td class="px-4 py-3 text-right"><i data-flecha class="fas fa-chevron-down text-xs text-slate-400 transition"></i></td>
+        </tr>
+        <tr id="detalle-${i}" hidden class="bg-slate-50/70">
+            <td colspan="5" class="px-4 py-3">
+                <table class="w-full text-xs">
+                    <thead class="text-slate-400"><tr><th class="py-1 pr-4 text-left font-semibold">Campo</th><th class="py-1 pr-4 text-left font-semibold">Valor anterior</th><th class="py-1 text-left font-semibold">Valor nuevo</th></tr></thead>
+                    <tbody class="text-slate-600">${cambios.map(([c, a, n]) => `<tr><td class="py-1 pr-4 font-semibold">${c}</td><td class="py-1 pr-4 text-red-600/80">${a}</td><td class="py-1 text-emerald-700">${n}</td></tr>`).join('')}</tbody>
+                </table>
+            </td>
+        </tr>`).join('');
+</script>
+</body>
+</html>

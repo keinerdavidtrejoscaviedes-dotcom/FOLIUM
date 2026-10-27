@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi postulación · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="postulacion" data-mockup="APR-05|Mi postulación|HU-048, HU-049, HU-050 · RF-012 · RN-066"
+      data-estados="postulado:Postulado,entrevistas:Con entrevistas,seleccionado:Seleccionado,reubicado:Reubicado,sin-cargo:Sin cargo asignado,sin-postulacion:Sin postulación">
+<div id="contenido" class="mx-auto max-w-3xl">
+    <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Mi postulación</h1>
+    <p class="mt-1 text-sm text-slate-600">Convocatoria Fase XXXVI. Aquí solo ves tu propia información.</p>
+
+    <div data-estado="sin-postulacion" class="mt-6 rounded-3xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-id-card mb-2 block text-3xl text-slate-300"></i>
+        <p class="font-semibold text-slate-700">No tiene una postulación registrada</p>
+        <a href="03-convocatoria.html" class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white">Ver la convocatoria abierta</a>
+    </div>
+
+    <div data-estado="postulado entrevistas seleccionado reubicado sin-cargo">
+        <!-- Resultado -->
+        <section data-estado="seleccionado" class="relative isolate mt-6 overflow-hidden rounded-3xl bg-[#064C3D] p-6 text-white">
+            <div class="folium-dots absolute inset-0 -z-10"></div>
+            <p class="text-xs font-bold uppercase tracking-[.18em] text-[#34D399]">Resultado · acta publicada el 28/10/2026</p>
+            <h2 class="mt-2 text-2xl font-extrabold">Seleccionado: Líder de U. F. Productiva Cacao</h2>
+            <p class="mt-1 text-sm text-emerald-50/85">Tu 1.ª opción. Tu asignación quedó «asignada»: completa el empalme para quedar vinculado.</p>
+            <a href="08-empalme.html#estado=entrante" class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#34D399] px-5 py-2 text-sm font-semibold text-[#043A2F]">Ir a mi empalme <i class="fas fa-arrow-right"></i></a>
+        </section>
+        <section data-estado="reubicado" class="mt-6 rounded-3xl bg-sky-50 p-6 text-sky-900 ring-1 ring-sky-200">
+            <span class="rounded-full bg-sky-200 px-2.5 py-0.5 text-xs font-bold">Reubicación</span>
+            <h2 class="mt-2 text-xl font-extrabold">Fuiste reubicado en Líder de riego</h2>
+            <p class="mt-1 text-sm">No quedaste en tus 3 opciones, pero el comité de reubicación te asignó este cargo según las necesidades de SENA Empresa. Te enviamos un correo con la decisión.</p>
+        </section>
+        <section data-estado="sin-cargo" class="mt-6 rounded-3xl bg-slate-100 p-6 text-slate-700">
+            <h2 class="text-lg font-extrabold">No quedaste asignado a ningún cargo en esta fase</h2>
+            <p class="mt-1 text-sm">El comité de reubicación no encontró cupos vacantes. Puedes postularte de nuevo cuando tu ficha participe en otra convocatoria.</p>
+        </section>
+
+        <!-- Avance -->
+        <section class="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 class="font-bold text-[#064C3D]">Estado de tu proceso</h2>
+                <span class="rounded-full bg-[#E8F3EF] px-2.5 py-0.5 text-xs font-semibold text-[#064C3D]">Postulado el 05/09/2026</span>
+            </div>
+            <ol id="pasos" class="mt-4 space-y-3"></ol>
+        </section>
+
+        <!-- Opciones -->
+        <section class="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+            <h2 class="font-bold text-[#064C3D]">Tus opciones</h2>
+            <ol class="mt-3 space-y-2 text-sm">
+                <li class="flex items-center gap-3"><span class="grid h-7 w-7 place-items-center rounded-full bg-[#064C3D] text-xs font-bold text-white">1</span>Líder de U. F. Productiva Cacao</li>
+                <li class="flex items-center gap-3"><span class="grid h-7 w-7 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">2</span>Gestor Agrícola</li>
+                <li class="flex items-center gap-3"><span class="grid h-7 w-7 place-items-center rounded-full bg-[#34D399] text-xs font-bold text-[#043A2F]">3</span>Líder de herramientas</li>
+            </ol>
+        </section>
+
+        <!-- Entrevistas (HU-048) -->
+        <section class="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+            <h2 class="font-bold text-[#064C3D]">Mis entrevistas</h2>
+            <p data-estado="postulado" class="mt-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-500"><i class="fas fa-calendar-xmark mr-1"></i>Aún no tiene entrevistas programadas.</p>
+            <ul data-estado="entrevistas seleccionado reubicado sin-cargo" class="mt-3 space-y-2 text-sm">
+                <li class="rounded-2xl p-4 ring-1 ring-slate-200"><p class="font-semibold text-slate-800"><i class="fas fa-screwdriver-wrench mr-1.5 text-[#064C3D]"></i>Técnica · individual</p><p class="mt-1 text-slate-600">Jueves 2 de octubre · 10:00 a. m. · Sala de Talento Humano</p></li>
+                <li class="rounded-2xl p-4 ring-1 ring-slate-200"><p class="font-semibold text-slate-800"><i class="fas fa-brain mr-1.5 text-sky-700"></i>Psicológica · grupal</p><p class="mt-1 text-slate-600">Viernes 3 de octubre · 8:00 a. m. · Oficina de Bienestar</p></li>
+            </ul>
+        </section>
+        <p class="mt-4 text-xs text-slate-500"><i class="fas fa-shield-halved mr-1"></i>No se publican resultados ni puntajes: solo el acta oficial con el cargo de cada seleccionado.</p>
+    </div>
+</div>
+<script>
+    document.addEventListener('estado', ({ detail }) => {
+        const nivel = { postulado: 2, entrevistas: 4, seleccionado: 6, reubicado: 6, 'sin-cargo': 6 }[detail] || 0;
+        const pasos = [
+            ['Postulación completa', '05/09/2026'], ['Hoja de vida analizada', '15/09/2026'], ['Prueba psicotécnica presentada', '28/09/2026'],
+            ['Entrevistas programadas', '2 y 3 de octubre'], ['Entrevistas realizadas', ''], ['Acta de seleccionados publicada', '28/10/2026'],
+        ];
+        document.getElementById('pasos').innerHTML = pasos.map(([t, f], i) => {
+            const hecho = i < nivel, actual = i === nivel;
+            return `<li class="flex items-center gap-3"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full ${hecho ? 'bg-[#064C3D] text-[#34D399]' : actual ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'} text-xs font-bold">${hecho ? '<i class="fas fa-check"></i>' : actual ? '<i class="fas fa-hourglass-half"></i>' : i + 1}</span>
+                <span class="flex-1 text-sm ${hecho ? 'font-semibold text-slate-800' : 'text-slate-500'}">${t}</span><span class="text-xs text-slate-400">${hecho ? f : actual ? 'en curso' : ''}</span></li>`;
+        }).join('');
+    });
+</script>
+</body>
+</html>

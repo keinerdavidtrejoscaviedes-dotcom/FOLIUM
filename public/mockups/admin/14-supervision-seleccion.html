@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Supervisión · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="supervision" data-mockup="ADM-14|Supervisión · proceso de selección|HU-014 · RF-002 (secuencia y alertas)"
+      data-estados="normal:En selección,bloqueo:Con bloqueos">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Supervisión</h1>
+            <p class="mt-1 text-sm text-slate-600">Consulta del proceso en modo de solo lectura, sin intervenir en su contenido.</p>
+        </div>
+        <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200"><i class="fas fa-eye text-emerald-600"></i> Solo lectura · Fase XXXVI</span>
+    </div>
+
+    <!-- Subsecciones -->
+    <nav class="sin-scroll mt-6 flex gap-2 overflow-x-auto" aria-label="Supervisión">
+        <a href="14-supervision-seleccion.html" aria-current="page" class="shrink-0 rounded-full bg-[#064C3D] px-4 py-1.5 text-sm font-semibold text-white"><i class="fas fa-user-check mr-1.5"></i>Selección</a>
+        <a href="15-supervision-empalmes.html" class="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:ring-[#064C3D]"><i class="fas fa-handshake mr-1.5"></i>Empalmes</a>
+        <a href="16-supervision-actas.html" class="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:ring-[#064C3D]"><i class="fas fa-folder-open mr-1.5"></i>Actas e historial</a>
+    </nav>
+
+    <!-- Bloqueos de la secuencia (RF-002: alertas con copia al Administrador) -->
+    <section data-estado="bloqueo" class="mt-4 space-y-2" role="alert">
+        <div class="flex flex-wrap items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <i class="fas fa-lock mt-0.5 text-red-500"></i>
+            <div class="min-w-0 flex-1">
+                <p class="font-semibold">Entrevistas bloqueadas para 4 postulantes</p>
+                <p class="mt-0.5">No presentaron la prueba psicotécnica dentro del plazo (venció el 29/09/2026) y quedaron como «no evaluado». Se notificó al Gestor de Talento Humano.</p>
+            </div>
+            <span class="text-xs text-red-500">hace 2 h</span>
+        </div>
+        <div class="flex flex-wrap items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <i class="fas fa-hourglass-half mt-0.5 text-amber-500"></i>
+            <div class="min-w-0 flex-1">
+                <p class="font-semibold">El acta de seleccionados no se puede publicar todavía</p>
+                <p class="mt-0.5">Faltan 30 cargos por validar. La publicación está programada para el 28/10/2026.</p>
+            </div>
+            <span class="text-xs text-amber-600">hoy</span>
+        </div>
+    </section>
+
+    <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="space-y-4">
+            <!-- Secuencia del proceso -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="font-bold text-[#064C3D]">Cronograma aprobado</h2>
+                    <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"><i class="fas fa-check mr-1"></i>Aprobado el 25/08/2026 por Yina</span>
+                </div>
+                <ol id="cronograma" class="relative mt-5 space-y-4 border-l-2 border-[#E8F3EF] pl-6"></ol>
+            </section>
+
+            <!-- Convocatoria -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="font-bold text-[#064C3D]">Convocatoria Fase XXXVI</h2>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">Cerrada</span>
+                </div>
+                <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-4">
+                    <div class="rounded-2xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Fichas habilitadas</dt><dd class="text-lg font-extrabold text-[#064C3D]">3</dd></div>
+                    <div class="rounded-2xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Cargos ofrecidos</dt><dd class="text-lg font-extrabold text-[#064C3D]">42</dd></div>
+                    <div class="rounded-2xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Cupos</dt><dd class="text-lg font-extrabold text-[#064C3D]">64</dd></div>
+                    <div class="rounded-2xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Postulados</dt><dd class="text-lg font-extrabold text-[#064C3D]">61</dd></div>
+                </dl>
+                <h3 class="mt-5 text-sm font-semibold text-slate-700">Fichas habilitadas</h3>
+                <div class="mt-2 grid gap-2 sm:grid-cols-3">
+                    <div class="rounded-2xl ring-1 ring-slate-200 p-3 text-sm"><p class="font-semibold text-slate-800">Ficha 2902114</p><p class="text-xs text-slate-500">Gestión Agroempresarial · 24 aprendices</p></div>
+                    <div class="rounded-2xl ring-1 ring-slate-200 p-3 text-sm"><p class="font-semibold text-slate-800">Ficha 2902187</p><p class="text-xs text-slate-500">Gestión de la Producción Agrícola · 21 aprendices</p></div>
+                    <div class="rounded-2xl ring-1 ring-slate-200 p-3 text-sm"><p class="font-semibold text-slate-800">Ficha 2902230</p><p class="text-xs text-slate-500">Producción Ganadera · 19 aprendices</p></div>
+                </div>
+                <h3 class="mt-5 text-sm font-semibold text-slate-700">Programas habilitados por excepción <span class="font-normal text-slate-400">(RN-048)</span></h3>
+                <div class="mt-2 rounded-2xl bg-amber-50 p-3 text-sm text-amber-900">
+                    <p><strong>Líder de Gestión Documental</strong> abierto a Gestión Agroempresarial.</p>
+                    <p class="mt-1 text-xs">Justificación del Gestor: «En la fase no ingresa ficha del tecnólogo SIG; el cargo es necesario para la auditoría interna».</p>
+                </div>
+            </section>
+        </div>
+
+        <aside class="space-y-4">
+            <!-- Avance -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Avance de la selección</h2>
+                <div class="mt-4 space-y-4 text-sm">
+                    <div><div class="flex justify-between"><span class="text-slate-600">Hojas de vida analizadas</span><span class="font-bold text-[#064C3D]">61 / 61</span></div><div class="mt-1.5 h-2 rounded-full bg-slate-100"><div class="h-2 w-full rounded-full bg-[#064C3D]"></div></div></div>
+                    <div><div class="flex justify-between"><span class="text-slate-600">Pruebas presentadas</span><span class="font-bold text-[#064C3D]"><span data-estado="normal">61</span><span data-estado="bloqueo">57</span> / 61</span></div><div class="mt-1.5 h-2 rounded-full bg-slate-100"><div class="h-2 rounded-full bg-[#064C3D]" style="width: 100%"></div></div></div>
+                    <div><div class="flex justify-between"><span class="text-slate-600">Entrevistas calificadas</span><span class="font-bold text-[#064C3D]">54 / 61</span></div><div class="mt-1.5 h-2 rounded-full bg-slate-100"><div class="h-2 rounded-full bg-emerald-500" style="width: 88%"></div></div></div>
+                    <div><div class="flex justify-between"><span class="text-slate-600">Cargos validados</span><span class="font-bold text-[#064C3D]">12 / 42</span></div><div class="mt-1.5 h-2 rounded-full bg-slate-100"><div class="h-2 rounded-full bg-amber-400" style="width: 29%"></div></div></div>
+                    <div><div class="flex justify-between"><span class="text-slate-600">Aprendices por reubicar</span><span class="font-bold text-amber-600">3</span></div></div>
+                </div>
+            </section>
+            <!-- Equipo evaluador -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Evaluadores de la convocatoria</h2>
+                <ul class="mt-3 space-y-2 text-sm">
+                    <li class="flex items-center justify-between gap-2"><span class="text-slate-700">Yina</span><span class="text-xs text-slate-500">Líder de la estrategia</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="text-slate-700">Carlos Andrés Medina</span><span class="text-xs text-slate-500">Técnico · líder de ficha</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="text-slate-700">Jorge Iván Cuéllar</span><span class="text-xs text-slate-500">Técnico · líder de ficha</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="text-slate-700">Diana Patricia Losada</span><span class="text-xs text-slate-500">Técnico · líder de ficha</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="text-slate-700">Adriana Carolina Muñoz</span><span class="text-xs text-slate-500">Psicóloga</span></li>
+                </ul>
+            </section>
+            <p class="px-2 text-xs text-slate-500"><i class="fas fa-shield-halved mr-1"></i>Desde la supervisión no se ven puntajes, resultados psicotécnicos ni calificaciones individuales.</p>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const etapas = [
+        ['Apertura de la convocatoria', '01/09/2026', 'hecho'],
+        ['Cierre de la convocatoria', '12/09/2026', 'hecho'],
+        ['Entrega de hojas de vida y propuestas', '01/09 – 12/09/2026', 'hecho'],
+        ['Prueba psicotécnica', '22/09 – 29/09/2026', 'hecho'],
+        ['Entrevistas técnica y psicológica', '01/10 – 10/10/2026', 'hecho'],
+        ['Validación de la selección y reubicaciones', '13/10 – 24/10/2026', 'actual'],
+        ['Publicación del acta de seleccionados', '28/10/2026', 'pendiente'],
+        ['Empalme', '11/01 – 22/01/2027', 'pendiente'],
+    ];
+    const punto = { hecho: 'bg-[#064C3D] ring-[#E8F3EF]', actual: 'bg-amber-400 ring-amber-100', pendiente: 'bg-slate-300 ring-white' };
+    document.getElementById('cronograma').innerHTML = etapas.map(([t, f, e]) => `
+        <li class="relative">
+            <span class="absolute -left-[31px] top-1 h-3.5 w-3.5 rounded-full ring-4 ${punto[e]}"></span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="text-sm font-semibold ${e === 'pendiente' ? 'text-slate-500' : 'text-slate-800'}">${t}</p>
+                <span class="text-xs ${e === 'actual' ? 'font-semibold text-amber-700' : 'text-slate-500'}">${f}${e === 'actual' ? ' · en curso' : ''}</span>
+            </div>
+        </li>`).join('');
+</script>
+</body>
+</html>

@@ -21,10 +21,11 @@ use Modules\TalentoHumano\Http\Controllers\PlantillasActaController;
 use Modules\TalentoHumano\Http\Controllers\PostulacionController;
 use Modules\TalentoHumano\Http\Controllers\PruebaPsicotecnicaController;
 use Modules\TalentoHumano\Http\Controllers\SeleccionActasController;
-use Modules\TalentoHumano\Http\Controllers\TalentoHumanoController;
 use Modules\TalentoHumano\Http\Middleware\AdministradorTH;
 use Modules\TalentoHumano\Http\Middleware\PermisoTH;
 use Modules\TalentoHumano\Http\Middleware\SubmoduloLider;
+use Modules\TalentoHumano\Http\Controllers\TalentoHumanoController;
+use Modules\TalentoHumano\Http\Controllers\AprendizController;
 
 /*
 |--------------------------------------------------------------------------
@@ -233,5 +234,27 @@ Route::prefix('talento-humano')
                     Route::put('convocatoria', [ConvocatoriaController::class, 'update'])->name('convocatoria.update');
                 });
             });
+
+            // Rutas del rol Aprendiz (HU-043 a HU-057)
+            Route::prefix('aprendiz')->name('aprendiz.')->group(function () {
+                Route::get('/', [AprendizController::class, 'index'])->name('index');
+                Route::get('cronograma', [AprendizController::class, 'cronograma'])->name('cronograma');
+                Route::get('convocatoria', [AprendizController::class, 'convocatoria'])->name('convocatoria');
+                Route::get('postularme', [AprendizController::class, 'postularme'])->name('postularme');
+                Route::post('postulacion', [AprendizController::class, 'guardarPostulacion'])->name('postulacion.guardar');
+                Route::get('mi-postulacion', [AprendizController::class, 'miPostulacion'])->name('postulacion');
+                Route::get('prueba', [AprendizController::class, 'prueba'])->name('prueba');
+                Route::post('prueba/progreso', [AprendizController::class, 'guardarProgresoPrueba'])->name('prueba.progreso');
+                Route::post('prueba/enviar', [AprendizController::class, 'enviarPrueba'])->name('prueba.enviar');
+                Route::get('acta', [AprendizController::class, 'acta'])->name('acta');
+                Route::get('empalme', [AprendizController::class, 'empalme'])->name('empalme');
+                Route::post('empalme/inventario', [AprendizController::class, 'guardarInventarioEmpalme'])->name('empalme.inventario');
+                Route::post('empalme/visita', [AprendizController::class, 'confirmarVisitaEmpalme'])->name('empalme.visita');
+                Route::post('empalme/firmar', [AprendizController::class, 'firmarActaEmpalme'])->name('empalme.firmar');
+                Route::get('satisfaccion', [AprendizController::class, 'satisfaccion'])->name('satisfaccion');
+                Route::post('satisfaccion/enviar', [AprendizController::class, 'enviarSatisfaccion'])->name('satisfaccion.enviar');
+                Route::get('cargo', [AprendizController::class, 'miCargo'])->name('cargo');
+            });
         });
     });
+

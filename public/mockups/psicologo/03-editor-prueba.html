@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editor de la prueba · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="psicologo" data-activo="pruebas" data-mockup="PSI-03|Editor de la prueba psicotécnica|HU-039 · RF-007 · RN-041, RN-063 · RNF-007"
+      data-estados="con-respuestas:Con respuestas,borrador:Sin respuestas,nueva:Nueva,incompleta:Pregunta incompleta,imagen:Imagen no válida,sin-cambios:Sin cambios,gestor:Apoyo del Gestor,vista:Vista previa">
+<div id="contenido">
+    <a href="02-pruebas.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Pruebas psicotécnicas</a>
+    <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 id="titulo" class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Prueba psicotécnica SENA Empresa</h1>
+            <p class="mt-1 text-sm text-slate-600">Preguntas de selección, escala o respuesta abierta. El puntaje se calcula según la configuración y se lleva a una escala de 0 a 100.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <span id="version" class="rounded-full px-3 py-1 text-xs font-semibold"></span>
+            <button type="button" data-estado="con-respuestas borrador nueva incompleta imagen sin-cambios gestor" onclick="cambiarEstado('vista')" class="rounded-full px-4 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-white"><i class="fas fa-eye mr-1"></i>Vista previa</button>
+            <button type="button" data-estado="vista" onclick="cambiarEstado('con-respuestas')" class="rounded-full px-4 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-white"><i class="fas fa-pen mr-1"></i>Volver al editor</button>
+        </div>
+    </div>
+
+    <!-- Avisos por estado -->
+    <div data-estado="con-respuestas" class="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><i class="fas fa-code-branch mt-0.5 text-amber-500"></i><span>Esta prueba ya tiene <strong>61 respuestas</strong>. Si la modificas, al guardar se creará la <strong>versión 3</strong>; los resultados existentes conservan la versión 2 con la que se presentaron.</span></div>
+    <div data-estado="gestor" class="mt-4 flex items-start gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900"><i class="fas fa-user-graduate mt-0.5"></i><span>Estás apoyando el diseño como <strong>Gestor de Talento Humano</strong>. Tus preguntas quedan registradas a tu nombre para que el psicólogo las revise. No tienes acceso a las respuestas ni a los resultados de los aprendices.</span></div>
+    <div data-estado="incompleta" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Complete las opciones y el puntaje de la pregunta</div>
+    <div data-estado="imagen" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-image mr-1"></i> Solo se permiten imágenes de hasta 5 MB</div>
+    <div data-estado="sin-cambios" class="mt-4 flex items-center gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900" role="status"><i class="fas fa-circle-info"></i> No se detectaron cambios. No se creó una nueva versión.</div>
+
+    <!-- Vista previa (como la ve el aprendiz) -->
+    <div data-estado="vista" class="mx-auto mt-6 max-w-2xl space-y-4">
+        <div class="rounded-3xl bg-[#064C3D] p-6 text-white">
+            <p class="text-xs font-semibold uppercase tracking-[.18em] text-[#34D399]">Vista previa · así la ve el aprendiz</p>
+            <h2 class="mt-2 text-xl font-extrabold">Prueba psicotécnica SENA Empresa</h2>
+            <p class="mt-1 text-sm text-emerald-50/85">32 preguntas · unos 40 minutos · tus respuestas se guardan mientras avanzas.</p>
+            <div class="mt-4 h-2 rounded-full bg-white/15"><div class="h-2 w-1/4 rounded-full bg-[#34D399]"></div></div>
+            <p class="mt-1 text-xs text-emerald-100">Pregunta 8 de 32</p>
+        </div>
+        <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <p class="font-semibold text-slate-800">8. Observa la secuencia. ¿Qué figura sigue?</p>
+            <div class="mt-3 grid h-28 place-items-center rounded-2xl bg-slate-100 text-slate-400"><i class="fas fa-shapes text-3xl"></i></div>
+            <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/60 has-[:checked]:ring-[#064C3D]"><input type="radio" name="p8" class="accent-[#064C3D]"> Triángulo</label>
+                <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/60 has-[:checked]:ring-[#064C3D]"><input type="radio" name="p8" class="accent-[#064C3D]"> Círculo</label>
+                <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/60 has-[:checked]:ring-[#064C3D]"><input type="radio" name="p8" class="accent-[#064C3D]"> Cuadrado</label>
+                <label class="flex items-center gap-3 rounded-2xl p-3 ring-1 ring-slate-200 has-[:checked]:bg-[#E8F3EF]/60 has-[:checked]:ring-[#064C3D]"><input type="radio" name="p8" class="accent-[#064C3D]"> Rombo</label>
+            </div>
+        </div>
+        <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <p class="font-semibold text-slate-800">9. Cuando un compañero no cumple su parte del trabajo, hablo con él directamente.</p>
+            <div class="mt-4 grid grid-cols-5 gap-2 text-center text-xs text-slate-600">
+                <label class="rounded-2xl p-2 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">1<br>Nunca</label>
+                <label class="rounded-2xl p-2 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">2</label>
+                <label class="rounded-2xl p-2 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">3</label>
+                <label class="rounded-2xl p-2 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">4</label>
+                <label class="rounded-2xl p-2 ring-1 ring-slate-200 has-[:checked]:bg-[#064C3D] has-[:checked]:text-white"><input type="radio" name="p9" class="sr-only">5<br>Siempre</label>
+            </div>
+        </div>
+        <div class="flex justify-between"><button type="button" class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200">Anterior</button><button type="button" class="rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white">Siguiente</button></div>
+    </div>
+
+    <!-- Editor -->
+    <div data-estado="con-respuestas borrador nueva incompleta imagen sin-cambios gestor" class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
+        <form id="editor" novalidate class="space-y-4" onsubmit="return false">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Datos de la prueba</h2>
+                <div class="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
+                    <div><label for="nombre" class="mb-1 block text-sm font-semibold text-slate-700">Nombre <span class="text-red-500">*</span></label><input id="nombre" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></div>
+                    <div><label for="tiempo" class="mb-1 block text-sm font-semibold text-slate-700">Tiempo sugerido</label><input id="tiempo" value="40 minutos" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></div>
+                    <div class="sm:col-span-2"><label for="instrucciones" class="mb-1 block text-sm font-semibold text-slate-700">Instrucciones para el aprendiz</label><textarea id="instrucciones" rows="2" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"></textarea></div>
+                </div>
+                <p class="mb-2 mt-4 text-sm font-semibold text-slate-700">Dimensiones que mide</p>
+                <div id="dimensiones" class="flex flex-wrap gap-2"></div>
+            </section>
+
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="font-bold text-[#064C3D]">Preguntas <span id="conteo" class="text-sm font-normal text-slate-400"></span></h2>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" data-agregar="Selección" class="rounded-xl bg-[#E8F3EF] px-3 py-1.5 text-xs font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-list-ul mr-1"></i>Selección</button>
+                        <button type="button" data-agregar="Escala" class="rounded-xl bg-[#E8F3EF] px-3 py-1.5 text-xs font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-sliders mr-1"></i>Escala</button>
+                        <button type="button" data-agregar="Abierta" class="rounded-xl bg-[#E8F3EF] px-3 py-1.5 text-xs font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-align-left mr-1"></i>Abierta</button>
+                    </div>
+                </div>
+                <ol id="preguntas" class="mt-4 space-y-3"></ol>
+                <p id="mas" class="mt-3 text-xs text-slate-400"></p>
+            </section>
+
+            <div class="flex flex-wrap justify-end gap-2 pb-4">
+                <a href="02-pruebas.html" class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-white">Cancelar</a>
+                <button type="button" id="guardar" class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-floppy-disk mr-1"></i> <span id="texto-guardar">Guardar</span></button>
+            </div>
+        </form>
+
+        <aside class="space-y-4">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70 xl:sticky xl:top-6">
+                <h2 class="font-bold text-[#064C3D]">Calificación</h2>
+                <dl class="mt-3 space-y-2 text-sm">
+                    <div class="flex justify-between"><dt class="text-slate-500">Puntaje máximo</dt><dd id="maximo" class="font-bold text-[#064C3D]"></dd></div>
+                    <div class="flex justify-between"><dt class="text-slate-500">Escala final</dt><dd class="font-bold text-[#064C3D]">0 a 100</dd></div>
+                </dl>
+                <p class="mt-3 text-xs text-slate-500">Las preguntas abiertas no suman automáticamente: las calificas tú al revisar los resultados.</p>
+                <div class="mt-4 space-y-2 text-xs">
+                    <div><div class="flex justify-between"><span>Razonamiento</span><span>30 %</span></div><div class="mt-1 h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[30%] rounded-full bg-[#064C3D]"></div></div></div>
+                    <div><div class="flex justify-between"><span>Trabajo en equipo</span><span>30 %</span></div><div class="mt-1 h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[30%] rounded-full bg-emerald-500"></div></div></div>
+                    <div><div class="flex justify-between"><span>Manejo de la presión</span><span>25 %</span></div><div class="mt-1 h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[25%] rounded-full bg-[#34D399]"></div></div></div>
+                    <div><div class="flex justify-between"><span>Orientación al servicio</span><span>15 %</span></div><div class="mt-1 h-1.5 rounded-full bg-slate-100"><div class="h-1.5 w-[15%] rounded-full bg-slate-400"></div></div></div>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+    const campo = 'w-full rounded-xl border bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40';
+    const PREGUNTAS = [
+        { tipo: 'Selección', dim: 'Razonamiento', texto: 'Observa la secuencia. ¿Qué figura sigue?', imagen: 'secuencia-figuras.png · 240 KB', opciones: [['Triángulo', 0], ['Círculo', 3], ['Cuadrado', 0], ['Rombo', 0]] },
+        { tipo: 'Escala', dim: 'Trabajo en equipo', texto: 'Cuando un compañero no cumple su parte del trabajo, hablo con él directamente.', escala: ['Nunca', 'Siempre'], puntos: '1 a 5 puntos' },
+        { tipo: 'Selección', dim: 'Manejo de la presión', texto: 'Faltan dos horas para entregar el informe de la unidad y se daña el computador. ¿Qué haces primero?', opciones: [['Aviso a mi jefe y propongo una alternativa', 3], ['Espero a que lo arreglen', 0], ['Lo hago a mano y lo paso después', 2]] },
+        { tipo: 'Abierta', dim: 'Orientación al servicio', texto: 'Describe una situación en la que ayudaste a un compañero o a un cliente. ¿Qué aprendiste?', manual: 5 },
+    ];
+    const PROPUESTAS = [
+        { tipo: 'Escala', dim: 'Trabajo en equipo', texto: 'Me siento cómodo recibiendo instrucciones de un compañero de mi misma fase.', escala: ['Nunca', 'Siempre'], puntos: '1 a 5 puntos', autor: 'Laura Cuéllar (Gestor de TH)' },
+        { tipo: 'Selección', dim: 'Razonamiento', texto: '¿Cuántos turnos de 4 horas cubren una jornada de 12 horas con 2 aprendices?', opciones: [['3', 3], ['6', 0], ['', '']], autor: 'Laura Cuéllar (Gestor de TH)' },
+    ];
+    const tarjeta = (p, i, estado) => {
+        const incompleta = estado === 'incompleta' && p.autor && p.tipo === 'Selección';
+        const imagenMala = estado === 'imagen' && i === 0;
+        const icono = { 'Selección': 'fa-list-ul', Escala: 'fa-sliders', Abierta: 'fa-align-left' }[p.tipo];
+        let cuerpo = '';
+        if (p.tipo === 'Selección') cuerpo = `<ul class="mt-3 space-y-2">${p.opciones.map(([o, pts]) => `
+            <li class="flex items-center gap-2"><i class="far fa-circle text-slate-300"></i><input value="${o}" placeholder="Opción de respuesta" aria-label="Opción" class="${campo} ${incompleta && o === '' ? 'border-red-400' : 'border-slate-200'}">
+            <input type="number" value="${pts}" aria-label="Puntos" class="w-20 rounded-xl border ${incompleta && pts === '' ? 'border-red-400' : 'border-slate-200'} bg-white px-3 py-2 text-sm"><span class="text-xs text-slate-400">pts</span></li>`).join('')}</ul>
+            <button type="button" class="mt-2 text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-plus mr-1"></i>Agregar opción</button>`;
+        if (p.tipo === 'Escala') cuerpo = `<div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600"><span class="rounded-lg bg-slate-100 px-2 py-1">1 = ${p.escala[0]}</span><span class="text-slate-300">…</span><span class="rounded-lg bg-slate-100 px-2 py-1">5 = ${p.escala[1]}</span><span class="ml-auto font-semibold text-[#064C3D]">${p.puntos}</span><label class="flex items-center gap-1"><input type="checkbox" class="accent-[#064C3D]"> Invertida</label></div>`;
+        if (p.tipo === 'Abierta') cuerpo = `<p class="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600"><i class="fas fa-user-pen mr-1"></i>Calificación manual del psicólogo: 0 a ${p.manual} puntos.</p>`;
+        return `<li class="rounded-2xl p-4 ring-1 ${incompleta || imagenMala ? 'ring-red-300 bg-red-50/30' : 'ring-slate-200'}">
+            <div class="flex flex-wrap items-center gap-2">
+                <i class="fas fa-grip-vertical cursor-grab text-slate-300"></i>
+                <span class="grid h-6 w-6 place-items-center rounded-full bg-[#064C3D] text-[11px] font-bold text-white">${i + 1}</span>
+                <span class="rounded-full bg-[#E8F3EF] px-2.5 py-0.5 text-[11px] font-semibold text-[#064C3D]"><i class="fas ${icono} mr-1"></i>${p.tipo}</span>
+                <select aria-label="Dimensión" class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs">${['Razonamiento', 'Trabajo en equipo', 'Manejo de la presión', 'Orientación al servicio'].map((d) => `<option ${d === p.dim ? 'selected' : ''}>${d}</option>`).join('')}</select>
+                ${p.autor ? `<span class="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800"><i class="fas fa-user-graduate mr-1"></i>Propuesta por ${p.autor}</span>` : ''}
+                <button type="button" data-quitar class="ml-auto rounded-lg px-2 py-1 text-sm text-slate-400 hover:bg-slate-100 hover:text-red-600" aria-label="Quitar pregunta"><i class="fas fa-trash"></i></button>
+            </div>
+            <textarea rows="2" aria-label="Enunciado" class="mt-3 ${campo} border-slate-200">${p.texto}</textarea>
+            ${p.imagen ? `<div class="mt-2 flex items-center gap-3 rounded-xl ${imagenMala ? 'bg-red-50 text-red-700' : 'bg-slate-50 text-slate-600'} px-3 py-2 text-xs"><i class="fas ${imagenMala ? 'fa-circle-xmark' : 'fa-image'}"></i><span class="flex-1">${imagenMala ? 'informe_unidad.pdf · 7,8 MB · no se cargó: solo imágenes de hasta 5 MB' : p.imagen}</span><button type="button" class="font-semibold text-emerald-700 hover:underline">Cambiar</button></div>` : '<button type="button" class="mt-2 text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-image mr-1"></i>Agregar imagen</button>'}
+            ${cuerpo}
+            ${incompleta ? '<p class="mt-2 text-xs font-semibold text-red-600">Complete las opciones y el puntaje de la pregunta</p>' : ''}
+        </li>`;
+    };
+    document.addEventListener('estado', ({ detail }) => {
+        if (detail === 'vista') return;
+        const nueva = detail === 'nueva';
+        const disenio = detail === 'borrador' || detail === 'incompleta' || detail === 'gestor';
+        $('titulo').textContent = nueva ? 'Nueva prueba psicotécnica' : disenio ? 'Prueba de liderazgo (cargos de Gerente)' : 'Prueba psicotécnica SENA Empresa';
+        $('nombre').value = nueva ? '' : $('titulo').textContent;
+        $('instrucciones').value = nueva ? '' : 'Responde con sinceridad. No hay respuestas buenas o malas en las preguntas de escala. Tus respuestas se guardan mientras avanzas.';
+        $('dimensiones').innerHTML = (nueva ? [] : ['Razonamiento', 'Trabajo en equipo', 'Manejo de la presión', 'Orientación al servicio']).map((d) => `<span class="inline-flex items-center gap-2 rounded-full bg-[#E8F3EF] py-1 pl-3 pr-1.5 text-xs font-semibold text-[#064C3D]">${d}<button type="button" class="grid h-5 w-5 place-items-center rounded-full hover:bg-white" aria-label="Quitar"><i class="fas fa-xmark text-[10px]"></i></button></span>`).join('')
+            + '<button type="button" class="rounded-full px-3 py-1 text-xs font-semibold text-emerald-700 border border-dashed border-emerald-300 hover:bg-[#E8F3EF]"><i class="fas fa-plus mr-1"></i>Dimensión</button>';
+        const lista = nueva ? [] : disenio ? [...PREGUNTAS.slice(0, 2), ...PROPUESTAS] : PREGUNTAS;
+        $('preguntas').innerHTML = lista.map((p, i) => tarjeta(p, i, detail)).join('') || '<li class="rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500">Agrega la primera pregunta con los botones de arriba.</li>';
+        $('conteo').textContent = nueva ? '(0)' : disenio ? '(14)' : '(32)';
+        $('mas').textContent = nueva ? '' : `… y ${disenio ? 10 : 28} preguntas más`;
+        $('maximo').textContent = nueva ? '0' : disenio ? '52 puntos' : '118 puntos';
+        const v = $('version');
+        v.textContent = nueva ? 'Sin guardar' : disenio ? 'Versión 1 · sin respuestas' : 'Versión 2 · 61 respuestas';
+        v.className = 'rounded-full px-3 py-1 text-xs font-semibold ' + (disenio || nueva ? 'bg-slate-100 text-slate-600' : 'bg-emerald-100 text-emerald-800');
+        $('texto-guardar').textContent = detail === 'con-respuestas' || detail === 'sin-cambios' ? 'Guardar como versión 3' : detail === 'gestor' ? 'Enviar mis preguntas' : 'Guardar';
+    });
+    $('guardar').addEventListener('click', () => {
+        const e = location.hash.split('=')[1];
+        if (e === 'incompleta' || e === 'imagen') return;
+        if (e === 'sin-cambios') return;
+        aviso('success', e === 'gestor' ? 'Tus preguntas quedaron registradas a tu nombre para revisión del psicólogo.' : e === 'con-respuestas' ? 'Se creó la versión 3 y quedó vigente. Los 61 resultados conservan la versión 2.' : 'Prueba guardada correctamente.');
+    });
+    document.addEventListener('click', (e) => {
+        const a = e.target.closest('[data-agregar]');
+        if (a) $('preguntas').insertAdjacentHTML('beforeend', tarjeta({ tipo: a.dataset.agregar, dim: 'Razonamiento', texto: '', opciones: [['', ''], ['', '']], escala: ['Nunca', 'Siempre'], puntos: '1 a 5 puntos', manual: 5 }, $('preguntas').children.length, ''));
+        const q = e.target.closest('[data-quitar]');
+        if (q) q.closest('li').remove();
+    });
+</script>
+</body>
+</html>

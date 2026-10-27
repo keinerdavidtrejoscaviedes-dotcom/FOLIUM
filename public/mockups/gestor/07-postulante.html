@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Camila Andrea Ruiz · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="postulantes" data-mockup="GTH-07|Ficha del postulante y análisis de hoja de vida|HU-024, HU-032 · RF-006 · RN-012, RN-063"
+      data-estados="pendiente:Por analizar,errores:Concepto incompleto,registrado:Concepto registrado,abierta:Convocatoria abierta">
+<div id="contenido">
+    <a href="06-postulantes.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Postulantes</a>
+    <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <span class="grid h-14 w-14 place-items-center rounded-2xl bg-[#064C3D] text-lg font-bold text-[#34D399]">CR</span>
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Camila Andrea Ruiz</h1>
+                <p class="text-sm text-slate-600">Ficha 2902187 · Gestión de la Producción Agrícola · postulada el 05/09/2026 3:41 p. m.</p>
+            </div>
+        </div>
+        <div class="flex gap-1">
+            <a href="#" class="grid h-9 w-9 place-items-center rounded-full text-slate-500 ring-1 ring-slate-200 hover:bg-white" aria-label="Aspirante anterior"><i class="fas fa-chevron-left"></i></a>
+            <a href="#" class="grid h-9 w-9 place-items-center rounded-full text-slate-500 ring-1 ring-slate-200 hover:bg-white" aria-label="Aspirante siguiente"><i class="fas fa-chevron-right"></i></a>
+        </div>
+    </div>
+
+    <div class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="space-y-4">
+            <!-- Opciones -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Cargos en orden de preferencia</h2>
+                <ol class="mt-4 space-y-2">
+                    <li class="flex flex-wrap items-center gap-3 rounded-2xl bg-[#E8F3EF]/60 p-3"><span class="grid h-8 w-8 place-items-center rounded-full bg-[#064C3D] text-sm font-bold text-white">1</span><span class="flex-1 font-semibold text-slate-800">Líder Subsistema Ambiental</span><button type="button" data-abrir="#modal-documento" data-titulo="Propuesta de trabajo · Líder Subsistema Ambiental" class="text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-file-lines mr-1"></i>Propuesta de trabajo</button></li>
+                    <li class="flex flex-wrap items-center gap-3 rounded-2xl bg-slate-50 p-3"><span class="grid h-8 w-8 place-items-center rounded-full bg-emerald-500 text-sm font-bold text-white">2</span><span class="flex-1 font-semibold text-slate-800">Equipo Ambiental</span><button type="button" data-abrir="#modal-documento" data-titulo="Propuesta de trabajo · Equipo Ambiental" class="text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-file-lines mr-1"></i>Propuesta de trabajo</button></li>
+                    <li class="flex flex-wrap items-center gap-3 rounded-2xl bg-slate-50 p-3"><span class="grid h-8 w-8 place-items-center rounded-full bg-[#34D399] text-sm font-bold text-[#043A2F]">3</span><span class="flex-1 font-semibold text-slate-800">Líder de BPA</span><button type="button" data-abrir="#modal-documento" data-titulo="Propuesta de trabajo · Líder de BPA" class="text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-file-lines mr-1"></i>Propuesta de trabajo</button></li>
+                </ol>
+            </section>
+
+            <!-- Análisis de la hoja de vida -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="font-bold text-[#064C3D]">Análisis de la hoja de vida</h2>
+                    <span data-estado="registrado" class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"><i class="fas fa-check mr-1"></i>Registrado por Laura Cuéllar · 15/09/2026 10:20 a. m.</span>
+                </div>
+                <div data-estado="abierta" class="mt-4 flex items-start gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900"><i class="fas fa-lock mt-0.5"></i><span>El análisis de hojas de vida se habilita al cerrar la convocatoria (12/09/2026).</span></div>
+                <div data-estado="errores" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Completa los campos marcados. Lo que ya diligenciaste se conserva.</div>
+
+                <form id="analisis" novalidate class="mt-4 space-y-4" data-ok="Concepto guardado. Ya se le puede habilitar la prueba psicotécnica." data-estado-destino="registrado">
+                    <div data-campo>
+                        <label for="formacion" class="mb-1 block text-sm font-semibold text-slate-700">Formación <span class="text-red-500">*</span></label>
+                        <textarea id="formacion" rows="2" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40 disabled:bg-slate-50"></textarea>
+                    </div>
+                    <div data-campo>
+                        <label for="habilidades" class="mb-1 block text-sm font-semibold text-slate-700">Habilidades <span class="text-red-500">*</span></label>
+                        <textarea id="habilidades" rows="2" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40 disabled:bg-slate-50"></textarea>
+                    </div>
+                    <fieldset>
+                        <legend class="mb-2 text-sm font-semibold text-slate-700">Afinidad con cada cargo elegido <span class="text-red-500">*</span></legend>
+                        <div id="afinidades" class="space-y-2"></div>
+                    </fieldset>
+                    <div>
+                        <label for="observaciones" class="mb-1 block text-sm font-semibold text-slate-700">Observaciones</label>
+                        <textarea id="observaciones" rows="2" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40 disabled:bg-slate-50"></textarea>
+                    </div>
+                    <div data-estado="pendiente errores" class="flex justify-end">
+                        <button class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-floppy-disk mr-1"></i> Guardar concepto</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <aside class="space-y-4">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Datos de la postulación</h2>
+                <dl class="mt-3 space-y-2.5 text-sm">
+                    <div><dt class="text-xs text-slate-400">Documento</dt><dd class="text-slate-700">CC 1.075.312.884</dd></div>
+                    <div><dt class="text-xs text-slate-400">Correo</dt><dd class="text-slate-700">caruiz@soy.sena.edu.co</dd></div>
+                    <div><dt class="text-xs text-slate-400">Teléfono</dt><dd class="text-slate-700">312 455 7781</dd></div>
+                    <div><dt class="text-xs text-slate-400">Municipio de procedencia</dt><dd class="text-slate-700">Campoalegre · vereda La Vega</dd></div>
+                </dl>
+            </section>
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Documentos</h2>
+                <ul class="mt-3 space-y-2 text-sm">
+                    <li><button type="button" data-abrir="#modal-documento" data-titulo="Hoja de vida (modelo de Talento Humano)" class="flex w-full items-center gap-3 rounded-2xl p-2.5 text-left ring-1 ring-slate-200 hover:bg-[#E8F3EF]/50"><i class="fas fa-file-pdf text-red-500"></i><span class="flex-1 text-slate-700">Hoja de vida con soportes</span><span class="text-xs text-slate-400">1,2 MB</span></button></li>
+                    <li><button type="button" data-abrir="#modal-documento" data-titulo="Certificados" class="flex w-full items-center gap-3 rounded-2xl p-2.5 text-left ring-1 ring-slate-200 hover:bg-[#E8F3EF]/50"><i class="fas fa-file-pdf text-red-500"></i><span class="flex-1 text-slate-700">Certificados</span><span class="text-xs text-slate-400">640 KB</span></button></li>
+                </ul>
+            </section>
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Estado del proceso</h2>
+                <ul class="mt-3 space-y-3 text-sm">
+                    <li class="flex items-center gap-3"><i class="fas fa-circle-check text-emerald-600"></i><span class="flex-1">Postulación completa</span></li>
+                    <li class="flex items-center gap-3"><i data-estado="registrado" class="fas fa-circle-check text-emerald-600"></i><i data-estado="pendiente errores abierta" class="far fa-circle text-slate-300"></i><span class="flex-1">Análisis de hoja de vida</span></li>
+                    <li class="flex items-center gap-3"><i class="far fa-circle text-slate-300"></i><span class="flex-1">Prueba psicotécnica <span class="text-xs text-slate-400">· solo se ve si la presentó</span></span></li>
+                    <li class="flex items-center gap-3"><i class="far fa-circle text-slate-300"></i><span class="flex-1">Entrevistas</span></li>
+                </ul>
+                <p class="mt-4 rounded-2xl bg-slate-50 p-3 text-xs text-slate-500"><i class="fas fa-shield-halved mr-1"></i>Los resultados psicológicos, las calificaciones y los puntajes no se muestran al Gestor de Talento Humano.</p>
+            </section>
+        </aside>
+    </div>
+
+    <!-- Visor de documentos -->
+    <dialog id="modal-documento" aria-labelledby="titulo-documento" class="m-auto w-[min(94vw,44rem)] rounded-3xl p-0 shadow-2xl">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-6 py-4">
+            <h2 id="titulo-documento" data-titulo-modal class="font-bold text-slate-900">Documento</h2>
+            <div class="flex gap-1">
+                <button type="button" data-accion data-ok="Se descargó el documento." data-ok-tipo="info" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100" aria-label="Descargar"><i class="fas fa-download"></i></button>
+                <button type="button" data-cerrar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            </div>
+        </div>
+        <div class="bg-slate-100 p-6">
+            <div class="mx-auto aspect-[3/4] max-h-[60vh] w-full max-w-sm rounded-lg bg-white p-6 shadow">
+                <div class="h-4 w-1/2 rounded bg-slate-200"></div><div class="mt-4 space-y-2"><div class="h-2.5 rounded bg-slate-100"></div><div class="h-2.5 rounded bg-slate-100"></div><div class="h-2.5 w-4/5 rounded bg-slate-100"></div></div>
+                <div class="mt-6 h-3 w-1/3 rounded bg-slate-200"></div><div class="mt-3 space-y-2"><div class="h-2.5 rounded bg-slate-100"></div><div class="h-2.5 w-3/4 rounded bg-slate-100"></div></div>
+            </div>
+        </div>
+    </dialog>
+</div>
+
+<script>
+    const cargos = ['Líder Subsistema Ambiental', 'Equipo Ambiental', 'Líder de BPA'];
+    document.addEventListener('estado', ({ detail }) => {
+        const lleno = detail === 'registrado' || detail === 'errores';
+        const lectura = detail === 'registrado' || detail === 'abierta';
+        const valores = {
+            formacion: 'Tecnóloga en Gestión de la Producción Agrícola (4.º trimestre). Curso complementario en manejo de residuos sólidos.',
+            habilidades: 'Liderazgo de equipos en la unidad de cítricos, buena comunicación escrita, manejo de hojas de cálculo.',
+            observaciones: detail === 'registrado' ? 'Muestra interés real por el área ambiental; su propuesta es concreta.' : '',
+        };
+        ['formacion', 'habilidades', 'observaciones'].forEach((id) => { const c = document.getElementById(id); c.value = lleno ? valores[id] : ''; c.disabled = lectura; });
+        document.getElementById('afinidades').innerHTML = cargos.map((c, i) => {
+            const falta = detail === 'errores' && i === 2;
+            const valor = detail === 'registrado' || (detail === 'errores' && i < 2) ? ['Alta', 'Alta', 'Media'][i] : '';
+            return `<div class="flex flex-col gap-2 rounded-2xl p-3 ring-1 ${falta ? 'ring-red-300 bg-red-50/40' : 'ring-slate-200'} sm:flex-row sm:items-center">
+                <span class="flex-1 text-sm font-semibold text-slate-700">${i + 1}. ${c}</span>
+                <select aria-label="Afinidad con ${c}" ${lectura ? 'disabled' : ''} ${i === 2 ? 'data-obligatorio' : ''} class="rounded-xl border ${falta ? 'border-red-400' : 'border-slate-200'} bg-white px-3 py-1.5 text-sm disabled:bg-slate-50">
+                    ${['', 'Alta', 'Media', 'Baja'].map((v) => `<option value="${v}" ${v === valor ? 'selected' : ''}>${v || 'Selecciona…'}</option>`).join('')}
+                </select>
+                ${falta ? '<span class="text-xs font-semibold text-red-600">Este campo es obligatorio</span>' : ''}
+            </div>`;
+        }).join('');
+        if (detail === 'errores') document.getElementById('formacion').classList.add('border-red-400'), document.getElementById('formacion').value = '';
+        else document.getElementById('formacion').classList.remove('border-red-400');
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cronograma · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="aprendiz" data-activo="cronograma" data-mockup="APR-02|Cronograma del proceso de selección|HU-043 · RF-003"
+      data-estados="publicado:Publicado,no-publicado:Aún no publicado">
+<div id="contenido" class="mx-auto max-w-3xl">
+    <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Cronograma</h1>
+    <p class="mt-1 text-sm text-slate-600">Proceso de selección de la Fase XXXVI. Aprobado por el Instructor Líder el 25/08/2026.</p>
+
+    <div data-estado="no-publicado" class="mt-6 rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-calendar mb-2 block text-3xl text-slate-300"></i>
+        <p class="font-semibold text-slate-700">El cronograma del proceso de selección aún no ha sido publicado</p>
+        <p class="mt-1 text-sm text-slate-500">Te enviaremos un correo cuando esté listo.</p>
+    </div>
+
+    <ol data-estado="publicado" id="etapas" class="relative mt-6 space-y-3 border-l-2 border-[#E8F3EF] pl-6"></ol>
+    <button type="button" data-estado="publicado" data-accion data-ok="Se descargó el cronograma en formato de calendario (.ics)." data-ok-tipo="info" class="mt-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-white"><i class="fas fa-calendar-plus"></i> Agregar a mi calendario</button>
+</div>
+<script>
+    const etapas = [
+        ['Apertura y cierre de la convocatoria', '01/09 – 12/09/2026', 'hecho'], ['Entrega de hoja de vida y propuestas de trabajo', '01/09 – 12/09/2026', 'hecho'],
+        ['Prueba psicotécnica', '22/09 – 29/09/2026', 'hecho'], ['Entrevistas técnica y psicológica', '01/10 – 10/10/2026', 'hecho'],
+        ['Validación de la selección', '13/10 – 24/10/2026', 'actual'], ['Publicación del acta de seleccionados', '28/10/2026', 'pendiente'], ['Empalme', '11/01 – 22/01/2027', 'pendiente'],
+    ];
+    document.getElementById('etapas').innerHTML = etapas.map(([t, f, e]) => `
+        <li class="relative rounded-2xl p-4 ${e === 'actual' ? 'bg-white shadow-lg shadow-[#064C3D]/10 ring-2 ring-[#34D399]' : 'bg-white ring-1 ring-slate-200/70'}">
+            <span class="absolute -left-[33px] top-5 h-4 w-4 rounded-full ring-4 ${e === 'hecho' ? 'bg-[#064C3D] ring-[#E8F3EF]' : e === 'actual' ? 'bg-[#34D399] ring-emerald-100' : 'bg-slate-300 ring-white'}"></span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="font-semibold ${e === 'pendiente' ? 'text-slate-500' : 'text-slate-800'}">${t}</p>
+                ${e === 'actual' ? '<span class="rounded-full bg-[#E8F3EF] px-2.5 py-0.5 text-xs font-semibold text-[#064C3D]">En curso</span>' : e === 'hecho' ? '<i class="fas fa-check text-emerald-600"></i>' : ''}
+            </div>
+            <p class="mt-0.5 text-sm text-slate-500"><i class="far fa-calendar mr-1"></i>${f}</p>
+        </li>`).join('');
+</script>
+</body>
+</html>

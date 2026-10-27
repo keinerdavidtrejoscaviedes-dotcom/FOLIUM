@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comité de reubicación · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="psicologo" data-activo="comite" data-mockup="PSI-08|Comité de reubicación (consulta)|HU-036 esc. 7 · RF-011 · RN-022"
+      data-estados="normal:Casos por decidir,vacio:Sin casos">
+<div id="contenido">
+    <div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Comité de reubicación</h1>
+        <p class="mt-1 text-sm text-slate-600">Participas porque evaluaste a estos aspirantes. Consulta sus resultados para la reunión; la decisión la registra el Instructor Líder.</p>
+    </div>
+
+    <div data-estado="vacio" class="mt-6 rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
+        <i class="fas fa-circle-check mb-2 block text-3xl text-emerald-500"></i>
+        <p class="font-semibold text-slate-700">No hay aprendices pendientes de reubicación</p>
+    </div>
+
+    <div data-estado="normal">
+        <div class="mt-6 flex flex-wrap items-center gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]">
+            <i class="fas fa-calendar-day"></i><span class="flex-1">Reunión del comité: <strong>miércoles 22 de octubre, 9:00 a. m.</strong> · Sala de Talento Humano · con Yina, Jorge Iván Cuéllar y Diana Patricia Losada.</span>
+        </div>
+        <div id="casos" class="mt-4 space-y-3"></div>
+        <section class="mt-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <h2 class="font-bold text-[#064C3D]">Cargos con cupos vacantes</h2>
+            <ul class="mt-3 flex flex-wrap gap-2 text-sm">
+                <li class="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">Líder de riego · 1</li>
+                <li class="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">Líder Semillero SEBI · 1</li>
+                <li class="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">Equipo de mantenimiento de cercos · 1</li>
+            </ul>
+        </section>
+    </div>
+</div>
+<script>
+    const casos = [
+        ['Óscar David Lara', 'Producción Ganadera', 134, 68, 66, 'Apto · «Comunicación asertiva, algo tímido»', ['Gestor Pecuario', 'Líder de reproducción', 'Equipo de Sanidad'], 'Reubicado en Líder de riego'],
+        ['Natalia Polanía', 'Gestión Agroempresarial', 113, 55, 58, 'Apto · «Escucha a los demás; le cuesta defender su postura»', ['Líder Semillero SEBI', 'Gestor de Innovación', 'Líder de BPA'], ''],
+        ['Kevin Ortiz', 'Producción Agrícola', 111, 51, 60, 'Apto · «Participa poco al inicio, luego argumenta con claridad»', ['Líder de riego', 'Equipo de Mecanización', 'Líder de registros'], ''],
+    ];
+    document.getElementById('casos').innerHTML = casos.map(([n, programa, total, prueba, entrevista, psico, opciones, decision]) => `
+        <article class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div><p class="text-lg font-bold text-slate-900">${n}</p><p class="text-sm text-slate-500">${programa}</p></div>
+                ${decision ? `<span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"><i class="fas fa-check mr-1"></i>${decision}</span>` : '<span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Por decidir</span>'}
+            </div>
+            <div class="mt-3 grid gap-2 text-sm sm:grid-cols-4">
+                <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Total</p><p class="text-lg font-extrabold text-[#064C3D]">${total}</p></div>
+                <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Prueba</p><p class="text-lg font-extrabold text-[#064C3D]">${prueba}</p></div>
+                <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Entrevista</p><p class="text-lg font-extrabold text-[#064C3D]">${entrevista}</p></div>
+                <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Tu concepto</p><p class="text-xs font-semibold text-slate-700">${psico}</p></div>
+            </div>
+            <p class="mt-3 text-xs text-slate-500">Opciones: ${opciones.map((o, i) => `${i + 1}. ${o}`).join(' · ')}</p>
+        </article>`).join('');
+</script>
+</body>
+</html>

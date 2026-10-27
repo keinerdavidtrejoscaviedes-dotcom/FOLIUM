@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calificar entrevista · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="tecnico" data-activo="entrevistas" data-mockup="INS-09|Calificar la entrevista técnica|HU-041 · RF-009 · RN-017, RN-018, RN-043 · RNF-015"
+      data-estados="calificar:Por calificar,incompleta:Incompleta,guardada:Guardada,terminado:Proceso terminado,no-asignado:No asignado">
+<div id="contenido">
+    <a href="07-mis-entrevistas.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Mis entrevistas</a>
+
+    <!-- No asignado (HU-041, esc. 5) -->
+    <div data-estado="no-asignado" class="mx-auto mt-6 max-w-xl rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-red-200">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-2xl text-red-500"><i class="fas fa-user-lock"></i></span>
+        <p class="mt-4 font-semibold text-slate-800">No está asignado como evaluador de esta entrevista</p>
+        <p class="mt-1 text-sm text-slate-500">Solo puedes consultar y calificar a los aspirantes que te asignaron.</p>
+    </div>
+
+    <div data-estado="calificar incompleta guardada terminado" class="mx-auto mt-3 max-w-3xl">
+        <!-- Aspirante (precargado) -->
+        <section class="rounded-3xl bg-[#064C3D] p-6 text-white">
+            <p class="text-xs font-semibold uppercase tracking-[.18em] text-[#34D399]">Entrevista técnica · jueves 2 de octubre · 10:00 a. m.</p>
+            <h1 class="mt-2 text-2xl font-extrabold">Santiago Rojas Polanía</h1>
+            <p class="text-sm text-emerald-50/85">Gestión de la Producción Agrícola · ficha 2902187</p>
+            <div class="mt-3 flex flex-wrap gap-1.5 text-xs">
+                <span class="rounded-full bg-white/10 px-2.5 py-1 font-semibold ring-1 ring-white/20">1. Líder U. F. Productiva Cacao</span><span class="rounded-full bg-white/10 px-2.5 py-1 font-semibold ring-1 ring-white/20">2. Gestor Agrícola</span><span class="rounded-full bg-white/10 px-2.5 py-1 font-semibold ring-1 ring-white/20">3. Líder de herramientas</span>
+            </div>
+            <a href="../gestor/07-postulante.html#estado=registrado" class="mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold hover:bg-white/25"><i class="fas fa-file-pdf"></i> Hoja de vida y propuestas</a>
+        </section>
+
+        <div data-estado="terminado" class="mt-4 flex items-start gap-3 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700"><i class="fas fa-lock mt-0.5"></i><span>El proceso terminó: solo consultas tu calificación.</span></div>
+        <div data-estado="incompleta" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Faltan 2 preguntas por calificar y las observaciones. Lo que ya diligenciaste se conserva.</div>
+
+        <form id="calificacion" novalidate class="mt-4 space-y-4" data-ok="Calificación guardada: 75 de 100 · Apto." data-estado-destino="guardada">
+            <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="font-bold text-[#064C3D]">Mi formato · versión 1</h2>
+                    <a href="08-formato.html" class="text-xs font-semibold text-emerald-700 hover:underline">Editar formato</a>
+                </div>
+                <ol id="preguntas" class="mt-4 space-y-4"></ol>
+                <div class="mt-5" data-campo>
+                    <label for="observaciones" class="mb-1 block text-sm font-semibold text-slate-700">Observaciones <span class="text-red-500">*</span></label>
+                    <textarea id="observaciones" rows="3" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40 disabled:bg-slate-50"></textarea>
+                </div>
+            </section>
+
+            <!-- Resultado -->
+            <section class="sticky bottom-3 flex flex-wrap items-center gap-4 rounded-3xl bg-white p-4 shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70">
+                <div class="flex-1">
+                    <p class="text-xs text-slate-500">Mi puntaje (escala 0 a 100)</p>
+                    <p class="text-2xl font-extrabold text-[#064C3D]"><span id="puntaje">0</span> <span id="concepto" class="ml-1 rounded-full px-2.5 py-0.5 align-middle text-xs font-semibold"></span></p>
+                    <p class="text-[11px] text-slate-400">Apto desde 60, según el umbral de la convocatoria</p>
+                </div>
+                <button data-estado="calificar incompleta" class="rounded-full bg-[#064C3D] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-floppy-disk mr-1"></i> Guardar calificación</button>
+            </section>
+        </form>
+
+        <!-- Otros evaluadores (RN-043) -->
+        <section class="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 sm:p-6">
+            <h2 class="font-bold text-[#064C3D]">Otros evaluadores de este aspirante</h2>
+            <p data-estado="calificar incompleta" class="mt-2 rounded-2xl bg-slate-50 p-3 text-sm text-slate-500"><i class="fas fa-eye-slash mr-1"></i>Verás las calificaciones de los demás cuando registres la tuya.</p>
+            <div data-estado="guardada terminado">
+                <ul class="mt-3 space-y-2 text-sm">
+                    <li class="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-slate-50 p-3"><span><strong>Yina</strong> · Líder · técnica</span><span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">77 · Apto</span></li>
+                </ul>
+                <p class="mt-3 text-sm text-slate-600">Puntaje de entrevista (promedio): <strong class="text-[#064C3D]">76</strong> <span class="text-xs text-slate-400">· solo consulta, no puedes modificar las de otros</span></p>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const PREGUNTAS = [
+        ['Presentación personal', 10, 8], ['Tipo de comunicación (pasiva, agresiva o asertiva)', 15, 12],
+        ['Actitud y proyección personal y laboral', 15, 11], ['Conocimientos técnicos del cargo', 30, 22],
+        ['¿Cómo programaría el riego de un cultivo de cacao en época seca?', 15, 11], ['¿Qué registros de producción llevaría en su unidad y para qué?', 15, 11],
+    ];
+    const recalcular = () => {
+        const valores = [...document.querySelectorAll('#preguntas input')].map((c) => Number(c.value) || 0);
+        const p = valores.reduce((a, b) => a + b, 0);
+        document.getElementById('puntaje').textContent = p;
+        const c = document.getElementById('concepto');
+        c.textContent = p >= 60 ? 'Apto' : 'No apto';
+        c.className = 'ml-1 rounded-full px-2.5 py-0.5 align-middle text-xs font-semibold ' + (p >= 60 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700');
+    };
+    document.addEventListener('estado', ({ detail }) => {
+        const lleno = detail === 'guardada' || detail === 'terminado';
+        const lectura = lleno;
+        document.getElementById('preguntas').innerHTML = PREGUNTAS.map(([t, max, v], i) => {
+            const valor = lleno ? v : detail === 'incompleta' ? (i < 4 ? v : '') : '';
+            const falta = detail === 'incompleta' && i >= 4;
+            return `<li class="rounded-2xl p-3 ring-1 ${falta ? 'ring-red-300 bg-red-50/40' : 'ring-slate-200'}">
+                <p class="text-sm font-semibold text-slate-800">${i + 1}. ${t}</p>
+                <div class="mt-2 flex items-center gap-3">
+                    <input type="number" min="0" max="${max}" value="${valor}" ${lectura ? 'disabled' : ''} data-obligatorio inputmode="numeric" aria-label="Puntaje de la pregunta ${i + 1}" class="w-24 rounded-xl border ${falta ? 'border-red-400' : 'border-slate-200'} bg-white px-3 py-2.5 text-base disabled:bg-slate-50">
+                    <span class="text-sm text-slate-500">de ${max}</span>
+                </div>
+            </li>`;
+        }).join('');
+        const obs = document.getElementById('observaciones');
+        obs.value = lleno ? 'Explica con seguridad el manejo del cultivo y los registros. Debe fortalecer el uso de hojas de cálculo.' : '';
+        obs.disabled = lectura;
+        obs.classList.toggle('border-red-400', detail === 'incompleta');
+        recalcular();
+    });
+    document.getElementById('preguntas').addEventListener('input', recalcular);
+</script>
+</body>
+</html>

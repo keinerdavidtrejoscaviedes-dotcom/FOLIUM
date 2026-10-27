@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inicio · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="completo" data-rol="aprendiz" data-mockup="APR-01|Inicio del Aprendiz|HU-043, HU-044, HU-055, HU-056 · réplica de panel.blade.php"
+      data-estados="postulante:Convocatoria abierta,seleccionado:Seleccionado (empalme),sin-ficha:Ficha no habilitada">
+<div id="contenido">
+    <section class="relative isolate overflow-hidden bg-[#064C3D] text-white">
+        <div class="folium-dots absolute inset-0 -z-10" aria-hidden="true"></div>
+        <i class="fas fa-leaf absolute -right-8 -top-6 -z-10 rotate-12 text-[11rem] text-white/5" aria-hidden="true"></i>
+        <div class="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 sm:pt-14">
+            <p class="entrada text-sm font-semibold uppercase tracking-[.2em] text-[#34D399]">FOLIUM · Talento Humano</p>
+            <h1 class="entrada mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl" style="animation-delay: 60ms">Hola, Santiago</h1>
+            <p class="entrada mt-2 max-w-2xl text-emerald-50/85" style="animation-delay: 120ms">Este es tu espacio en FOLIUM. Aquí encontrarás las secciones del proceso de Talento Humano que corresponden a tu rol.</p>
+            <div class="entrada mt-5 flex flex-wrap gap-2" style="animation-delay: 180ms">
+                <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/20"><i class="fas fa-id-badge text-[#34D399]"></i> Aprendiz</span>
+                <span data-estado="postulante seleccionado" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/20"><i class="fas fa-users-rectangle text-[#34D399]"></i> Ficha 2902187 habilitada en la Fase XXXVI</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="relative z-10 mx-auto -mt-14 max-w-6xl px-4 pb-16 sm:px-6">
+        <!-- Ficha no habilitada (HU-043 esc. 3, HU-044 esc. 2) -->
+        <div data-estado="sin-ficha" class="entrada rounded-3xl bg-white p-8 text-center shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70 sm:p-12">
+            <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#E8F3EF] text-2xl text-[#064C3D]"><i class="fas fa-hourglass-half"></i></span>
+            <h2 class="mt-5 text-xl font-bold text-[#064C3D]">Tu ficha no participa en la convocatoria actual</h2>
+            <p class="mx-auto mt-2 max-w-md text-slate-600">Cuando Talento Humano habilite tu ficha para una fase, aquí verás el cronograma, la convocatoria y los cargos a los que puedes postularte.</p>
+            <a href="10-mi-cargo.html#estado=finalizada" class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-clock-rotate-left"></i> Ver mi historial</a>
+        </div>
+
+        <!-- Siguiente paso -->
+        <div data-estado="postulante" class="entrada rounded-3xl bg-white p-6 shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70">
+            <p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-600">Tu siguiente paso</p>
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
+                <div><h2 class="text-lg font-extrabold text-[#064C3D]">Postúlate antes del 12/09/2026</h2><p class="text-sm text-slate-500">Elige 3 cargos en orden de preferencia y carga tu hoja de vida y tus propuestas.</p></div>
+                <a href="04-postularme.html" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]">Postularme <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <ol id="pasos-postulante" class="mt-5 grid gap-2 sm:grid-cols-3 lg:grid-cols-6"></ol>
+        </div>
+        <div data-estado="seleccionado" class="entrada rounded-3xl bg-white p-6 shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70">
+            <div class="flex flex-wrap items-center gap-4">
+                <span class="grid h-14 w-14 place-items-center rounded-2xl bg-[#064C3D] text-2xl text-[#34D399]"><i class="fas fa-award"></i></span>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-600">¡Fuiste seleccionado!</p>
+                    <h2 class="text-lg font-extrabold text-[#064C3D]">Líder de Unidad de Formación Productiva Cacao</h2>
+                    <p class="text-sm text-slate-500">Tu asignación está «asignada»: completa el empalme con María José Ospina para quedar vinculado.</p>
+                </div>
+                <a href="08-empalme.html#estado=entrante" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]">Ir a mi empalme <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div data-estado="postulante seleccionado">
+            <h2 class="mt-8 text-xs font-bold uppercase tracking-[.18em] text-slate-400">Como aprendiz</h2>
+            <div id="secciones" class="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+        </div>
+        <p class="mt-10 text-center text-sm text-slate-500"><a href="../admin/01-presentacion.html" class="font-semibold text-[#064C3D] hover:underline"><i class="fas fa-seedling mr-1"></i> Ver la presentación de FOLIUM</a></p>
+    </section>
+</div>
+<script>
+    document.getElementById('pasos-postulante').innerHTML = ['Postulación', 'Análisis de tu hoja de vida', 'Prueba psicotécnica', 'Entrevistas', 'Acta de seleccionados', 'Empalme'].map((t, i) => `
+        <li class="flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold ${i === 0 ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-200' : 'bg-slate-50 text-slate-400'}"><span class="grid h-5 w-5 place-items-center rounded-full ${i === 0 ? 'bg-amber-400 text-white' : 'bg-slate-200 text-slate-500'} text-[10px]">${i + 1}</span>${t}</li>`).join('');
+    const tarjeta = ([icono, titulo, texto, url, estado], i) => `
+        <a href="${url}" class="entrada group relative flex h-full flex-col rounded-3xl bg-white p-6 shadow-lg shadow-[#064C3D]/5 ring-1 ring-slate-200/70 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#064C3D]/10 hover:ring-[#34D399]/60" style="animation-delay: ${200 + i * 60}ms">
+            <div class="flex items-start justify-between gap-3">
+                <span class="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8F3EF] text-lg text-[#064C3D] transition duration-300 group-hover:bg-[#064C3D] group-hover:text-[#34D399]"><i class="fas ${icono}"></i></span>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">${estado}</span>
+            </div>
+            <h2 class="mt-5 font-bold text-slate-900">${titulo}</h2>
+            <p class="mt-1.5 text-sm leading-relaxed text-slate-600">${texto}</p>
+        </a>`;
+    document.getElementById('secciones').innerHTML = [
+        ['fa-calendar-days', 'Cronograma', 'Las fechas de cada etapa del proceso de selección.', '02-cronograma.html', 'Publicado'],
+        ['fa-bullhorn', 'Convocatoria', 'Los cargos disponibles para tu ficha y sus requisitos.', '03-convocatoria.html', 'Abierta'],
+        ['fa-id-card', 'Mi postulación', 'Postúlate a los cargos por prioridad y sigue el estado de tu proceso.', '05-mi-postulacion.html', 'Sin postular'],
+        ['fa-clipboard-check', 'Mi prueba psicotécnica', 'Presenta la prueba cuando esté habilitada en el cronograma.', '06-prueba.html', '22/09 – 29/09'],
+        ['fa-user-check', 'Acta de seleccionados', 'El resultado oficial de la convocatoria.', '07-acta.html', '28/10/2026'],
+        ['fa-signature', 'Mi empalme', 'Recibe tu cargo, revisa el inventario y firma el acta.', '08-empalme.html', 'Enero de 2027'],
+    ].map(tarjeta).join('');
+</script>
+</body>
+</html>

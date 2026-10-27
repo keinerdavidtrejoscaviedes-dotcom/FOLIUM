@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Empalme · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="gestor" data-activo="empalmes" data-mockup="GTH-13|Empalme: visto bueno e inventario inicial|HU-030, HU-031, HU-033 · RF-013, RF-014 · RN-024, RN-044"
+      data-estados="completo:Listo para visto bueno,firmas:Firmas pendientes,satisfaccion:Falta satisfacción,inicial:Inventario inicial,devuelto:Inventario devuelto,cerrado:Cerrado">
+<div id="contenido">
+    <a href="12-empalmes.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Seguimiento de empalmes</a>
+    <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400"><span data-estado="completo firmas satisfaccion cerrado">Empalme individual</span><span data-estado="inicial devuelto">Primer empalme del cargo</span> · Área Agrícola · plantilla v2</p>
+            <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl"><span data-estado="completo firmas satisfaccion cerrado">Líder de U. F. Productiva Cacao</span><span data-estado="inicial devuelto">Líder de riego</span></h1>
+        </div>
+        <span data-estado="completo" class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Listo para visto bueno</span>
+        <span data-estado="firmas satisfaccion inicial" class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">En curso</span>
+        <span data-estado="devuelto" class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">Pendiente de corrección</span>
+        <span data-estado="cerrado" class="rounded-full bg-[#064C3D] px-3 py-1 text-xs font-semibold text-white"><i class="fas fa-lock mr-1"></i>Cerrado</span>
+    </div>
+
+    <!-- Partes -->
+    <div class="mt-6 grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
+        <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Entrega</p>
+            <p data-estado="completo firmas satisfaccion cerrado" class="mt-1 font-bold text-slate-900">María José Ospina</p>
+            <p data-estado="completo firmas satisfaccion cerrado" class="text-xs text-slate-500">Saliente · Fase XXXV</p>
+            <p data-estado="inicial devuelto" class="mt-1 font-bold text-slate-400">Sin saliente</p>
+            <p data-estado="inicial devuelto" class="text-xs text-slate-500">El cargo se activa por primera vez y no tiene inventario previo.</p>
+        </div>
+        <i class="fas fa-arrow-right hidden text-xl text-[#064C3D] md:block"></i>
+        <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Recibe</p>
+            <p class="mt-1 font-bold text-slate-900"><span data-estado="completo firmas satisfaccion cerrado">Santiago Rojas Polanía</span><span data-estado="inicial devuelto">Óscar David Lara</span></p>
+            <p class="text-xs text-slate-500">Entrante · Fase XXXVI · asignación <span data-estado="cerrado" class="font-semibold text-emerald-700">vigente</span><span data-estado="completo firmas satisfaccion inicial devuelto">asignada</span></p>
+        </div>
+    </div>
+
+    <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="space-y-4">
+            <!-- Pasos -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Secuencia del empalme</h2>
+                <ol id="pasos" class="mt-4 space-y-3"></ol>
+            </section>
+
+            <!-- Inventario -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="font-bold text-[#064C3D]"><span data-estado="completo firmas satisfaccion cerrado">Inventario verificado</span><span data-estado="inicial devuelto">Inventario inicial registrado por el entrante</span></h2>
+                    <a href="../admin/09-plantilla-versiones.html" class="text-xs font-semibold text-emerald-700 hover:underline"><i class="fas fa-file-lines mr-1"></i>Ver el acta</a>
+                </div>
+                <div class="mt-3 overflow-x-auto rounded-2xl ring-1 ring-slate-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-3 py-2">Implemento</th><th class="px-3 py-2">Cantidad</th><th class="px-3 py-2">Estado</th><th class="px-3 py-2">Ubicación</th><th class="px-3 py-2">Verificación</th></tr></thead>
+                        <tbody id="inventario" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+                <p data-estado="completo firmas satisfaccion cerrado" class="mt-3 rounded-2xl bg-amber-50 p-3 text-xs text-amber-900"><i class="fas fa-triangle-exclamation mr-1 text-amber-500"></i><strong>Novedad documentada:</strong> Tijeras de poda: se entregan 3 de 4; una se dañó en septiembre (reporte del 18/09/2026).</p>
+
+                <!-- Validación del inventario inicial (HU-033) -->
+                <div data-estado="inicial devuelto" class="mt-4 rounded-2xl bg-slate-50 p-4">
+                    <div data-estado="devuelto" class="mb-3 rounded-xl bg-red-50 p-3 text-sm text-red-800"><i class="fas fa-rotate-left mr-1"></i>Devuelto el 13/01/2027: «Falta registrar la motobomba de la caseta 2 y el serial del medidor de caudal». Se notificó al aprendiz entrante.</div>
+                    <form id="form-inventario" novalidate data-ok="Inventario inicial devuelto al aprendiz entrante con tus observaciones." data-ok-tipo="warning" data-estado-destino="devuelto">
+                        <label for="observaciones" class="mb-1 block text-sm font-semibold text-slate-700">Observaciones para el aprendiz</label>
+                        <div data-campo>
+                            <textarea id="observaciones" rows="2" data-obligatorio placeholder="Escribe qué debe corregir…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+                            <p data-error hidden class="mt-1 text-xs font-semibold text-red-600">Escriba las observaciones para el aprendiz</p>
+                        </div>
+                        <div class="mt-3 flex flex-wrap justify-end gap-2">
+                            <button class="rounded-full px-4 py-2 text-sm font-semibold text-red-600 ring-1 ring-red-200 hover:bg-red-50"><i class="fas fa-rotate-left mr-1"></i> Devolver</button>
+                            <button type="button" data-titulo-confirmar="¿Validar el inventario inicial?" data-confirmar="Quedará como inventario vigente del cargo y se usará para precargar su próximo empalme." data-ok="Inventario inicial validado." data-estado-destino="completo" class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-check mr-1"></i> Validar inventario</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <aside class="space-y-4">
+            <!-- Firmas -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Firmas</h2>
+                <ul id="firmas" class="mt-3 space-y-2 text-sm"></ul>
+            </section>
+            <!-- Satisfacción -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Formulario de satisfacción</h2>
+                <ul id="satisfaccion" class="mt-3 space-y-2 text-sm"></ul>
+            </section>
+            <!-- Visto bueno -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">Visto bueno</h2>
+                <div data-estado="completo">
+                    <p class="mt-2 text-sm text-slate-600">Confirmas que el aprendiz cumplió con la hoja de vida, la entrevista, el empalme y la entrega del cargo.</p>
+                    <button type="button" data-titulo-confirmar="¿Dar el visto bueno?" data-confirmar="Se cerrará el empalme, Santiago Rojas Polanía quedará vinculado y su asignación pasará a «vigente»." data-ok="Empalme cerrado. Santiago Rojas Polanía quedó vinculado a su cargo." data-estado-destino="cerrado"
+                            class="mt-4 w-full rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-stamp mr-1"></i> Dar visto bueno</button>
+                    <p class="mt-2 text-xs text-slate-400">No se pide paz y salvo: lo gestiona la Gerencia al terminar la fase.</p>
+                </div>
+                <div data-estado="firmas satisfaccion inicial devuelto">
+                    <p id="motivo-bloqueo" class="mt-2 rounded-2xl bg-amber-50 p-3 text-sm text-amber-900"></p>
+                    <button type="button" disabled class="mt-4 w-full cursor-not-allowed rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white opacity-50"><i class="fas fa-stamp mr-1"></i> Dar visto bueno</button>
+                </div>
+                <div data-estado="cerrado" class="mt-2 space-y-2 text-sm text-slate-600">
+                    <p><i class="fas fa-circle-check mr-1.5 text-emerald-600"></i>Visto bueno de Laura Cuéllar · 15/01/2027 11:20 a. m.</p>
+                    <p><i class="fas fa-link mr-1.5 text-emerald-600"></i>Santiago Rojas Polanía quedó vinculado: asignación «vigente».</p>
+                    <p><i class="fas fa-box-archive mr-1.5 text-emerald-600"></i>El inventario verificado es ahora el vigente del cargo.</p>
+                </div>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+    document.addEventListener('estado', ({ detail }) => {
+        const inicial = detail === 'inicial' || detail === 'devuelto';
+        const firmas = detail !== 'firmas' && !inicial;
+        const satisfaccion = firmas && detail !== 'satisfaccion';
+        const pasos = [
+            ['Acta generada con la plantilla del área', true, '11/01/2027'],
+            [inicial ? 'Inventario inicial registrado y validado por el Gestor' : 'Registro y verificación del inventario', !inicial, inicial ? 'pendiente de tu validación' : '12/01/2027 · 1 novedad'],
+            ['Confirmación de visita a la unidad productiva', !inicial, '12/01/2027'],
+            ['Firma digital de todas las partes', firmas, firmas ? '13/01/2027' : 'faltan firmas'],
+            ['Formulario de satisfacción de ambos', satisfaccion, satisfaccion ? '14/01/2027' : 'pendiente'],
+            ['Visto bueno del Gestor de Talento Humano', detail === 'cerrado', detail === 'cerrado' ? '15/01/2027' : 'pendiente'],
+        ];
+        $('pasos').innerHTML = pasos.map(([t, hecho, f], i) => `
+            <li class="flex items-center gap-3"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full ${hecho ? 'bg-[#064C3D] text-[#34D399]' : 'bg-slate-100 text-slate-400'} text-xs font-bold">${hecho ? '<i class="fas fa-check"></i>' : i + 1}</span>
+                <span class="flex-1 text-sm ${hecho ? 'font-semibold text-slate-800' : 'text-slate-500'}">${t}</span><span class="text-xs ${hecho ? 'text-slate-400' : 'text-amber-600'}">${f}</span></li>`).join('');
+
+        const inventario = inicial
+            ? [['Motobomba 2 HP', '1', 'Bueno', 'Caseta 1'], ['Manguera 1"', '6 rollos', 'Bueno', 'Bodega'], ['Medidor de caudal', '1', 'Regular', 'Caseta 1'], ['Llave de paso 2"', '4', 'Bueno', 'Bodega']]
+            : [['Machete', '4', 'Bueno', 'Bodega de cacao'], ['Tijeras de poda', '3 de 4', 'Bueno', 'Bodega de cacao', true], ['Bomba de espalda 20 L', '2', 'Regular', 'Bodega de cacao'], ['Botas de caucho', '4 pares', 'Bueno', 'Bodega de cacao']];
+        $('inventario').innerHTML = inventario.map(([n, c, e, u, novedad]) => `
+            <tr class="${novedad ? 'bg-amber-50/60' : ''}"><td class="px-3 py-2 font-medium text-slate-700">${n}</td><td class="px-3 py-2">${c}</td><td class="px-3 py-2">${e}</td><td class="px-3 py-2 text-slate-500">${u}</td>
+            <td class="px-3 py-2 text-xs">${inicial ? '<span class="text-slate-400">Por validar</span>' : novedad ? '<span class="font-semibold text-amber-700"><i class="fas fa-triangle-exclamation mr-1"></i>Novedad</span>' : '<span class="font-semibold text-emerald-700"><i class="fas fa-check mr-1"></i>Coincide</span>'}</td></tr>`).join('');
+
+        const partes = inicial ? [['Óscar David Lara', 'Entrante', false], ['Jorge Iván Cuéllar', 'Instructor del área', false]]
+            : [['María José Ospina', 'Saliente', true], ['Santiago Rojas Polanía', 'Entrante', firmas], ['Jorge Iván Cuéllar', 'Instructor del área', firmas]];
+        $('firmas').innerHTML = partes.map(([n, r, ok]) => `<li class="flex items-center gap-2"><i class="${ok ? 'fas fa-circle-check text-emerald-600' : 'far fa-circle text-slate-300'}"></i><span class="flex-1">${n} <span class="text-xs text-slate-400">· ${r}</span></span>${ok ? '<span class="firma text-base text-[#064C3D]">' + n.split(' ')[0] + '</span>' : '<span class="text-xs text-amber-600">Pendiente</span>'}</li>`).join('');
+        $('satisfaccion').innerHTML = (inicial ? [['Óscar David Lara', false]] : [['María José Ospina', firmas], ['Santiago Rojas Polanía', satisfaccion]])
+            .map(([n, ok]) => `<li class="flex items-center gap-2"><i class="${ok ? 'fas fa-circle-check text-emerald-600' : 'far fa-circle text-slate-300'}"></i><span class="flex-1">${n}</span><span class="text-xs ${ok ? 'text-slate-400' : 'text-amber-600'}">${ok ? 'Diligenciado' : 'Pendiente'}</span></li>`).join('');
+
+        $('motivo-bloqueo').innerHTML = {
+            firmas: '<i class="fas fa-signature mr-1"></i>Faltan firmas: Santiago Rojas Polanía (entrante) y Jorge Iván Cuéllar (instructor del área).',
+            satisfaccion: '<i class="fas fa-clipboard-list mr-1"></i>Santiago Rojas Polanía no ha diligenciado el formulario de satisfacción.',
+            inicial: '<i class="fas fa-boxes-stacked mr-1"></i>Falta validar el inventario inicial del cargo.',
+            devuelto: '<i class="fas fa-boxes-stacked mr-1"></i>Falta validar el inventario inicial del cargo.',
+        }[detail] || '';
+    });
+</script>
+</body>
+</html>

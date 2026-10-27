@@ -1,0 +1,29 @@
+/* FOLIUM · mockups: estilos compartidos (los mismos del módulo TalentoHumano) */
+.folium-dots { background-image: radial-gradient(rgba(255, 255, 255, .08) 1px, transparent 1px); background-size: 22px 22px; }
+.folium-glow { background: radial-gradient(circle at 15% 20%, rgba(52, 211, 153, .20), transparent 45%), radial-gradient(circle at 85% 75%, rgba(52, 211, 153, .12), transparent 40%); }
+
+@media (prefers-reduced-motion: no-preference) {
+    .entrada { animation: entrada .6s cubic-bezier(.2, .8, .2, 1) both; }
+    .fade-in { animation: entrada .45s cubic-bezier(.2, .8, .2, 1); }
+}
+@keyframes entrada { from { opacity: 0; transform: translateY(1rem); } to { opacity: 1; transform: none; } }
+
+dialog::backdrop { background: rgb(15 23 42 / .5); }
+dialog[open] { animation: entrada .3s cubic-bezier(.2, .8, .2, 1); }
+
+/* Las tablas con scroll propio no deben ensanchar las columnas de la grilla en el celular */
+#contenido .grid > * { min-width: 0; }
+
+.sin-scroll::-webkit-scrollbar { display: none; }
+.sin-scroll { scrollbar-width: none; }
+
+/* Panel lateral (historial, detalle) */
+.cajon { transform: translateX(100%); transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
+.cajon.abierto { transform: none; }
+
+/* Firma digital simulada */
+.firma { font-family: 'Brush Script MT', 'Segoe Script', cursive; }
+
+@media print {
+    .no-imprimir { display: none !important; }
+}

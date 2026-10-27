@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Supervisión de empalmes · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="supervision" data-mockup="ADM-15|Supervisión · empalmes|HU-014 · RF-013, RF-014 · RN-057 a RN-060"
+      data-estados="curso:Empalmes en curso,sin-iniciar:Aún sin empalmes">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Supervisión</h1>
+            <p class="mt-1 text-sm text-slate-600">Consulta del proceso en modo de solo lectura, sin intervenir en su contenido.</p>
+        </div>
+        <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200"><i class="fas fa-eye text-emerald-600"></i> Solo lectura · Fase XXXV → XXXVI</span>
+    </div>
+
+    <nav class="sin-scroll mt-6 flex gap-2 overflow-x-auto" aria-label="Supervisión">
+        <a href="14-supervision-seleccion.html" class="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:ring-[#064C3D]"><i class="fas fa-user-check mr-1.5"></i>Selección</a>
+        <a href="15-supervision-empalmes.html" aria-current="page" class="shrink-0 rounded-full bg-[#064C3D] px-4 py-1.5 text-sm font-semibold text-white"><i class="fas fa-handshake mr-1.5"></i>Empalmes</a>
+        <a href="16-supervision-actas.html" class="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:ring-[#064C3D]"><i class="fas fa-folder-open mr-1.5"></i>Actas e historial</a>
+    </nav>
+
+    <!-- Sin iniciar -->
+    <div data-estado="sin-iniciar" class="relative isolate mt-4 overflow-hidden rounded-3xl bg-[#064C3D] p-8 text-white sm:p-10">
+        <div class="folium-dots absolute inset-0 -z-10"></div>
+        <i class="fas fa-handshake absolute -bottom-6 -right-2 -z-10 text-[9rem] text-white/5"></i>
+        <span class="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-2xl text-[#34D399] ring-1 ring-white/20"><i class="fas fa-hourglass-start"></i></span>
+        <h2 class="mt-5 text-xl font-extrabold sm:text-2xl">Los empalmes todavía no han empezado</h2>
+        <p class="mt-2 max-w-xl text-emerald-50/85">Se habilitan cuando el Gestor de Talento Humano publique el acta de seleccionados (28/10/2026). Según el cronograma, el empalme va del 11 al 22 de enero de 2027.</p>
+    </div>
+
+    <div data-estado="curso">
+        <p class="mt-4 flex items-center gap-2 rounded-2xl bg-sky-50 px-4 py-2.5 text-xs text-sky-900"><i class="fas fa-circle-info"></i> Datos de ejemplo de cómo se verá la supervisión durante el empalme (enero de 2027).</p>
+
+        <!-- Resumen -->
+        <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Empalmes de la fase</p><p class="text-2xl font-extrabold text-[#064C3D]">58</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Cerrados con visto bueno</p><p class="text-2xl font-extrabold text-[#064C3D]">21</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">En curso</p><p class="text-2xl font-extrabold text-amber-600">31</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Sin iniciar</p><p class="text-2xl font-extrabold text-slate-500">6</p></div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/70"><p class="text-xs text-slate-500">Con novedades</p><p class="text-2xl font-extrabold text-red-600">3</p></div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+            <i class="fas fa-triangle-exclamation text-amber-500"></i>
+            <span class="flex-1"><strong>9 aprendices salientes</strong> aún no entregan su cargo. La Fase XXXV no se puede cerrar con entregas pendientes.</span>
+        </div>
+
+        <!-- Filtros -->
+        <div class="mt-4 flex flex-wrap gap-2">
+            <select aria-label="Estado del empalme" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todos los estados</option><option>Sin iniciar</option><option>En curso</option><option>Con novedad</option><option>Cerrado</option></select>
+            <select aria-label="Área" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Todas las áreas</option><option>Administrativa</option><option>Agrícola</option><option>Pecuaria</option><option>Ambiental</option></select>
+            <select aria-label="Tipo" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Individuales y grupales</option><option>Individuales</option><option>Grupales</option></select>
+        </div>
+
+        <!-- Tablero de empalmes -->
+        <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">Cargo</th>
+                            <th class="px-4 py-3 font-semibold">Entrega → Recibe</th>
+                            <th class="px-4 py-3 font-semibold">Avance</th>
+                            <th class="px-4 py-3 font-semibold">Estado</th>
+                            <th class="px-4 py-3"><span class="sr-only">Ver</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="empalmes" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
+                <span class="font-semibold">Pasos:</span>
+                <span>1 Acta generada</span><span>2 Inventario</span><span>3 Visita a la unidad</span><span>4 Firmas</span><span>5 Satisfacción</span><span>6 Visto bueno</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: detalle del empalme (solo lectura) -->
+    <dialog id="modal-empalme" aria-labelledby="titulo-empalme" class="m-auto w-[min(94vw,40rem)] rounded-3xl p-0 shadow-2xl">
+        <div class="p-6">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Empalme grupal · Área Sistema Integrado de Gestión</p>
+                    <h2 id="titulo-empalme" class="mt-1 text-lg font-bold text-slate-900">Equipo Ambiental → Líder Subsistema Ambiental</h2>
+                </div>
+                <button type="button" data-cerrar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <div class="rounded-2xl bg-slate-50 p-3 text-sm"><p class="text-xs font-semibold text-slate-400">Entregan (4 salientes)</p><p class="mt-1 text-slate-700">Daniela Cortés · Miguel Ángel Tovar · Yesica Lorena Castro · Duván Esteban Ríos</p></div>
+                <div class="rounded-2xl bg-slate-50 p-3 text-sm"><p class="text-xs font-semibold text-slate-400">Recibe</p><p class="mt-1 text-slate-700">Camila Andrea Ruiz · Líder Subsistema Ambiental (entrante)</p><p class="mt-1 text-xs text-slate-500">Custodia el inventario del equipo y lo pone a disposición del nuevo equipo.</p></div>
+            </div>
+            <ol class="mt-5 space-y-2 text-sm">
+                <li class="flex items-center gap-3"><i class="fas fa-circle-check text-emerald-600"></i><span class="flex-1">Acta generada con la plantilla general v3</span><span class="text-xs text-slate-400">12/01/2027</span></li>
+                <li class="flex items-center gap-3"><i class="fas fa-circle-exclamation text-red-500"></i><span class="flex-1">Inventario verificado con 1 novedad: «Kit de muestreo de agua: faltan 2 frascos»</span><span class="text-xs text-slate-400">13/01/2027</span></li>
+                <li class="flex items-center gap-3"><i class="fas fa-circle-check text-emerald-600"></i><span class="flex-1">Visita a la unidad confirmada</span><span class="text-xs text-slate-400">13/01/2027</span></li>
+                <li class="flex items-center gap-3"><i class="fas fa-circle-half-stroke text-amber-500"></i><span class="flex-1">Firmas: 3 de 5</span><span class="text-xs text-slate-400">pendiente</span></li>
+                <li class="flex items-center gap-3"><i class="far fa-circle text-slate-300"></i><span class="flex-1 text-slate-500">Formulario de satisfacción</span></li>
+                <li class="flex items-center gap-3"><i class="far fa-circle text-slate-300"></i><span class="flex-1 text-slate-500">Visto bueno del Gestor de Talento Humano</span></li>
+            </ol>
+            <div class="mt-6 flex justify-end gap-2">
+                <a href="09-plantilla-versiones.html" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"><i class="fas fa-file-lines mr-1"></i> Ver acta</a>
+                <button type="button" data-cerrar class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Cerrar</button>
+            </div>
+        </div>
+    </dialog>
+</div>
+
+<script>
+    // pasos: 1 = hecho, 0.5 = con novedad, 0 = pendiente
+    const empalmes = [
+        ['Gerente Administrativo', 'Individual', 'Valeria Polanía', 'Camilo Andrés Vargas', [1, 1, 1, 1, 1, 1], 'Cerrado'],
+        ['Gestor de Talento Humano', 'Grupal · 2 → 2', 'L. Cuéllar · J. Rojas', 'P. Díaz · S. Medina', [1, 1, 1, 1, 0, 0], 'En curso'],
+        ['Equipo Ambiental', 'Grupal · 4 → 1', '4 salientes', 'Líder Subsistema Ambiental', [1, 0.5, 1, 0, 0, 0], 'Con novedad'],
+        ['Equipo Praderas y Cercos', 'Grupal · 3 → 1', '3 salientes', 'Gestor Pecuario (custodia)', [1, 1, 0, 0, 0, 0], 'En curso', 'El Líder Bovino no se activó en la fase: recibe el Gestor Pecuario.'],
+        ['Líder de U. F. Productiva Cacao', 'Individual', 'María José Ospina', 'Santiago Rojas Polanía', [1, 1, 1, 1, 1, 0], 'En curso'],
+        ['Líder Unidad de Lácteos', 'Individual', 'Kevin Murcia', 'Laura Sofía Puentes', [0, 0, 0, 0, 0, 0], 'Sin iniciar'],
+        ['Líder de riego', 'Primer empalme', '—', 'Óscar David Lara', [1, 0.5, 0, 0, 0, 0], 'Con novedad', 'Cargo activado por primera vez: inventario inicial por validar.'],
+    ];
+    const chip = { Cerrado: 'bg-emerald-100 text-emerald-800', 'En curso': 'bg-amber-100 text-amber-800', 'Con novedad': 'bg-red-100 text-red-700', 'Sin iniciar': 'bg-slate-100 text-slate-500' };
+    const paso = (v, i) => `<span title="Paso ${i + 1}" class="grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold ${v === 1 ? 'bg-[#064C3D] text-[#34D399]' : v ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-400'}">${v === 1 ? '<i class="fas fa-check"></i>' : v ? '!' : i + 1}</span>`;
+    document.getElementById('empalmes').innerHTML = empalmes.map(([cargo, tipo, entrega, recibe, pasos, estado, nota]) => `
+        <tr class="transition hover:bg-[#E8F3EF]/40">
+            <td class="px-4 py-3"><p class="font-semibold text-slate-800">${cargo}</p><p class="text-xs text-slate-500">${tipo}</p>${nota ? `<p class="mt-1 text-xs text-sky-700"><i class="fas fa-circle-info mr-1"></i>${nota}</p>` : ''}</td>
+            <td class="px-4 py-3 text-slate-600">${entrega} <i class="fas fa-arrow-right mx-1 text-xs text-[#064C3D]"></i> ${recibe}</td>
+            <td class="px-4 py-3"><div class="flex gap-1">${pasos.map(paso).join('')}</div></td>
+            <td class="px-4 py-3"><span class="whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${chip[estado]}">${estado}</span></td>
+            <td class="px-4 py-3 text-right"><button type="button" data-abrir="#modal-empalme" class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#064C3D]" aria-label="Ver empalme"><i class="fas fa-eye"></i></button></td>
+        </tr>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calificar entrevista grupal · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-rol="psicologo" data-activo="entrevistas" data-mockup="PSI-06|Calificar la entrevista psicológica grupal|HU-041 esc. 6 a 9 · RF-009 · RN-018, RN-043"
+      data-estados="calificar:Por calificar,incompleta:Incompleta,guardada:Guardada,terminado:Proceso terminado,tecnica:Intenta calificar técnica">
+<div id="contenido">
+    <a href="05-mis-entrevistas.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1"></i> Mis entrevistas</a>
+
+    <!-- Psicólogo en entrevista técnica (HU-041, esc. 6) -->
+    <div data-estado="tecnica" class="mx-auto mt-6 max-w-xl rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-red-200">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-red-50 text-2xl text-red-500"><i class="fas fa-ban"></i></span>
+        <p class="mt-4 font-semibold text-slate-800">No puedes calificar esta entrevista</p>
+        <p class="mt-1 text-sm text-slate-500">La entrevista técnica solo la califican los instructores técnicos convocados o el Instructor Líder. La psicológica, solo el Evaluador psicológico.</p>
+    </div>
+
+    <div data-estado="calificar incompleta guardada terminado" class="mx-auto mt-3 max-w-3xl">
+        <section class="rounded-3xl bg-[#064C3D] p-6 text-white">
+            <p class="text-xs font-semibold uppercase tracking-[.18em] text-[#34D399]">Entrevista psicológica grupal · viernes 10 de octubre · 2:00 p. m.</p>
+            <h1 class="mt-2 text-2xl font-extrabold">Grupo 9 · 6 aspirantes</h1>
+            <p class="text-sm text-emerald-50/85">Oficina de Bienestar. Cada aspirante necesita su propia calificación y observaciones.</p>
+            <div id="chips" class="mt-4 flex flex-wrap gap-1.5"></div>
+        </section>
+
+        <div data-estado="terminado" class="mt-4 flex items-start gap-3 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700"><i class="fas fa-lock mt-0.5"></i><span>El proceso terminó: solo consultas tus calificaciones.</span></div>
+        <div data-estado="incompleta" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1"></i> Falta la calificación y las observaciones de 2 aspirantes del grupo. No se guarda hasta que estén completas.</div>
+
+        <form id="grupal" novalidate class="mt-4 space-y-3" data-ok="Calificaciones del grupo guardadas: 6 aspirantes." data-estado-destino="guardada">
+            <div id="aspirantes" class="space-y-3"></div>
+            <div data-estado="calificar incompleta" class="sticky bottom-3 flex flex-wrap items-center gap-3 rounded-3xl bg-white p-4 shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70">
+                <p class="flex-1 text-sm text-slate-600"><strong id="listos" class="text-[#064C3D]">4</strong> de 6 aspirantes completos</p>
+                <button class="rounded-full bg-[#064C3D] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-floppy-disk mr-1"></i> Guardar calificaciones</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const ITEMS = [['Presentación personal', 20], ['Tipo de comunicación (pasiva, agresiva o asertiva)', 30], ['Actitud', 25], ['Proyección personal y laboral', 25]];
+    const GRUPO = [
+        ['Kevin Ortiz', '2902187', [16, 24, 20, 19], 'Participa poco al inicio, luego argumenta con claridad.'],
+        ['Natalia Polanía', '2902114', [17, 22, 19, 18], 'Escucha a los demás; le cuesta defender su postura.'],
+        ['Brayan Felipe Cuéllar', '2902230', [16, 25, 21, 20], 'Lidera la dinámica de forma respetuosa.'],
+        ['Daniel Felipe Ortiz', '2902114', [18, 26, 22, 21], 'Comunicación asertiva y buena proyección.'],
+        ['Valentina Ortiz Rojas', '2902187', [15, 23, 20, 18], '', true],
+        ['Sebastián Gómez Peña', '2902230', [17, 21, 18, 19], '', true],
+    ];
+    const pintar = (estado) => {
+        const lleno = estado === 'guardada' || estado === 'terminado';
+        document.getElementById('chips').innerHTML = GRUPO.map(([n, , , , pendiente]) => {
+            const ok = lleno || !pendiente;
+            return `<span class="rounded-full ${ok ? 'bg-white/15' : 'bg-amber-400 text-[#043A2F]'} px-2.5 py-1 text-xs font-semibold ring-1 ring-white/20"><i class="fas ${ok ? 'fa-check' : 'fa-hourglass-half'} mr-1"></i>${n.split(' ')[0]}</span>`;
+        }).join('');
+        document.getElementById('aspirantes').innerHTML = GRUPO.map(([n, ficha, notas, obs, pendiente], i) => {
+            const vacio = pendiente && !lleno;
+            const rojo = estado === 'incompleta' && pendiente;
+            const total = vacio ? 0 : notas.reduce((a, b) => a + b, 0);
+            return `<details ${vacio || i === 0 ? 'open' : ''} class="group rounded-3xl bg-white shadow-sm ring-1 ${rojo ? 'ring-red-300' : 'ring-slate-200/70'}">
+                <summary class="flex cursor-pointer list-none flex-wrap items-center gap-3 p-5">
+                    <i class="fas fa-chevron-right text-xs text-slate-400 transition group-open:rotate-90"></i>
+                    <span class="flex-1"><span class="font-bold text-slate-900">${n}</span> <span class="text-xs text-slate-500">· ficha ${ficha}</span></span>
+                    ${vacio ? `<span class="rounded-full ${rojo ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'} px-2.5 py-0.5 text-xs font-semibold">Sin calificar</span>` : `<span class="rounded-full ${total >= 60 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'} px-2.5 py-0.5 text-xs font-semibold">${total} · ${total >= 60 ? 'Apto' : 'No apto'}</span>`}
+                </summary>
+                <div class="space-y-3 border-t border-slate-100 p-5">
+                    ${ITEMS.map(([t, max], j) => `<div class="flex flex-wrap items-center gap-3"><span class="flex-1 text-sm text-slate-700">${t}</span>
+                        <input type="number" min="0" max="${max}" inputmode="numeric" value="${vacio ? '' : notas[j]}" ${lleno ? 'disabled' : ''} aria-label="${t} de ${n}" class="w-20 rounded-xl border ${rojo ? 'border-red-400' : 'border-slate-200'} bg-white px-3 py-2 text-base disabled:bg-slate-50"><span class="w-10 text-xs text-slate-400">de ${max}</span></div>`).join('')}
+                    <textarea rows="2" ${lleno ? 'disabled' : ''} placeholder="Observaciones individuales" aria-label="Observaciones de ${n}" class="w-full rounded-xl border ${rojo ? 'border-red-400' : 'border-slate-200'} bg-white px-3 py-2 text-sm disabled:bg-slate-50">${vacio ? '' : obs || 'Se expresa con seguridad y mantiene una actitud colaborativa.'}</textarea>
+                    ${lleno && i === 3 ? '<div class="rounded-2xl bg-slate-50 p-3 text-xs text-slate-600"><p class="font-semibold text-slate-700">Otros evaluadores de este aspirante (solo consulta)</p><p class="mt-1">Yina · técnica · 72 · Apto</p><p>Carlos Andrés Medina · técnica · 70 · Apto</p><p class="mt-1 font-semibold">Promedio de entrevista: 76</p></div>' : ''}
+                </div>
+            </details>`;
+        }).join('');
+        document.getElementById('listos').textContent = lleno ? 6 : 4;
+    };
+    document.addEventListener('estado', ({ detail }) => pintar(detail));
+    // Sin las calificaciones de todo el grupo no se guarda (HU-041, esc. 7)
+    document.getElementById('grupal').addEventListener('submit', (e) => {
+        const vacios = [...document.querySelectorAll('#aspirantes input, #aspirantes textarea')].filter((c) => !c.disabled && !c.value.trim());
+        if (vacios.length) { e.preventDefault(); e.stopImmediatePropagation(); cambiarEstado('incompleta'); }
+    });
+</script>
+</body>
+</html>

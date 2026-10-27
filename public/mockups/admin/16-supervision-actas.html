@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Actas e historial · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="supervision" data-mockup="ADM-16|Supervisión · actas e historial de fases|HU-014, HU-016 · RF-020 (supervisión)">
+<div id="contenido">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Supervisión</h1>
+            <p class="mt-1 text-sm text-slate-600">Consulta del proceso en modo de solo lectura, sin intervenir en su contenido.</p>
+        </div>
+        <span class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200"><i class="fas fa-eye text-emerald-600"></i> Solo lectura</span>
+    </div>
+
+    <nav class="sin-scroll mt-6 flex gap-2 overflow-x-auto" aria-label="Supervisión">
+        <a href="14-supervision-seleccion.html" class="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:ring-[#064C3D]"><i class="fas fa-user-check mr-1.5"></i>Selección</a>
+        <a href="15-supervision-empalmes.html" class="shrink-0 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:ring-[#064C3D]"><i class="fas fa-handshake mr-1.5"></i>Empalmes</a>
+        <a href="16-supervision-actas.html" aria-current="page" class="shrink-0 rounded-full bg-[#064C3D] px-4 py-1.5 text-sm font-semibold text-white"><i class="fas fa-folder-open mr-1.5"></i>Actas e historial</a>
+    </nav>
+
+    <!-- Actas de la fase en curso -->
+    <section class="mt-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+        <h2 class="font-bold text-[#064C3D]">Actas de la Fase XXXVI</h2>
+        <div class="mt-4 grid gap-3 md:grid-cols-3">
+            <div class="flex items-start gap-3 rounded-2xl p-4 ring-1 ring-slate-200">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#E8F3EF] text-[#064C3D]"><i class="fas fa-calendar-days"></i></span>
+                <div class="min-w-0 flex-1"><p class="font-semibold text-slate-800">Cronograma de selección</p><p class="text-xs text-slate-500">Aprobado el 25/08/2026</p>
+                    <a href="14-supervision-seleccion.html" class="mt-2 inline-block text-xs font-semibold text-emerald-700 hover:underline">Ver</a></div>
+            </div>
+            <div class="flex items-start gap-3 rounded-2xl p-4 ring-1 ring-slate-200">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-400"><i class="fas fa-user-check"></i></span>
+                <div class="min-w-0 flex-1"><p class="font-semibold text-slate-800">Acta de seleccionados</p><p class="text-xs text-slate-500">Pendiente · 30 cargos por validar</p></div>
+            </div>
+            <div class="flex items-start gap-3 rounded-2xl p-4 ring-1 ring-slate-200">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-400"><i class="fas fa-file-signature"></i></span>
+                <div class="min-w-0 flex-1"><p class="font-semibold text-slate-800">Actas de recibimiento</p><p class="text-xs text-slate-500">Se generan en el empalme</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Historial de fases -->
+    <section class="mt-4 rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+        <div class="flex flex-wrap items-center justify-between gap-3 p-6 pb-0">
+            <h2 class="font-bold text-[#064C3D]">Historial de fases</h2>
+            <label class="relative"><span class="sr-only">Buscar acta</span><i class="fas fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                <input type="search" placeholder="Buscar cargo o aprendiz en las actas…" class="w-72 max-w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm focus:border-[#064C3D] focus:outline-none"></label>
+        </div>
+        <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                    <tr><th class="px-4 py-3 font-semibold">Fase</th><th class="hidden px-4 py-3 font-semibold md:table-cell">Periodo</th><th class="px-4 py-3 text-center font-semibold">Cargos</th><th class="px-4 py-3 text-center font-semibold">Postulados</th><th class="hidden px-4 py-3 text-center font-semibold sm:table-cell">Reubicados</th><th class="hidden px-4 py-3 text-center font-semibold lg:table-cell">Empalmes</th><th class="px-4 py-3 font-semibold">Actas</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr class="hover:bg-[#E8F3EF]/40">
+                        <td class="px-4 py-3"><p class="font-bold text-slate-800">Fase XXXV</p><span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">En curso</span></td>
+                        <td class="hidden px-4 py-3 text-slate-600 md:table-cell">04/08/2026 – 11/12/2026</td>
+                        <td class="px-4 py-3 text-center font-semibold">40</td><td class="px-4 py-3 text-center font-semibold">—</td><td class="hidden px-4 py-3 text-center sm:table-cell">—</td><td class="hidden px-4 py-3 text-center lg:table-cell">—</td>
+                        <td class="px-4 py-3 text-xs text-slate-500">Carga inicial (puesta en marcha)</td>
+                    </tr>
+                    <tr class="hover:bg-[#E8F3EF]/40">
+                        <td class="px-4 py-3"><p class="font-bold text-slate-800">Fase XXXIV</p><span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">Cerrada</span></td>
+                        <td class="hidden px-4 py-3 text-slate-600 md:table-cell">03/02/2026 – 26/06/2026</td>
+                        <td class="px-4 py-3 text-center font-semibold">—</td><td class="px-4 py-3 text-center font-semibold">—</td><td class="hidden px-4 py-3 text-center sm:table-cell">—</td><td class="hidden px-4 py-3 text-center lg:table-cell">—</td>
+                        <td class="px-4 py-3 text-xs text-slate-500">Proceso en papel, antes de FOLIUM</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="border-t border-slate-100 px-6 py-3 text-xs text-slate-500"><i class="fas fa-circle-info mr-1"></i>Desde la Fase XXXVI cada fase guarda aquí su cronograma, su acta de seleccionados y todas las actas de recibimiento.</p>
+    </section>
+
+    <!-- Así se verá una fase cerrada en FOLIUM -->
+    <section class="mt-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="font-bold text-[#064C3D]">Ejemplo: fase cerrada en FOLIUM</h2>
+                <p class="text-sm text-slate-500">Así se verá la Fase XXXVI cuando termine.</p>
+            </div>
+            <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800">Vista de ejemplo</span>
+        </div>
+        <div class="mt-4 grid gap-3 sm:grid-cols-5">
+            <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Cargos</p><p class="text-lg font-extrabold text-[#064C3D]">42</p></div>
+            <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Postulados</p><p class="text-lg font-extrabold text-[#064C3D]">61</p></div>
+            <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Seleccionados</p><p class="text-lg font-extrabold text-[#064C3D]">58</p></div>
+            <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Reubicados</p><p class="text-lg font-extrabold text-[#064C3D]">3</p></div>
+            <div class="rounded-2xl bg-slate-50 p-3"><p class="text-xs text-slate-500">Empalmes cerrados</p><p class="text-lg font-extrabold text-[#064C3D]">58 / 58</p></div>
+        </div>
+        <ul class="mt-4 divide-y divide-slate-100 rounded-2xl ring-1 ring-slate-200 text-sm">
+            <li class="flex flex-wrap items-center gap-3 px-4 py-3"><i class="fas fa-calendar-days w-5 text-center text-[#064C3D]"></i><span class="flex-1">Cronograma del proceso de selección</span><button type="button" data-accion data-ok="Se descargó cronograma_fase_XXXVI.pdf" data-ok-tipo="info" class="text-xs font-semibold text-emerald-700 hover:underline">PDF</button></li>
+            <li class="flex flex-wrap items-center gap-3 px-4 py-3"><i class="fas fa-user-check w-5 text-center text-[#064C3D]"></i><span class="flex-1">Acta de seleccionados</span><button type="button" data-abrir="#modal-acta" class="text-xs font-semibold text-emerald-700 hover:underline">Ver</button><button type="button" data-accion data-ok="Se descargó acta_seleccionados_fase_XXXVI.pdf" data-ok-tipo="info" class="text-xs font-semibold text-emerald-700 hover:underline">PDF</button></li>
+            <li class="flex flex-wrap items-center gap-3 px-4 py-3"><i class="fas fa-file-signature w-5 text-center text-[#064C3D]"></i><span class="flex-1">Actas de recibimiento del cargo <span class="text-slate-400">(58)</span></span><a href="15-supervision-empalmes.html" class="text-xs font-semibold text-emerald-700 hover:underline">Ver todas</a></li>
+        </ul>
+    </section>
+
+    <!-- Modal: acta de seleccionados (solo lectura) -->
+    <dialog id="modal-acta" aria-labelledby="titulo-acta" class="m-auto w-[min(94vw,46rem)] rounded-3xl p-0 shadow-2xl">
+        <div class="max-h-[85vh] overflow-y-auto p-6 sm:p-8">
+            <div class="flex items-center justify-between gap-3 border-b-2 border-[#064C3D] pb-4">
+                <div class="flex items-center gap-3">
+                    <span class="grid h-11 w-11 place-items-center rounded-full bg-[#E8F3EF] text-lg text-[#064C3D]"><i class="fas fa-seedling"></i></span>
+                    <div><p class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">SENA Empresa · La Angostura</p><h2 id="titulo-acta" class="text-lg font-extrabold text-[#064C3D]">Acta de seleccionados · Fase XXXVI</h2></div>
+                </div>
+                <button type="button" data-cerrar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            </div>
+            <p class="mt-4 text-sm text-slate-600">Publicada el 28/10/2026 por Paula Díaz (Gestor de Talento Humano). Selección validada por Yina (Líder de la estrategia).</p>
+            <table class="mt-4 w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"><tr><th class="px-3 py-2">Aprendiz</th><th class="px-3 py-2">Ficha</th><th class="px-3 py-2">Cargo</th><th class="px-3 py-2">Observación</th></tr></thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    <tr><td class="px-3 py-2">Camilo Andrés Vargas</td><td class="px-3 py-2">2902114</td><td class="px-3 py-2">Gerente Administrativo</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                    <tr><td class="px-3 py-2">Paula Díaz Rivera</td><td class="px-3 py-2">2902114</td><td class="px-3 py-2">Gestor de Talento Humano</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                    <tr><td class="px-3 py-2">Sergio Medina Ortiz</td><td class="px-3 py-2">2902187</td><td class="px-3 py-2">Gestor de Talento Humano</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                    <tr><td class="px-3 py-2">Camila Andrea Ruiz</td><td class="px-3 py-2">2902187</td><td class="px-3 py-2">Líder Subsistema Ambiental</td><td class="px-3 py-2 text-slate-400">—</td></tr>
+                    <tr><td class="px-3 py-2">Óscar David Lara</td><td class="px-3 py-2">2902230</td><td class="px-3 py-2">Líder de riego</td><td class="px-3 py-2"><span class="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800">Reubicado</span></td></tr>
+                    <tr><td class="px-3 py-2 text-slate-400" colspan="4">… 53 aprendices más</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </dialog>
+</div>
+</body>
+</html>

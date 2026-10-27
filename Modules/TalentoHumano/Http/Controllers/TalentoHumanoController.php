@@ -22,9 +22,11 @@ class TalentoHumanoController extends Controller
         ['icono' => 'fa-user-check', 'titulo' => 'Selección y actas', 'texto' => 'Valida a los seleccionados, haz reubicaciones y genera el acta.', 'roles' => ['instructor'], 'ruta' => 'talentohumano.seleccion.index', 'seccion' => 'seleccion'],
         ['icono' => 'fa-handshake', 'titulo' => 'Empalmes', 'texto' => 'Acta de recibimiento, inventario del cargo y firmas digitales.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.empalmes.index', 'seccion' => 'empalmes'],
         ['icono' => 'fa-book-open', 'titulo' => 'Catálogo de cargos', 'texto' => 'Rol, actividades, responsabilidades y requisitos de cada cargo.', 'roles' => ['instructor', 'psicologo', 'gestor', 'aprendiz'], 'ruta' => 'talentohumano.catalogo.index', 'seccion' => 'catalogo'],
-        ['icono' => 'fa-id-card', 'titulo' => 'Mi postulación', 'texto' => 'Postúlate a los cargos por prioridad y sigue el estado de tu proceso.', 'roles' => ['aprendiz']],
-        ['icono' => 'fa-clipboard-check', 'titulo' => 'Mi prueba psicotécnica', 'texto' => 'Presenta la prueba cuando esté habilitada en el cronograma.', 'roles' => ['aprendiz']],
-        ['icono' => 'fa-signature', 'titulo' => 'Mi empalme', 'texto' => 'Recibe tu cargo, revisa el inventario y firma el acta.', 'roles' => ['aprendiz']],
+        ['icono' => 'fa-id-card', 'titulo' => 'Mi postulación', 'texto' => 'Postúlate a los cargos por prioridad y sigue el estado de tu proceso.', 'roles' => ['aprendiz'], 'ruta' => 'talentohumano.aprendiz.postulacion'],
+        ['icono' => 'fa-clipboard-check', 'titulo' => 'Mi prueba psicotécnica', 'texto' => 'Presenta la prueba cuando esté habilitada en el cronograma.', 'roles' => ['aprendiz'], 'ruta' => 'talentohumano.aprendiz.prueba'],
+        ['icono' => 'fa-signature', 'titulo' => 'Mi empalme', 'texto' => 'Recibe tu cargo, revisa el inventario y firma el acta.', 'roles' => ['aprendiz'], 'ruta' => 'talentohumano.aprendiz.empalme'],
+        ['icono' => 'fa-calendar-days', 'titulo' => 'Cronograma de selección', 'texto' => 'Consulta las fechas aprobadas de cada etapa del proceso.', 'roles' => ['aprendiz'], 'ruta' => 'talentohumano.aprendiz.cronograma'],
+        ['icono' => 'fa-id-card-clip', 'titulo' => 'Mi cargo e historial', 'texto' => 'Consulta tu cargo vigente o el histórico en SENA Empresa.', 'roles' => ['aprendiz'], 'ruta' => 'talentohumano.aprendiz.cargo'],
     ];
 
     /**

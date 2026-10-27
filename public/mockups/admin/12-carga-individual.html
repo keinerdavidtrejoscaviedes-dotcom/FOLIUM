@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Asignación inicial · FOLIUM · SENA Empresa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/folium.css">
+    <script src="../assets/folium.js"></script>
+</head>
+<body data-layout="lider" data-activo="asignaciones" data-mockup="ADM-12|Asignación inicial una por una|HU-013 · RN-032, RN-067"
+      data-estados="encontrado:Aprendiz encontrado,buscar:Buscar aprendiz,no-existe:No existe en SICEFA,ya-asignado:Ya tiene asignación,emergencia:Sin Gestor de TH">
+<div id="contenido">
+    <a href="11-asignaciones.html" class="text-sm font-semibold text-emerald-700 hover:underline"><i class="fas fa-arrow-left mr-1" aria-hidden="true"></i> Asignaciones</a>
+    <h1 class="mt-3 text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Asignación inicial</h1>
+    <p class="mt-1 text-sm text-slate-600">Para quienes ya ocupan un cargo en la fase en curso, o para reemplazar a un Gestor de Talento Humano en una emergencia.</p>
+
+    <div data-estado="emergencia" class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+        <i class="fas fa-triangle-exclamation text-amber-500"></i>
+        <span class="flex-1"><strong>No hay un Gestor de Talento Humano con asignación vigente.</strong> Puedes asignar a un aprendiz a ese cargo: al quedar vigente recibe el rol Gestor de Talento Humano.</span>
+    </div>
+
+    <div class="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <form novalidate class="space-y-4" data-confirmar="La asignación quedará con origen «carga inicial» directamente en estado «vigente», sin acta de seleccionados ni empalme." data-titulo-confirmar="¿Crear la asignación?"
+              data-ok="Asignación creada en estado «vigente» con origen «carga inicial»." data-ir="11-asignaciones.html">
+            <!-- Aprendiz -->
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">1. Aprendiz</h2>
+                <div class="mt-4 flex flex-col gap-2 sm:flex-row" data-campo>
+                    <label for="documento" class="sr-only">Documento del aprendiz</label>
+                    <div class="relative flex-1">
+                        <i class="fas fa-id-card pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+                        <input id="documento" data-obligatorio inputmode="numeric" placeholder="Número de documento" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 pl-8 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">
+                    </div>
+                    <button type="button" onclick="cambiarEstado('encontrado')" class="shrink-0 rounded-xl bg-[#064C3D] px-4 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-magnifying-glass mr-1"></i> Buscar en SICEFA</button>
+                </div>
+
+                <div data-estado="encontrado ya-asignado emergencia" class="mt-4 flex items-center gap-4 rounded-2xl bg-[#E8F3EF]/60 p-4">
+                    <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#064C3D] text-sm font-bold text-[#34D399]">AT</span>
+                    <div class="min-w-0 flex-1 text-sm">
+                        <p class="font-bold text-slate-900">Andrés Felipe Trujillo Cabrera</p>
+                        <p class="text-slate-600">CC 1.075.276.540 · aftrujillo@soy.sena.edu.co</p>
+                        <p class="text-slate-600">Ficha 2758641 · Gestión Agroempresarial · Tecnólogo presencial</p>
+                    </div>
+                    <span class="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/20"><i class="fas fa-check mr-1"></i>SICEFA</span>
+                </div>
+                <div data-estado="no-existe" class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                    <p class="font-semibold"><i class="fas fa-circle-xmark mr-1"></i> No encontramos el documento 1.075.999.000 en SICEFA</p>
+                    <p class="mt-1">Verifica el número. Solo se pueden asignar aprendices registrados en SICEFA.</p>
+                </div>
+                <div data-estado="ya-asignado" class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+                    <p class="font-semibold"><i class="fas fa-triangle-exclamation mr-1 text-amber-500"></i> Ya tiene una asignación vigente en la Fase XXXV</p>
+                    <p class="mt-1">Ocupa el cargo <strong>Equipo de Calidad</strong>. Un aprendiz solo puede tener una asignación asignada o vigente por fase.</p>
+                </div>
+            </section>
+
+            <!-- Cargo -->
+            <section data-estado="encontrado emergencia" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">2. Cargo y fase</h2>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-slate-700">Fase</label>
+                        <p class="rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">Fase XXXV · En curso</p>
+                    </div>
+                    <div data-campo>
+                        <label for="cargo" class="mb-1 block text-sm font-semibold text-slate-700">Cargo <span class="text-red-500">*</span></label>
+                        <select id="cargo" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">
+                            <option value="">Selecciona…</option>
+                            <optgroup label="Administrativa"><option selected>Gestor de Talento Humano · 1 de 2 cupos ocupados</option><option>Gestor de contabilidad y finanzas</option></optgroup>
+                            <optgroup label="Agrícola"><option>Líder de riego</option><option>Líder de herramientas</option></optgroup>
+                        </select>
+                        <p class="mt-1 text-xs text-slate-500">Solo cargos activos del catálogo.</p>
+                    </div>
+                    <div>
+                        <label for="unidad" class="mb-1 block text-sm font-semibold text-slate-700">Unidades productivas</label>
+                        <select id="unidad" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><option>Administración</option><option>Cacao</option><option>Lácteos</option></select>
+                    </div>
+                    <div data-campo>
+                        <label for="inicio" class="mb-1 block text-sm font-semibold text-slate-700">Fecha de inicio <span class="text-red-500">*</span></label>
+                        <input id="inicio" type="date" value="2026-08-04" data-obligatorio class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="mt-4 flex items-start gap-3 rounded-2xl bg-[#E8F3EF] px-4 py-3 text-sm text-[#064C3D]">
+                    <i class="fas fa-user-shield mt-0.5"></i>
+                    <span>Al quedar vigente en el cargo Gestor de Talento Humano, el aprendiz recibe automáticamente el rol <strong>Gestor de Talento Humano</strong>.</span>
+                </div>
+            </section>
+
+            <!-- Justificación -->
+            <section data-estado="encontrado emergencia" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">3. Justificación</h2>
+                <div class="mt-4" data-campo>
+                    <label for="justificacion" class="mb-1 block text-sm font-semibold text-slate-700">Motivo de la asignación inicial <span class="text-red-500">*</span></label>
+                    <textarea id="justificacion" rows="3" data-obligatorio placeholder="Por ejemplo: reemplazo del Gestor de Talento Humano por retiro voluntario…" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40"></textarea>
+                    <p data-error hidden class="mt-1 text-xs font-semibold text-red-600">La justificación es obligatoria.</p>
+                </div>
+            </section>
+
+            <div data-estado="encontrado emergencia" class="flex flex-wrap justify-end gap-2 pb-4">
+                <a href="11-asignaciones.html" class="rounded-full px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">Cancelar</a>
+                <button class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]"><i class="fas fa-check mr-1"></i> Crear asignación</button>
+            </div>
+        </form>
+
+        <aside class="space-y-4">
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">¿Cuándo se usa?</h2>
+                <ul class="mt-3 space-y-3 text-sm text-slate-600">
+                    <li class="flex gap-2"><i class="fas fa-rocket mt-0.5 text-emerald-600"></i> Puesta en marcha: aprendices que ya ocupan cargos seleccionados en papel.</li>
+                    <li class="flex gap-2"><i class="fas fa-life-ring mt-0.5 text-emerald-600"></i> Emergencia: no hay un Gestor de Talento Humano vigente.</li>
+                </ul>
+            </section>
+            <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                <h2 class="font-bold text-[#064C3D]">¿Muchos aprendices?</h2>
+                <p class="mt-2 text-sm text-slate-600">Usa la carga masiva con la plantilla de Excel: es la forma prevista para el día de la implementación.</p>
+                <a href="13-carga-masiva.html" class="mt-3 inline-flex items-center gap-2 rounded-full bg-[#E8F3EF] px-4 py-2 text-sm font-semibold text-[#064C3D] hover:bg-emerald-100"><i class="fas fa-file-excel"></i> Carga masiva</a>
+            </section>
+        </aside>
+    </div>
+</div>
+<script>
+    document.addEventListener('estado', ({ detail }) => {
+        document.getElementById('documento').value = { buscar: '', 'no-existe': '1075999000' }[detail] ?? '1075276540';
+    });
+</script>
+</body>
+</html>
