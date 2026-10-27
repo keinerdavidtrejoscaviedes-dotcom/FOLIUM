@@ -61,28 +61,6 @@ class AsignacionesController extends Controller
     }
 
     /**
-     * Puesta en marcha: registro de la fase que ya está en curso cuando se implementa FOLIUM.
-     */
-    public function registrarFase(Request $request)
-    {
-        abort_if(Fase::actual(), 409, 'Ya hay una fase en curso');
-        $datos = $request->validateWithBag('fase', [
-            'numero' => ['required', 'integer', 'min:1', 'max:999', Rule::unique('th_fases', 'numero')],
-            'fecha_inicio' => ['required', 'date'],
-            'fecha_fin' => ['nullable', 'date', 'after:fecha_inicio'],
-        ], [
-            'required' => 'Este campo es obligatorio',
-            'numero.unique' => 'Ya existe una fase con ese número',
-            'fecha_fin.after' => 'La fecha de fin debe ser posterior a la de inicio',
-        ]);
-
-        $fase = Fase::create($datos + ['estado' => 'en_curso']);
-        Auditoria::registrar('fase_registrada', $fase, [], $datos + ['estado' => 'en_curso']);
-
-        return redirect()->route('talentohumano.lider.asignaciones.index')->with('success', "Se registró la {$fase->nombre()} como fase en curso.");
-    }
-
-    /**
      * Detalle del aprendiz: sus asignaciones y los movimientos registrados en la auditoría.
      */
     public function show(Asignacion $asignacion)

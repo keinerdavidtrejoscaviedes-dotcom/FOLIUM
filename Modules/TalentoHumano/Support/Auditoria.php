@@ -28,6 +28,14 @@ class Auditoria
     }
 
     /**
+     * Acción sobre un registro que no se carga como modelo (consultas con DB::table).
+     */
+    public static function registrarTipo(string $evento, string $tipo, int $id, array $nuevo = []): void
+    {
+        self::insertar($evento, $tipo, $id, [], $nuevo, self::origen());
+    }
+
+    /**
      * Petición rechazada por la matriz de permisos: no ejecuta nada, pero queda el intento (HU-002, esc. 4).
      */
     public static function registrarIntentoDenegado(Request $request): void

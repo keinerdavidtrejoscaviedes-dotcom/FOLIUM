@@ -14,7 +14,9 @@ use Modules\TalentoHumano\Entities\Calificacion;
 use Modules\TalentoHumano\Entities\CargaInicial;
 use Modules\TalentoHumano\Entities\Cargo;
 use Modules\TalentoHumano\Entities\CargoActivado;
+use Modules\TalentoHumano\Entities\Convocatoria;
 use Modules\TalentoHumano\Entities\ConvocatoriaCargo;
+use Modules\TalentoHumano\Entities\Cronograma;
 use Modules\TalentoHumano\Entities\Cuestionario;
 use Modules\TalentoHumano\Entities\Designacion;
 use Modules\TalentoHumano\Entities\Empalme;
@@ -36,6 +38,7 @@ class DescripcionAuditoria
         'asignaciones' => ['Asignaciones', [Asignacion::class, CargaInicial::class, Fase::class]],
         'plantillas' => ['Plantillas de acta', [PlantillaActa::class]],
         'activacion' => ['Activación de cargos', [CargoActivado::class, FaseFicha::class, Area::class, Course::class]],
+        'convocatoria' => ['Cronograma y convocatoria', [Cronograma::class, Convocatoria::class]],
         'evaluacion' => ['Postulaciones y entrevistas', [AnalisisHv::class, Cuestionario::class, Calificacion::class]],
         'seleccion' => ['Selección', [ConvocatoriaCargo::class, Reubicacion::class]],
         'empalmes' => ['Empalmes', [Empalme::class, Acta::class, InventarioEmpalme::class]],

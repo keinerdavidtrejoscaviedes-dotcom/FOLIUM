@@ -30,7 +30,7 @@
     @if (!$fase && $paso < 3)
         <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             <i class="fas fa-triangle-exclamation mr-1 text-amber-500" aria-hidden="true"></i>
-            No hay una fase en curso. Registra primero la fase desde <a href="{{ route('talentohumano.lider.asignaciones.index') }}" class="font-semibold underline">Asignaciones</a>.
+            No hay una fase en curso. El Gestor de Talento Humano debe registrarla primero desde «Fases».
         </div>
     @elseif ($paso === 1)
         <div class="mt-6 grid gap-4 xl:grid-cols-2">

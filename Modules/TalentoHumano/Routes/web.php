@@ -7,12 +7,18 @@ use Modules\TalentoHumano\Http\Controllers\AsignacionesController;
 use Modules\TalentoHumano\Http\Controllers\AuditoriaController;
 use Modules\TalentoHumano\Http\Controllers\CatalogoCargoController;
 use Modules\TalentoHumano\Http\Controllers\CatalogoCargosController;
+use Modules\TalentoHumano\Http\Controllers\ConvocatoriaController;
+use Modules\TalentoHumano\Http\Controllers\CronogramaController;
 use Modules\TalentoHumano\Http\Controllers\DesignacionesController;
 use Modules\TalentoHumano\Http\Controllers\EmpalmeController;
 use Modules\TalentoHumano\Http\Controllers\EntrevistaController;
+use Modules\TalentoHumano\Http\Controllers\FaseController;
+use Modules\TalentoHumano\Http\Controllers\FichaFaseController;
+use Modules\TalentoHumano\Http\Controllers\FormatoEntrevistaController;
 use Modules\TalentoHumano\Http\Controllers\InstructorLiderController;
 use Modules\TalentoHumano\Http\Controllers\PlantillasActaController;
 use Modules\TalentoHumano\Http\Controllers\PostulacionController;
+use Modules\TalentoHumano\Http\Controllers\PruebaPsicotecnicaController;
 use Modules\TalentoHumano\Http\Controllers\SeleccionActasController;
 use Modules\TalentoHumano\Http\Controllers\TalentoHumanoController;
 use Modules\TalentoHumano\Http\Middleware\AdministradorTH;
@@ -88,7 +94,6 @@ Route::prefix('talento-humano')
                     Route::patch('{asignacion}/suspender', 'suspender')->whereNumber('asignacion')->name('suspender');
                     Route::patch('{asignacion}/reactivar', 'reactivar')->whereNumber('asignacion')->name('reactivar');
                     Route::middleware(AdministradorTH::class)->group(function () {
-                        Route::post('fase', 'registrarFase')->name('fase');
                         Route::get('inicial', 'create')->name('create');
                         Route::post('inicial', 'store')->name('store');
                         Route::get('carga-masiva', 'cargaMasiva')->name('carga-masiva');
@@ -124,18 +129,6 @@ Route::prefix('talento-humano')
 
             // Proceso de Talento Humano (rama Maicol). Cada sección valida su permiso con la matriz AccesoTH::PERMISOS (HU-002, esc. 4)
 
-            // Activación de cargos y fichas (HU-017 a HU-019)
-            Route::prefix('activacion-cargos')->name('activacion.')->controller(ActivacionCargoController::class)
-                ->middleware(PermisoTH::class . ':activacion')->group(function () {
-                    Route::get('/', 'index')->name('index');
-                    Route::post('/toggle', 'toggleCargo')->name('toggle');
-                    Route::post('/cupos', 'updateCupos')->name('cupos');
-                    Route::post('/area', 'activarArea')->name('area');
-                    Route::post('/fichas/agregar', 'agregarFicha')->name('fichas.agregar');
-                    Route::delete('/fichas/{id}', 'eliminarFicha')->name('fichas.eliminar');
-                    Route::post('/fichas/asignar-programa', 'asignarPrograma')->name('fichas.asignar-programa');
-                });
-
             // Postulaciones y análisis de hojas de vida (HU-024 · Mockup INS-05)
             Route::prefix('postulaciones')->name('postulaciones.')->controller(PostulacionController::class)
                 ->middleware(PermisoTH::class . ':postulaciones')->group(function () {
@@ -148,8 +141,11 @@ Route::prefix('talento-humano')
             Route::prefix('entrevistas')->name('entrevistas.')->controller(EntrevistaController::class)
                 ->middleware(PermisoTH::class . ':entrevistas')->group(function () {
                     Route::get('/', 'index')->name('index');
-                    Route::get('/formato', 'formato')->name('formato');
-                    Route::post('/formato', 'guardarFormato')->name('formato.guardar');
+                    // Formato de la entrevista técnica: lo arma cada instructor evaluador
+                    Route::middleware(PermisoTH::class . ':formato_tecnico')->group(function () {
+                        Route::get('/formato', 'formato')->name('formato');
+                        Route::post('/formato', 'guardarFormato')->name('formato.guardar');
+                    });
                     Route::get('/{entrevista}/calificar/{postulacion}', 'calificar')->name('calificar');
                     Route::post('/{entrevista}/calificar/{postulacion}', 'guardarCalificacion')->name('calificar.guardar');
                 });
@@ -184,5 +180,49 @@ Route::prefix('talento-humano')
                     Route::get('/', 'index')->name('index');
                     Route::get('/{id}', 'show')->name('show');
                 });
+
+            // Proceso de Talento Humano (rama talento-humano-gestor-psicologo)
+
+            // Psicólogo: pruebas psicotécnicas (HU-039)
+            Route::prefix('pruebas-psicotecnicas')->name('pruebas.')->controller(PruebaPsicotecnicaController::class)
+                ->middleware(PermisoTH::class . ':pruebas')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('crear', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+                Route::get('preguntas/{pregunta}/imagen', 'imagen')->whereNumber('pregunta')->name('imagen');
+                Route::get('{prueba}', 'show')->whereNumber('prueba')->name('show');
+                Route::get('{prueba}/editar', 'edit')->whereNumber('prueba')->name('edit');
+                Route::put('{prueba}', 'update')->whereNumber('prueba')->name('update');
+                Route::patch('{prueba}/estado', 'estado')->whereNumber('prueba')->name('estado');
+            });
+
+            // Psicólogo: formato de la entrevista psicológica (HU-040). El de la técnica está en Entrevistas
+            Route::middleware(PermisoTH::class . ':formato')->group(function () {
+                Route::get('formato-entrevista', [FormatoEntrevistaController::class, 'edit'])->name('formato.edit');
+                Route::put('formato-entrevista', [FormatoEntrevistaController::class, 'update'])->name('formato.update');
+            });
+
+            // Gestor de TH: preparación de la fase (HU-017, HU-019, HU-020)
+            Route::prefix('fases')->name('fases.')->middleware(PermisoTH::class . ':activacion')->group(function () {
+                Route::get('/', [FaseController::class, 'index'])->name('index');
+                Route::post('/', [FaseController::class, 'store'])->name('store');
+
+                Route::prefix('{fase}')->whereNumber('fase')->group(function () {
+                    Route::get('/', [FaseController::class, 'show'])->name('show');
+
+                    Route::get('fichas', [FichaFaseController::class, 'index'])->name('fichas.index');
+                    Route::put('fichas', [FichaFaseController::class, 'update'])->name('fichas.update');
+                    Route::get('fichas/{ficha}/aprendices', [FichaFaseController::class, 'aprendices'])->whereNumber('ficha')->name('fichas.aprendices');
+
+                    Route::get('cargos', [ActivacionCargoController::class, 'edit'])->name('cargos.edit');
+                    Route::put('cargos', [ActivacionCargoController::class, 'update'])->name('cargos.update');
+
+                    Route::get('cronograma', [CronogramaController::class, 'edit'])->name('cronograma.edit');
+                    Route::put('cronograma', [CronogramaController::class, 'update'])->name('cronograma.update');
+
+                    Route::get('convocatoria', [ConvocatoriaController::class, 'edit'])->name('convocatoria.edit');
+                    Route::put('convocatoria', [ConvocatoriaController::class, 'update'])->name('convocatoria.update');
+                });
+            });
         });
     });

@@ -4,407 +4,198 @@ namespace Modules\TalentoHumano\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\TalentoHumano\Entities\Fase;
-use Modules\TalentoHumano\Entities\Cargo;
-use Modules\TalentoHumano\Entities\Area;
-use Modules\TalentoHumano\Entities\CargoActivado;
-use Modules\TalentoHumano\Entities\FaseFicha;
-use Modules\SICA\Entities\Course;
-use Modules\SICA\Entities\Program;
-use Modules\TalentoHumano\Support\Auditoria;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\MessageBag;
+use Modules\TalentoHumano\Services\Auditoria;
+use Modules\TalentoHumano\Services\FaseService;
 
+/**
+ * Activación de los cargos que operarán en la fase (HU-019, RF-001).
+ *
+ * La propuesta sale de los programas de las fichas de la fase (RN-037) y siempre incluye los cargos
+ * de nivel Gestor, porque reciben los empalmes de su área (RN-056).
+ */
 class ActivacionCargoController extends Controller
 {
-    /**
-     * Muestra la interfaz de activación de cargos y gestión de fichas para la fase.
-     * Cumple con HU-018 y HU-019 (RF-001, RF-018, RN-037, RN-047, RN-048).
-     */
-    public function index(Request $request)
+    private const ORDEN_NIVEL = ['Gerente' => 1, 'Gestor' => 2, 'Lider' => 3, 'Equipo' => 4];
+
+    public function __construct(private FaseService $fases)
     {
-        // Bloque 1: Resolución de la fase formativa
-        $fase = $this->resolverFaseActiva($request->query('fase_id'));
-        $todasFases = Fase::orderByDesc('numero')->get();
-
-        // Bloque 2: Programas y fichas participantes
-        $fichasFase = $fase ? $fase->faseFichas : collect();
-        $programasFaseIds = $this->obtenerProgramasFaseIds($fase);
-        $cargosActivadosMap = $fase ? $fase->cargosActivados->keyBy('cargo_id') : collect();
-
-        // Bloque 3: Filtrado y mapeo de compatibilidad de cargos
-        $cargosBase = $this->filtrarCargos($request);
-        $cargos = $this->mapearCompatibilidadCargos($cargosBase, $programasFaseIds, $cargosActivadosMap, $request);
-
-        // Bloque 4: Métricas del módulo
-        $metricas = $this->calcularMetricasActivacion($cargosActivadosMap, $fase, $programasFaseIds);
-
-        // Bloque 5: Catálogos para modales de apoyo
-        $areas = Area::orderBy('nombre')->get();
-        $cursosDisponibles = $this->obtenerCursosDisponibles($fichasFase);
-        $programas = $this->obtenerProgramasFormacion();
-
-        return view('talentohumano::activacion.index', array_merge([
-            'fase' => $fase,
-            'todasFases' => $todasFases,
-            'fichasFase' => $fichasFase,
-            'programasFaseIds' => $programasFaseIds,
-            'areas' => $areas,
-            'cargos' => $cargos,
-            'cursosDisponibles' => $cursosDisponibles,
-            'programas' => $programas,
-        ], $metricas));
     }
 
-    /**
-     * Activa o desactiva un cargo en la fase (HU-019).
-     */
-    public function toggleCargo(Request $request)
+    public function edit(int $fase)
     {
-        $request->validate([
-            'fase_id' => 'required|exists:th_fases,id',
-            'cargo_id' => 'required|exists:th_cargos,id',
-            'numero_aprendices' => 'nullable|integer|min:1|max:99',
-        ]);
+        $fase = $this->fases->buscar($fase);
+        $fichas = $this->fases->fichasDeLaFase($fase->id);
 
-        $fase = Fase::findOrFail($request->fase_id);
-        $cargo = Cargo::findOrFail($request->cargo_id);
-        $personId = auth()->user()->person_id ?? 1;
-
-        // Bloque: Operación toggle
-        $resultado = $this->ejecutarToggleCargo($fase, $cargo, $request->numero_aprendices, $personId);
-        Auditoria::registrar($resultado['estado'] === 'activado' ? 'cargo_activado' : 'cargo_desactivado', $cargo, [],
-            ['cargo' => $cargo->nombre, 'fase' => $fase->nombre()]);
-
-        if ($request->wantsJson()) {
-            return response()->json(array_merge(['success' => true], $resultado));
+        // Escenario 11: sin fichas no hay propuesta
+        if ($fichas->isEmpty()) {
+            return view('talentohumano::fases.cargos', ['fase' => $fase, 'fichas' => $fichas]);
         }
 
-        return back()->with('success', $resultado['mensaje']);
-    }
+        $cargos = $this->cargosDelCatalogo();
+        $activados = DB::table('th_cargos_activados')->where('fase_id', $fase->id)->pluck('numero_aprendices', 'cargo_id');
+        $compatibles = DB::table('th_cargo_programas as cp')
+            ->join('programs as p', 'p.id', '=', 'cp.program_id')
+            ->whereIn('cp.program_id', $fichas->pluck('program_id')->unique())
+            ->select('cp.cargo_id', 'p.name')
+            ->get()
+            ->groupBy('cargo_id')
+            ->map(fn ($programas) => $programas->pluck('name')->unique()->values()->all());
 
-    /**
-     * Actualiza el número de cupos / aprendices de un cargo activado (HU-019).
-     */
-    public function updateCupos(Request $request)
-    {
-        $request->validate([
-            'fase_id' => 'required|exists:th_fases,id',
-            'cargo_id' => 'required|exists:th_cargos,id',
-            'numero_aprendices' => 'required|integer|min:1|max:99',
-        ]);
+        // Si la fase aún no tiene activación guardada, se marca la propuesta del sistema
+        $hayActivacion = $activados->isNotEmpty();
 
-        $fase = Fase::findOrFail($request->fase_id);
-        $cargo = Cargo::findOrFail($request->cargo_id);
-        $personId = auth()->user()->person_id ?? 1;
-        $cuposAnteriores = CargoActivado::where('fase_id', $fase->id)->where('cargo_id', $cargo->id)->value('numero_aprendices');
-
-        $activado = CargoActivado::updateOrCreate(
-            ['fase_id' => $fase->id, 'cargo_id' => $cargo->id],
-            [
-                'numero_aprendices' => $request->numero_aprendices,
-                'activado_por' => $personId,
-            ]
-        );
-
-        $mensaje = "Cupos actualizados para «{$cargo->nombre}»: {$activado->numero_aprendices} cupo(s).";
-        Auditoria::registrar('cupos_actualizados', $cargo, ['cupos' => $cuposAnteriores],
-            ['cupos' => $activado->numero_aprendices, 'cargo' => $cargo->nombre, 'fase' => $fase->nombre()]);
-
-        if ($request->wantsJson()) {
-            $totalCupos = CargoActivado::where('fase_id', $fase->id)->sum('numero_aprendices');
-            return response()->json([
-                'success' => true,
-                'mensaje' => $mensaje,
-                'numero_aprendices' => $activado->numero_aprendices,
-                'total_cupos' => $totalCupos,
-            ]);
-        }
-
-        return back()->with('success', $mensaje);
-    }
-
-    /**
-     * Activa todos los cargos de un área de manera masiva.
-     */
-    public function activarArea(Request $request)
-    {
-        $request->validate([
-            'fase_id' => 'required|exists:th_fases,id',
-            'area_id' => 'required|exists:th_areas,id',
-        ]);
-
-        $fase = Fase::findOrFail($request->fase_id);
-        $area = Area::findOrFail($request->area_id);
-        $personId = auth()->user()->person_id ?? 1;
-
-        $cargos = Cargo::where('area_id', $area->id)->where('estado', 'activo')->get();
-        $activados = 0;
-
-        foreach ($cargos as $cargo) {
-            CargoActivado::firstOrCreate(
-                ['fase_id' => $fase->id, 'cargo_id' => $cargo->id],
-                [
-                    'numero_aprendices' => $cargo->numero_aprendices ?: 1,
-                    'activado_por' => $personId,
-                ]
-            );
-            $activados++;
-        }
-
-        Auditoria::registrar('area_activada', $area, [], ['area' => $area->nombre, 'fase' => $fase->nombre(), 'cargos' => $activados]);
-
-        return back()->with('success', "Se activaron {$activados} cargos del área «{$area->nombre}».");
-    }
-
-    /**
-     * Agrega una ficha de formación a la fase participante (HU-018).
-     * Si la ficha no tenía programa y se proporciona, se lo asigna (HU-018).
-     */
-    public function agregarFicha(Request $request)
-    {
-        $request->validate([
-            'fase_id' => 'required|exists:th_fases,id',
-            'course_id' => 'required|exists:courses,id',
-            'program_id' => 'nullable|exists:programs,id',
-        ]);
-
-        $fase = Fase::findOrFail($request->fase_id);
-        $course = Course::findOrFail($request->course_id);
-        $personId = auth()->user()->person_id ?? 1;
-
-        $programaAnterior = $course->program_id;
-
-        // HU-018: Registrar manualmente el programa de la ficha si falta o se especifica
-        if ($request->filled('program_id') && ($course->program_id != $request->program_id)) {
-            $course->program_id = $request->program_id;
-            $course->save();
-        }
-
-        // Asociar la ficha a la fase
-        $faseFicha = FaseFicha::firstOrCreate(
-            ['fase_id' => $fase->id, 'course_id' => $course->id],
-            ['registrada_por' => $personId]
-        );
-        Auditoria::registrar('ficha_agregada', $faseFicha, $programaAnterior != $course->program_id ? ['programa_id' => $programaAnterior] : [],
-            ['ficha' => $course->code, 'fase' => $fase->nombre(), 'programa_id' => $course->program_id]);
-
-        return back()->with('success', "Ficha {$course->code} agregada a la {$fase->romano}.");
-    }
-
-    /**
-     * Elimina una ficha de la fase.
-     */
-    public function eliminarFicha(Request $request, $id)
-    {
-        $faseFicha = FaseFicha::findOrFail($id);
-        $codigo = $faseFicha->course->code ?? 'Ficha';
-        Auditoria::registrar('ficha_retirada', $faseFicha, ['ficha' => $codigo, 'fase' => optional(Fase::find($faseFicha->fase_id))->nombre()], []);
-        $faseFicha->delete();
-
-        return back()->with('success', "Ficha {$codigo} removida de la fase.");
-    }
-
-    /**
-     * Asigna manualmente el programa de formación a una ficha (HU-018 específico).
-     */
-    public function asignarPrograma(Request $request)
-    {
-        $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'program_id' => 'required|exists:programs,id',
-        ]);
-
-        $course = Course::findOrFail($request->course_id);
-        $program = Program::findOrFail($request->program_id);
-
-        $programaAnterior = Program::find($course->program_id)?->name;
-        $course->program_id = $program->id;
-        $course->save();
-        Auditoria::registrar('programa_asignado', $course, ['programa' => $programaAnterior], ['programa' => $program->name, 'ficha' => $course->code]);
-
-        $mensaje = "Programa «{$program->name}» asignado exitosamente a la ficha {$course->code}.";
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'mensaje' => $mensaje,
-                'program_name' => $program->name,
-            ]);
-        }
-
-        return back()->with('success', $mensaje);
-    }
-
-    // =========================================================================
-    // FUNCIONES DE APOYO Y MODULARIZACIÓN POR BLOQUES
-    // =========================================================================
-
-    /**
-     * Resuelve la fase activa por parámetro o la más reciente.
-     */
-    private function resolverFaseActiva(?int $faseId): ?Fase
-    {
-        if ($faseId) {
-            return Fase::with(['faseFichas.course.program', 'cargosActivados'])->findOrFail($faseId);
-        }
-
-        return Fase::with(['faseFichas.course.program', 'cargosActivados'])
-            ->whereIn('estado', ['planeacion', 'seleccion', 'en_curso'])
-            ->orderByDesc('numero')
-            ->first() ?? Fase::orderByDesc('numero')->first();
-    }
-
-    /**
-     * Obtiene los IDs de los programas asociados a las fichas de la fase.
-     */
-    private function obtenerProgramasFaseIds(?Fase $fase): array
-    {
-        if (!$fase) {
-            return [];
-        }
-
-        return $fase->faseFichas
-            ->pluck('course.program_id')
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-    }
-
-    /**
-     * Realiza la consulta inicial filtrada de cargos activos.
-     */
-    private function filtrarCargos(Request $request)
-    {
-        $query = Cargo::with(['area', 'cargoProgramas.program'])
-            ->where('estado', 'activo');
-
-        if ($buscar = $request->query('buscar')) {
-            $query->where(function ($q) use ($buscar) {
-                $q->where('nombre', 'like', "%{$buscar}%")
-                  ->orWhere('rol_principal', 'like', "%{$buscar}%")
-                  ->orWhere('requisitos', 'like', "%{$buscar}%");
-            });
-        }
-
-        if ($areaId = $request->query('area_id')) {
-            $query->where('area_id', $areaId);
-        }
-
-        if ($nivel = $request->query('nivel')) {
-            $query->where('nivel', $nivel);
-        }
-
-        return $query->orderBy('area_id')->orderBy('nivel')->orderBy('nombre')->get();
-    }
-
-    /**
-     * Mapea compatibilidad técnica y estado de activación en la fase.
-     */
-    private function mapearCompatibilidadCargos($cargos, array $programasFaseIds, $cargosActivadosMap, Request $request)
-    {
-        $cargos = $cargos->map(function ($cargo) use ($cargosActivadosMap, $programasFaseIds) {
-            $activado = $cargosActivadosMap->get($cargo->id);
-            $cargo->is_activado = (bool) $activado;
-            $cargo->cupos_activados = $activado ? $activado->numero_aprendices : $cargo->numero_aprendices;
-            $cargo->activado_registro = $activado;
-
-            $programasCargo = $cargo->cargoProgramas;
-            $programasCompatiblesPresentes = $programasCargo->filter(function ($cp) use ($programasFaseIds) {
-                return in_array($cp->program_id, $programasFaseIds);
-            });
-
-            $cargo->es_compatible = $programasCompatiblesPresentes->isNotEmpty();
-            $cargo->programas_compatibles_en_fase = $programasCompatiblesPresentes;
-            $cargo->total_programas_afines = $programasCargo->count();
+        $filas = $cargos->map(function ($cargo) use ($activados, $compatibles, $hayActivacion) {
+            $cargo->programas = $compatibles[$cargo->id] ?? [];
+            $cargo->propuesto = $cargo->programas || $cargo->nivel === 'Gestor';
+            $cargo->activo = $hayActivacion ? $activados->has($cargo->id) : $cargo->propuesto;
+            $cargo->numero = $activados[$cargo->id] ?? $cargo->numero_aprendices;
 
             return $cargo;
         });
 
-        // Filtro por estado de activación
-        if ($request->query('estado_activacion') === 'activados') {
-            $cargos = $cargos->where('is_activado', true)->values();
-        } elseif ($request->query('estado_activacion') === 'pendientes') {
-            $cargos = $cargos->where('is_activado', false)->values();
+        return view('talentohumano::fases.cargos', [
+            'fase' => $fase,
+            'fichas' => $fichas,
+            'propuesta' => $filas->filter(fn ($c) => $c->propuesto || $c->activo)->groupBy('area'),
+            'otros' => $filas->reject(fn ($c) => $c->propuesto || $c->activo)->values(),
+            'subordinados' => $this->subordinados($cargos),
+            'unidades' => DB::table('productive_units as u')
+                ->leftJoin('sectors as s', 's.id', '=', 'u.sector_id')
+                ->whereNull('u.deleted_at')
+                ->select('u.name', 's.name as sector')
+                ->orderBy('s.name')->orderBy('u.name')
+                ->get(),
+            'hayActivacion' => $hayActivacion,
+            'bloqueada' => $this->fases->convocatoriaPublicada($fase->id),
+        ]);
+    }
+
+    /**
+     * 'Confirmar activación' (escenarios 7, 8, 9, 12 y 13).
+     */
+    public function update(Request $request, int $fase)
+    {
+        $fase = $this->fases->buscar($fase);
+
+        if ($this->fases->convocatoriaPublicada($fase->id)) {
+            return back()->with('error', 'La convocatoria ya fue publicada; no se pueden modificar los cargos activados.');
         }
 
-        // Filtro por compatibilidad
-        if ($request->query('solo_compatibles') === '1') {
-            $cargos = $cargos->where('es_compatible', true)->values();
+        if ($this->fases->fichasDeLaFase($fase->id)->isEmpty()) {
+            return redirect()->route('talentohumano.fases.cargos.edit', $fase->id);
         }
 
-        return $cargos;
-    }
+        $catalogo = $this->cargosDelCatalogo()->keyBy('id');
+        $seleccion = collect($request->input('cargos', []))->filter(fn ($c) => !empty($c['activo']));
+        $errores = new MessageBag();
 
-    /**
-     * Calcula métricas globales de activación para el panel de cabecera.
-     */
-    private function calcularMetricasActivacion($cargosActivadosMap, ?Fase $fase, array $programasFaseIds): array
-    {
-        return [
-            'totalCargos' => Cargo::where('estado', 'activo')->count(),
-            'totalActivados' => $cargosActivadosMap->count(),
-            'totalCupos' => $cargosActivadosMap->sum('numero_aprendices'),
-            'totalFichas' => $fase ? $fase->faseFichas->count() : 0,
-            'totalProgramas' => count($programasFaseIds),
-        ];
-    }
-
-    /**
-     * Obtiene los cursos formativos disponibles para asociar.
-     */
-    private function obtenerCursosDisponibles($fichasFase)
-    {
-        $fichasExistentesIds = $fichasFase->pluck('course_id')->all();
-
-        return Course::with('program')
-            ->whereNotIn('id', $fichasExistentesIds)
-            ->orderByDesc('id')
-            ->limit(100)
-            ->get();
-    }
-
-    /**
-     * Obtiene los programas de formación para selección rápida.
-     */
-    private function obtenerProgramasFormacion()
-    {
-        return Program::orderBy('name')->get(['id', 'name', 'sofia_code']);
-    }
-
-    /**
-     * Ejecuta la activación o desactivación de un cargo.
-     */
-    private function ejecutarToggleCargo(Fase $fase, Cargo $cargo, ?int $numeroAprendices, int $personId): array
-    {
-        $activado = CargoActivado::where('fase_id', $fase->id)
-            ->where('cargo_id', $cargo->id)
-            ->first();
-
-        if ($activado) {
-            $activado->delete();
-            $estado = 'desactivado';
-            $mensaje = "El cargo «{$cargo->nombre}» fue desactivado de la {$fase->romano}.";
-        } else {
-            $cupos = $numeroAprendices ? (int) $numeroAprendices : ($cargo->numero_aprendices ?: 1);
-
-            CargoActivado::create([
-                'fase_id' => $fase->id,
-                'cargo_id' => $cargo->id,
-                'numero_aprendices' => $cupos,
-                'activado_por' => $personId,
-            ]);
-            $estado = 'activado';
-            $mensaje = "El cargo «{$cargo->nombre}» fue activado con {$cupos} cupo(s).";
+        if ($seleccion->isEmpty()) {
+            $errores->add('cargos', 'Active al menos un cargo para la fase.');
         }
 
-        $totalActivados = CargoActivado::where('fase_id', $fase->id)->count();
-        $totalCupos = CargoActivado::where('fase_id', $fase->id)->sum('numero_aprendices');
+        foreach ($seleccion as $cargoId => $datos) {
+            $cargo = $catalogo[$cargoId] ?? null;
+            $numero = trim((string) ($datos['numero'] ?? ''));
 
-        return [
-            'estado' => $estado,
-            'mensaje' => $mensaje,
-            'total_activados' => $totalActivados,
-            'total_cupos' => $totalCupos,
-        ];
+            if (!$cargo) {
+                $errores->add("cargos.$cargoId.activo", 'Uno de los cargos ya no está activo en el catálogo. Recargue la página.');
+            } elseif (!$cargo->area_id) {
+                $errores->add("cargos.$cargoId.activo", "{$cargo->nombre}: el cargo no tiene nivel jerárquico o área funcional definidos. Solicite al Administrador completarlos.");
+            } elseif ($numero === '') {
+                $errores->add("cargos.$cargoId.numero", "{$cargo->nombre}: indique el número de aprendices requeridos.");
+            } elseif (!ctype_digit($numero) || (int) $numero < 1) {
+                $errores->add("cargos.$cargoId.numero", "{$cargo->nombre}: el número de aprendices debe ser un entero mayor que cero.");
+            } elseif ((int) $numero > 255) {
+                $errores->add("cargos.$cargoId.numero", "{$cargo->nombre}: el número de aprendices no puede ser mayor que 255.");
+            }
+        }
+
+        if ($errores->isNotEmpty()) {
+            return back()->withErrors($errores)->withInput();
+        }
+
+        $actuales = DB::table('th_cargos_activados')->where('fase_id', $fase->id)->get()->keyBy('cargo_id');
+        $retirados = $actuales->keys()->diff($seleccion->keys());
+
+        DB::transaction(function () use ($fase, $seleccion, $actuales, $retirados) {
+            // Un cargo retirado sale también de la convocatoria en borrador (publicada ya no se llega hasta aquí)
+            $idsRetirados = $actuales->only($retirados->all())->pluck('id');
+            DB::table('th_convocatoria_cargos')->whereIn('cargo_activado_id', $idsRetirados)->delete();
+            DB::table('th_cargos_activados')->whereIn('id', $idsRetirados)->delete();
+
+            foreach ($seleccion as $cargoId => $datos) {
+                $numero = (int) $datos['numero'];
+
+                if ($actuales->has($cargoId)) {
+                    if ((int) $actuales[$cargoId]->numero_aprendices !== $numero) {
+                        DB::table('th_cargos_activados')->where('id', $actuales[$cargoId]->id)
+                            ->update(['numero_aprendices' => $numero, 'updated_at' => now()]);
+                    }
+                    continue;
+                }
+
+                DB::table('th_cargos_activados')->insert([
+                    'fase_id' => $fase->id,
+                    'cargo_id' => $cargoId,
+                    'numero_aprendices' => $numero,
+                    'activado_por' => auth()->user()->person_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
+        Auditoria::registrar('Confirmar activación de cargos', 'th_cargos_activados', $fase->id, [
+            'activados' => $seleccion->map(fn ($c) => (int) $c['numero'])->all(),
+            'retirados' => $retirados->values()->all(),
+        ]);
+
+        return redirect()->route('talentohumano.fases.cargos.edit', $fase->id)
+            ->with('success', 'Cargos activados correctamente: ' . $seleccion->count() . ' cargos y '
+                . $seleccion->sum(fn ($c) => (int) $c['numero']) . ' aprendices requeridos.');
+    }
+
+    /**
+     * Cargos activos del catálogo (los inactivos no se proponen ni se pueden agregar, escenario 10).
+     */
+    private function cargosDelCatalogo(): Collection
+    {
+        return DB::table('th_cargos as c')
+            ->leftJoin('th_areas as a', 'a.id', '=', 'c.area_id')
+            ->whereNull('c.deleted_at')
+            ->where('c.estado', 'activo')
+            ->select('c.id', 'c.nombre', 'c.nivel', 'c.area_id', 'c.numero_aprendices', 'c.cargo_superior_id', 'a.nombre as area')
+            ->get()
+            ->sortBy(fn ($c) => [$c->area ?? 'zzz', self::ORDEN_NIVEL[$c->nivel] ?? 9, $c->nombre])
+            ->values();
+    }
+
+    /**
+     * Para cada cargo de nivel Gestor, los cargos que dependen de él (directa o indirectamente).
+     * Se muestran en la advertencia al retirarlo: sus empalmes quedarían sin receptor (escenario 5).
+     */
+    private function subordinados(Collection $cargos): array
+    {
+        $hijos = $cargos->groupBy('cargo_superior_id');
+        $resultado = [];
+
+        foreach ($cargos->where('nivel', 'Gestor') as $gestor) {
+            $nombres = [];
+            $pendientes = [$gestor->id];
+
+            while ($pendientes) {
+                foreach ($hijos[array_pop($pendientes)] ?? [] as $hijo) {
+                    $nombres[] = $hijo->nombre;
+                    $pendientes[] = $hijo->id;
+                }
+            }
+
+            $resultado[$gestor->id] = $nombres;
+        }
+
+        return $resultado;
     }
 }

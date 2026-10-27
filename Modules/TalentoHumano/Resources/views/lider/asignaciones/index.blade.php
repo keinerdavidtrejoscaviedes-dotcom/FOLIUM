@@ -36,14 +36,9 @@
             <span class="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-2xl text-[#34D399] ring-1 ring-white/20"><i class="fas fa-flag-checkered" aria-hidden="true"></i></span>
             <h2 class="mt-5 text-xl font-extrabold sm:text-2xl">Puesta en marcha de FOLIUM</h2>
             <p class="mt-2 max-w-2xl text-emerald-50/85">
-                Aún no hay fases registradas. Registra la fase que ya está en curso en SENA Empresa; después podrás cargar las asignaciones
+                Aún no hay fases registradas. El Gestor de Talento Humano registra la fase desde «Fases»; después podrás cargar las asignaciones
                 de los aprendices que ya ocupan cargos, una por una o desde Excel.
             </p>
-            @if ($esAdministrador)
-                <button type="button" data-abrir="#modal-fase" class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#34D399] px-5 py-2.5 text-sm font-semibold text-[#043A2F] hover:bg-emerald-300">
-                    <i class="fas fa-plus" aria-hidden="true"></i> Registrar la fase en curso
-                </button>
-            @endif
         </div>
     @else
         {{-- Fase --}}
@@ -224,29 +219,4 @@
             </div>
         </form>
     </dialog>
-
-    {{-- Registrar la fase en curso (puesta en marcha) --}}
-    @if ($esAdministrador && !$fase)
-        <dialog id="modal-fase" aria-labelledby="titulo-fase" class="m-auto w-[min(94vw,30rem)] rounded-3xl p-0 shadow-2xl backdrop:bg-slate-900/50" @if ($errors->fase->any()) data-abrir-al-cargar @endif>
-            <form method="POST" action="{{ route('talentohumano.lider.asignaciones.fase') }}" class="p-6" novalidate>
-                @csrf
-                <h2 id="titulo-fase" class="text-lg font-bold text-slate-900">Registrar la fase en curso</h2>
-                <p class="text-sm text-slate-500">La fase que SENA Empresa tiene en marcha cuando empieza a usar FOLIUM.</p>
-                <div class="mt-5 grid gap-4 sm:grid-cols-3">
-                    @foreach (['numero' => ['Número', 'number'], 'fecha_inicio' => ['Inicio', 'date'], 'fecha_fin' => ['Fin', 'date']] as $nombreCampo => [$etiqueta, $tipo])
-                        <div>
-                            <label for="fase-{{ $nombreCampo }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ $etiqueta }} @if ($nombreCampo !== 'fecha_fin') <span class="text-red-500">*</span> @endif</label>
-                            <input id="fase-{{ $nombreCampo }}" name="{{ $nombreCampo }}" type="{{ $tipo }}" value="{{ old($nombreCampo) }}" @if ($tipo === 'number') min="1" @endif
-                                   class="{{ $campo }} w-full {{ $errors->fase->has($nombreCampo) ? 'border-red-400' : '' }}">
-                            @if ($errors->fase->has($nombreCampo)) <p class="mt-1 text-xs font-semibold text-red-600">{{ $errors->fase->first($nombreCampo) }}</p> @endif
-                        </div>
-                    @endforeach
-                </div>
-                <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
-                    <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Registrar fase</button>
-                </div>
-            </form>
-        </dialog>
-    @endif
 </x-talentohumano::layouts.lider>

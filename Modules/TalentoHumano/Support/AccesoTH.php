@@ -13,17 +13,26 @@ class AccesoTH
 {
     /**
      * Matriz de permisos por sección del proceso (SRS 2.5, HU-002 esc. 4): roles talentohumano.* (sin el prefijo)
-     * y designaciones vigentes que pueden entrar. El Administrador entra a todas.
+     * y designaciones vigentes que pueden entrar. El Administrador entra a todas, salvo las indicadas abajo.
      */
     public const PERMISOS = [
-        'activacion' => ['gestor', 'instructor_th', 'lider_estrategia'],
+        'activacion' => ['gestor'],
         'postulaciones' => ['gestor', 'instructor_th', 'lider_estrategia'],
+        'pruebas' => ['psicologo', 'gestor'],
+        'formato' => ['psicologo'],
+        'formato_tecnico' => ['instructor', 'instructor_th', 'instructor_tecnico', 'lider_estrategia'],
         'entrevistas' => ['gestor', 'psicologo', 'instructor_th', 'instructor_tecnico', 'lider_estrategia'],
         'seleccion' => ['instructor_th', 'lider_estrategia'],
         'reubicaciones' => ['lider_estrategia'],
         'empalmes' => ['gestor', 'instructor_th'],
         'catalogo' => ['gestor', 'instructor', 'psicologo', 'aprendiz', 'instructor_th', 'instructor_tecnico', 'lider_estrategia'],
     ];
+
+    /** Secciones que el Administrador solo supervisa: puede consultarlas, pero no registrar ni cambiar nada. */
+    public const SOLO_SUPERVISION = ['activacion'];
+
+    /** Formatos de entrevista propios de cada evaluador (psicólogo e instructores): el Administrador no tiene uno. */
+    public const PROPIAS_DEL_EVALUADOR = ['formato', 'formato_tecnico'];
 
     /**
      * Administrador de FOLIUM: superadmin del ERP o rol talentohumano.admin.
@@ -89,10 +98,22 @@ class AccesoTH
     public static function puede(User $user, string $seccion): bool
     {
         if (self::esAdministrador($user)) {
-            return true;
+            return !in_array($seccion, self::PROPIAS_DEL_EVALUADOR);
         }
 
         return $user->person_id && array_intersect(self::funciones($user), self::PERMISOS[$seccion] ?? []);
+    }
+
+    /**
+     * ¿Puede registrar o cambiar datos en la sección? El Administrador solo consulta las secciones de SOLO_SUPERVISION.
+     */
+    public static function puedeModificar(User $user, string $seccion): bool
+    {
+        if (self::esAdministrador($user) && in_array($seccion, self::SOLO_SUPERVISION)) {
+            return false;
+        }
+
+        return self::puede($user, $seccion);
     }
 
     /**

@@ -13,10 +13,11 @@ class TalentoHumanoController extends Controller
      * sus rutas); las demás, según los roles (sufijo del slug talentohumano.*).
      */
     private const SECCIONES = [
-        ['icono' => 'fa-layer-group', 'titulo' => 'Fichas y cargos de la fase', 'texto' => 'Registra las fichas que ingresan y activa los cargos de la fase.', 'roles' => ['gestor'], 'ruta' => 'talentohumano.activacion.index', 'seccion' => 'activacion'],
-        ['icono' => 'fa-bullhorn', 'titulo' => 'Convocatoria y cronograma', 'texto' => 'Elabora el cronograma y publica la convocatoria.', 'roles' => ['gestor']],
+        ['icono' => 'fa-calendar-days', 'titulo' => 'Fases', 'texto' => 'Registra la fase, elige las fichas participantes, activa los cargos y elabora el cronograma.', 'roles' => ['gestor'], 'ruta' => 'talentohumano.fases.index', 'seccion' => 'activacion'],
+        ['icono' => 'fa-bullhorn', 'titulo' => 'Convocatoria y cronograma', 'texto' => 'Define las fechas de cada etapa y publica la convocatoria, desde la página de cada fase.', 'roles' => ['gestor'], 'ruta' => 'talentohumano.fases.index', 'seccion' => 'activacion'],
         ['icono' => 'fa-file-signature', 'titulo' => 'Postulaciones', 'texto' => 'Revisa a los aspirantes y analiza sus hojas de vida.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.postulaciones.index', 'seccion' => 'postulaciones'],
-        ['icono' => 'fa-brain', 'titulo' => 'Prueba psicotécnica', 'texto' => 'Administra el cuestionario y consulta los resultados.', 'roles' => ['psicologo']],
+        ['icono' => 'fa-brain', 'titulo' => 'Prueba psicotécnica', 'texto' => 'Diseña las pruebas que presentan los postulantes, con sus preguntas y puntajes.', 'roles' => ['psicologo', 'gestor'], 'ruta' => 'talentohumano.pruebas.index', 'seccion' => 'pruebas'],
+        ['icono' => 'fa-list-check', 'titulo' => 'Mi formato de entrevista psicológica', 'texto' => 'Tus preguntas de la entrevista psicológica con su puntaje, para calificar a los aspirantes.', 'roles' => ['psicologo'], 'ruta' => 'talentohumano.formato.edit', 'seccion' => 'formato'],
         ['icono' => 'fa-comments', 'titulo' => 'Entrevistas', 'texto' => 'Programa entrevistas, asigna evaluadores y registra calificaciones.', 'roles' => ['instructor', 'psicologo', 'gestor'], 'ruta' => 'talentohumano.entrevistas.index', 'seccion' => 'entrevistas'],
         ['icono' => 'fa-user-check', 'titulo' => 'Selección y actas', 'texto' => 'Valida a los seleccionados, haz reubicaciones y genera el acta.', 'roles' => ['instructor'], 'ruta' => 'talentohumano.seleccion.index', 'seccion' => 'seleccion'],
         ['icono' => 'fa-handshake', 'titulo' => 'Empalmes', 'texto' => 'Acta de recibimiento, inventario del cargo y firmas digitales.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.empalmes.index', 'seccion' => 'empalmes'],
