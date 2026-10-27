@@ -9,17 +9,18 @@ use Modules\TalentoHumano\Support\AccesoTH;
 class TalentoHumanoController extends Controller
 {
     /**
-     * Secciones del módulo y los roles (sufijo del slug talentohumano.*) que las usan.
+     * Secciones del módulo. Las que tienen 'seccion' se muestran según la matriz AccesoTH::PERMISOS (la misma que protege
+     * sus rutas); las demás, según los roles (sufijo del slug talentohumano.*).
      */
     private const SECCIONES = [
-        ['icono' => 'fa-layer-group', 'titulo' => 'Fichas y cargos de la fase', 'texto' => 'Registra las fichas que ingresan y activa los cargos de la fase.', 'roles' => ['gestor']],
+        ['icono' => 'fa-layer-group', 'titulo' => 'Fichas y cargos de la fase', 'texto' => 'Registra las fichas que ingresan y activa los cargos de la fase.', 'roles' => ['gestor'], 'ruta' => 'talentohumano.activacion.index', 'seccion' => 'activacion'],
         ['icono' => 'fa-bullhorn', 'titulo' => 'Convocatoria y cronograma', 'texto' => 'Elabora el cronograma y publica la convocatoria.', 'roles' => ['gestor']],
-        ['icono' => 'fa-file-signature', 'titulo' => 'Postulaciones', 'texto' => 'Revisa a los aspirantes y analiza sus hojas de vida.', 'roles' => ['instructor', 'gestor']],
+        ['icono' => 'fa-file-signature', 'titulo' => 'Postulaciones', 'texto' => 'Revisa a los aspirantes y analiza sus hojas de vida.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.postulaciones.index', 'seccion' => 'postulaciones'],
         ['icono' => 'fa-brain', 'titulo' => 'Prueba psicotécnica', 'texto' => 'Administra el cuestionario y consulta los resultados.', 'roles' => ['psicologo']],
-        ['icono' => 'fa-comments', 'titulo' => 'Entrevistas', 'texto' => 'Programa entrevistas, asigna evaluadores y registra calificaciones.', 'roles' => ['instructor', 'psicologo', 'gestor']],
-        ['icono' => 'fa-user-check', 'titulo' => 'Selección y actas', 'texto' => 'Valida a los seleccionados, haz reubicaciones y genera el acta.', 'roles' => ['instructor']],
-        ['icono' => 'fa-handshake', 'titulo' => 'Empalmes', 'texto' => 'Acta de recibimiento, inventario del cargo y firmas digitales.', 'roles' => ['instructor', 'gestor']],
-        ['icono' => 'fa-book-open', 'titulo' => 'Catálogo de cargos', 'texto' => 'Rol, actividades, responsabilidades y requisitos de cada cargo.', 'roles' => ['instructor', 'psicologo', 'gestor', 'aprendiz']],
+        ['icono' => 'fa-comments', 'titulo' => 'Entrevistas', 'texto' => 'Programa entrevistas, asigna evaluadores y registra calificaciones.', 'roles' => ['instructor', 'psicologo', 'gestor'], 'ruta' => 'talentohumano.entrevistas.index', 'seccion' => 'entrevistas'],
+        ['icono' => 'fa-user-check', 'titulo' => 'Selección y actas', 'texto' => 'Valida a los seleccionados, haz reubicaciones y genera el acta.', 'roles' => ['instructor'], 'ruta' => 'talentohumano.seleccion.index', 'seccion' => 'seleccion'],
+        ['icono' => 'fa-handshake', 'titulo' => 'Empalmes', 'texto' => 'Acta de recibimiento, inventario del cargo y firmas digitales.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.empalmes.index', 'seccion' => 'empalmes'],
+        ['icono' => 'fa-book-open', 'titulo' => 'Catálogo de cargos', 'texto' => 'Rol, actividades, responsabilidades y requisitos de cada cargo.', 'roles' => ['instructor', 'psicologo', 'gestor', 'aprendiz'], 'ruta' => 'talentohumano.catalogo.index', 'seccion' => 'catalogo'],
         ['icono' => 'fa-id-card', 'titulo' => 'Mi postulación', 'texto' => 'Postúlate a los cargos por prioridad y sigue el estado de tu proceso.', 'roles' => ['aprendiz']],
         ['icono' => 'fa-clipboard-check', 'titulo' => 'Mi prueba psicotécnica', 'texto' => 'Presenta la prueba cuando esté habilitada en el cronograma.', 'roles' => ['aprendiz']],
         ['icono' => 'fa-signature', 'titulo' => 'Mi empalme', 'texto' => 'Recibe tu cargo, revisa el inventario y firma el acta.', 'roles' => ['aprendiz']],
@@ -48,13 +49,41 @@ class TalentoHumanoController extends Controller
         $roles = $user->roles->filter(fn ($role) => Str::startsWith($role->slug, 'talentohumano.'))->values();
         $tipos = $roles->map(fn ($role) => Str::after($role->slug, 'talentohumano.'))->all();
 
+        $esInstructor = in_array('instructor', $tipos);
+
+        // Cargar designaciones del usuario (RF-016)
+        $designaciones = $user->person_id
+            ? \Modules\TalentoHumano\Entities\Designacion::where('person_id', $user->person_id)
+                ->whereNull('fecha_retiro')
+                ->with('program')
+                ->get()
+            : collect();
+
+        $designacionesNombres = $designaciones->map(function ($d) {
+            return match ($d->tipo) {
+                'instructor_th' => 'Instructor de Talento Humano',
+                'lider_estrategia' => 'Líder de la estrategia',
+                'instructor_tecnico' => 'Instructor técnico' . ($d->program ? " · {$d->program->name}" : ''),
+                default => 'Instructor',
+            };
+        });
+
+        // Fase activa para contexto del dashboard
+        $faseActiva = \Modules\TalentoHumano\Entities\Fase::whereIn('estado', ['planeacion', 'seleccion', 'en_curso'])
+            ->orderByDesc('numero')
+            ->first();
+
+        // Secciones por defecto
         $secciones = collect(self::SECCIONES)
-            ->filter(fn ($seccion) => array_intersect($seccion['roles'], $tipos))
+            ->filter(fn ($seccion) => isset($seccion['seccion']) ? AccesoTH::puede($user, $seccion['seccion']) : array_intersect($seccion['roles'], $tipos))
             ->values();
 
         return view('talentohumano::panel', [
             'user' => $user,
             'roles' => $roles->pluck('name'),
+            'designaciones' => $designacionesNombres,
+            'esInstructor' => $esInstructor,
+            'faseActiva' => $faseActiva,
             'secciones' => $secciones,
         ]);
     }

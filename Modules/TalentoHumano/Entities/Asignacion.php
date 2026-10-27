@@ -56,4 +56,11 @@ class Asignacion extends Model
     {
         return $this->cargo?->nombre === self::CARGO_GESTOR_TH;
     }
+
+    // Nombres que usa el código del proceso del Gestor (rama Maicol)
+
+    public function person()
+    {
+        return $this->persona();
+    }
 }

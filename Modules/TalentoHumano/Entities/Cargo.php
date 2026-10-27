@@ -80,4 +80,26 @@ class Cargo extends Model
             || DB::table('th_asignaciones')->where('cargo_id', $this->id)->exists()
             || DB::table('th_empalmes')->where('cargo_id', $this->id)->orWhere('cargo_receptor_id', $this->id)->exists();
     }
+
+    // Nombres que usa el código del proceso del Gestor (rama Maicol)
+
+    public function cargoSuperior()
+    {
+        return $this->superior();
+    }
+
+    public function programs()
+    {
+        return $this->programas();
+    }
+
+    public function cargoProgramas()
+    {
+        return $this->hasMany(CargoPrograma::class, 'cargo_id');
+    }
+
+    public function cargosActivados()
+    {
+        return $this->hasMany(CargoActivado::class, 'cargo_id');
+    }
 }

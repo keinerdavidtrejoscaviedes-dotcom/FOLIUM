@@ -1,15 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\TalentoHumano\Http\Controllers\ActivacionCargoController;
 use Modules\TalentoHumano\Http\Controllers\AlertasController;
 use Modules\TalentoHumano\Http\Controllers\AsignacionesController;
 use Modules\TalentoHumano\Http\Controllers\AuditoriaController;
+use Modules\TalentoHumano\Http\Controllers\CatalogoCargoController;
 use Modules\TalentoHumano\Http\Controllers\CatalogoCargosController;
 use Modules\TalentoHumano\Http\Controllers\DesignacionesController;
+use Modules\TalentoHumano\Http\Controllers\EmpalmeController;
+use Modules\TalentoHumano\Http\Controllers\EntrevistaController;
 use Modules\TalentoHumano\Http\Controllers\InstructorLiderController;
 use Modules\TalentoHumano\Http\Controllers\PlantillasActaController;
+use Modules\TalentoHumano\Http\Controllers\PostulacionController;
+use Modules\TalentoHumano\Http\Controllers\SeleccionActasController;
 use Modules\TalentoHumano\Http\Controllers\TalentoHumanoController;
 use Modules\TalentoHumano\Http\Middleware\AdministradorTH;
+use Modules\TalentoHumano\Http\Middleware\PermisoTH;
 use Modules\TalentoHumano\Http\Middleware\SubmoduloLider;
 
 /*
@@ -114,5 +121,68 @@ Route::prefix('talento-humano')
                     ->whereIn('seccion', InstructorLiderController::enConstruccion())
                     ->name('seccion');
             });
+
+            // Proceso de Talento Humano (rama Maicol). Cada sección valida su permiso con la matriz AccesoTH::PERMISOS (HU-002, esc. 4)
+
+            // Activación de cargos y fichas (HU-017 a HU-019)
+            Route::prefix('activacion-cargos')->name('activacion.')->controller(ActivacionCargoController::class)
+                ->middleware(PermisoTH::class . ':activacion')->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::post('/toggle', 'toggleCargo')->name('toggle');
+                    Route::post('/cupos', 'updateCupos')->name('cupos');
+                    Route::post('/area', 'activarArea')->name('area');
+                    Route::post('/fichas/agregar', 'agregarFicha')->name('fichas.agregar');
+                    Route::delete('/fichas/{id}', 'eliminarFicha')->name('fichas.eliminar');
+                    Route::post('/fichas/asignar-programa', 'asignarPrograma')->name('fichas.asignar-programa');
+                });
+
+            // Postulaciones y análisis de hojas de vida (HU-024 · Mockup INS-05)
+            Route::prefix('postulaciones')->name('postulaciones.')->controller(PostulacionController::class)
+                ->middleware(PermisoTH::class . ':postulaciones')->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/{id}', 'show')->name('show');
+                    Route::post('/{id}/analisis', 'guardarAnalisis')->name('analisis');
+                });
+
+            // Entrevistas, formato y calificaciones (HU-040 a HU-043 · Mockups INS-07, INS-08)
+            Route::prefix('entrevistas')->name('entrevistas.')->controller(EntrevistaController::class)
+                ->middleware(PermisoTH::class . ':entrevistas')->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/formato', 'formato')->name('formato');
+                    Route::post('/formato', 'guardarFormato')->name('formato.guardar');
+                    Route::get('/{entrevista}/calificar/{postulacion}', 'calificar')->name('calificar');
+                    Route::post('/{entrevista}/calificar/{postulacion}', 'guardarCalificacion')->name('calificar.guardar');
+                });
+
+            // Selección y actas (HU-035, HU-036, HU-038 · Mockups INS-01, INS-03, INS-04)
+            Route::prefix('seleccion')->name('seleccion.')->controller(SeleccionActasController::class)->group(function () {
+                Route::middleware(PermisoTH::class . ':seleccion')->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/validar/{id}', 'validarCargo')->name('validar');
+                    Route::post('/validar/{id}', 'guardarValidacion')->name('validar.guardar');
+                });
+                Route::middleware(PermisoTH::class . ':reubicaciones')->group(function () {
+                    Route::get('/reubicaciones', 'reubicaciones')->name('reubicaciones');
+                    Route::post('/reubicaciones', 'guardarReubicacion')->name('reubicaciones.guardar');
+                });
+            });
+
+            // Empalmes: acta de recibimiento, inventario y firmas (RF-013)
+            Route::prefix('empalmes')->name('empalmes.')->controller(EmpalmeController::class)
+                ->middleware(PermisoTH::class . ':empalmes')->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/{id}', 'show')->name('show');
+                    Route::post('/{id}/item/{itemId}/toggle', 'toggleItem')->name('items.toggle');
+                    Route::post('/{id}/items', 'agregarItem')->name('items.agregar');
+                    Route::post('/{id}/firmar', 'firmarActa')->name('firmar');
+                    Route::post('/{id}/visto-bueno', 'vistoBueno')->name('visto-bueno');
+                });
+
+            // Catálogo de cargos, consulta (RF-019)
+            Route::prefix('catalogo')->name('catalogo.')->controller(CatalogoCargoController::class)
+                ->middleware(PermisoTH::class . ':catalogo')->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/{id}', 'show')->name('show');
+                });
         });
     });

@@ -61,13 +61,18 @@ class AuditoriaController extends Controller
 
     private function consulta(Request $request)
     {
-        $tipos = DescripcionAuditoria::SECCIONES[$request->query('seccion')][1] ?? null;
+        $seccion = $request->query('seccion');
+        $tipos = DescripcionAuditoria::SECCIONES[$seccion][1] ?? null;
+        $eventosPropios = DescripcionAuditoria::EVENTOS_DE_SECCION[$seccion] ?? [];
+        $eventosAjenos = collect(DescripcionAuditoria::EVENTOS_DE_SECCION)->except($seccion)->flatten()->all();
 
         return DB::table('audits')
             ->leftJoin('users', 'users.id', '=', 'audits.user_id')
             ->leftJoin('people', 'people.id', '=', 'users.person_id')
             ->where('audits.tags', 'like', Auditoria::ETIQUETA . '%')
-            ->when($tipos, fn ($q) => $q->whereIn('audits.auditable_type', $tipos))
+            ->when($tipos, fn ($q) => $q->where(fn ($w) => $w
+                ->where(fn ($t) => $t->whereIn('audits.auditable_type', $tipos)->whereNotIn('audits.event', $eventosAjenos))
+                ->orWhereIn('audits.event', $eventosPropios)))
             ->when(isset(self::ORIGENES[$request->query('origen')]), fn ($q) => $q->where('audits.tags', 'like', Auditoria::ETIQUETA . '|' . $request->query('origen') . '|%'))
             ->when($request->query('desde'), fn ($q, $fecha) => $q->whereDate('audits.created_at', '>=', $fecha))
             ->when($request->query('hasta'), fn ($q, $fecha) => $q->whereDate('audits.created_at', '<=', $fecha))

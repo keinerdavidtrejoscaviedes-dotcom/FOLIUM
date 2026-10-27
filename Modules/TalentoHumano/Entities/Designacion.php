@@ -116,4 +116,16 @@ class Designacion extends Model
 
         return collect($pendientes)->filter()->map(fn ($cantidad, $texto) => ['texto' => $texto, 'cantidad' => $cantidad])->values()->all();
     }
+
+    // Nombres que usa el código del proceso del Gestor (rama Maicol)
+
+    public function person()
+    {
+        return $this->persona();
+    }
+
+    public function program()
+    {
+        return $this->programa();
+    }
 }

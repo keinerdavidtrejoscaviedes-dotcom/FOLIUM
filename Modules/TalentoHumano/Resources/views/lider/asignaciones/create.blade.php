@@ -84,7 +84,7 @@
                                 </div>
                                 <div>
                                     <label for="fecha_inicio" class="mb-1 block text-sm font-semibold text-slate-700">Fecha de inicio <span class="text-red-500">*</span></label>
-                                    <input id="fecha_inicio" name="fecha_inicio" type="date" value="{{ old('fecha_inicio', $fase->fecha_inicio) }}" class="{{ $campo }} {{ $borde('fecha_inicio') }}">
+                                    <input id="fecha_inicio" name="fecha_inicio" type="date" value="{{ old('fecha_inicio', $fase->fecha_inicio?->format('Y-m-d')) }}" class="{{ $campo }} {{ $borde('fecha_inicio') }}">
                                     @error('fecha_inicio') <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p> @enderror
                                 </div>
                                 <div class="sm:col-span-2">

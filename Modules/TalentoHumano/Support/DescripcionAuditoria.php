@@ -5,11 +5,22 @@ namespace Modules\TalentoHumano\Support;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Modules\SICA\Entities\Course;
+use Modules\TalentoHumano\Entities\Acta;
+use Modules\TalentoHumano\Entities\AnalisisHv;
+use Modules\TalentoHumano\Entities\Area;
 use Modules\TalentoHumano\Entities\Asignacion;
+use Modules\TalentoHumano\Entities\Calificacion;
 use Modules\TalentoHumano\Entities\CargaInicial;
 use Modules\TalentoHumano\Entities\Cargo;
+use Modules\TalentoHumano\Entities\CargoActivado;
+use Modules\TalentoHumano\Entities\ConvocatoriaCargo;
+use Modules\TalentoHumano\Entities\Cuestionario;
 use Modules\TalentoHumano\Entities\Designacion;
+use Modules\TalentoHumano\Entities\Empalme;
 use Modules\TalentoHumano\Entities\Fase;
+use Modules\TalentoHumano\Entities\FaseFicha;
+use Modules\TalentoHumano\Entities\InventarioEmpalme;
 use Modules\TalentoHumano\Entities\PlantillaActa;
 
 /**
@@ -23,7 +34,16 @@ class DescripcionAuditoria
         'designaciones' => ['Designaciones', [Designacion::class]],
         'asignaciones' => ['Asignaciones', [Asignacion::class, CargaInicial::class, Fase::class]],
         'plantillas' => ['Plantillas de acta', [PlantillaActa::class]],
+        'activacion' => ['Activación de cargos', [CargoActivado::class, FaseFicha::class, Area::class, Course::class]],
+        'evaluacion' => ['Postulaciones y entrevistas', [AnalisisHv::class, Cuestionario::class, Calificacion::class]],
+        'seleccion' => ['Selección', [ConvocatoriaCargo::class]],
+        'empalmes' => ['Empalmes', [Empalme::class, Acta::class, InventarioEmpalme::class]],
         'accesos' => ['Intentos sin permiso', [Auditoria::ACCESO]],
+    ];
+
+    /** Acciones que se registran sobre un cargo pero pertenecen a otra sección. */
+    public const EVENTOS_DE_SECCION = [
+        'activacion' => ['cargo_activado', 'cargo_desactivado', 'cupos_actualizados'],
     ];
 
     private const ETIQUETAS = [
@@ -79,6 +99,22 @@ class DescripcionAuditoria
             'rol_gestor_otorgado' => "Otorgó el rol Gestor de Talento Humano a {$nombre()}",
             'rol_gestor_retirado' => "Retiró el rol Gestor de Talento Humano a {$nombre()}",
             'carga_masiva' => "Carga masiva de asignaciones iniciales ({$nuevo('creadas')} creadas, {$nuevo('con_error')} rechazadas)",
+            'cargo_activado' => "Activó el cargo «{$nuevo('cargo')}» en la {$nuevo('fase')}",
+            'cargo_desactivado' => "Desactivó el cargo «{$nuevo('cargo')}» en la {$nuevo('fase')}",
+            'cupos_actualizados' => "Cambió los cupos del cargo «{$nuevo('cargo')}» a {$nuevo('cupos')}",
+            'area_activada' => "Activó los {$nuevo('cargos')} cargos del área {$nuevo('area')} en la {$nuevo('fase')}",
+            'ficha_agregada' => "Agregó la ficha {$nuevo('ficha')} a la {$nuevo('fase')}",
+            'ficha_retirada' => "Retiró la ficha {$anterior('ficha')} de la {$anterior('fase')}",
+            'programa_asignado' => "Asignó el programa {$nuevo('programa')} a la ficha {$nuevo('ficha')}",
+            'analisis_hv_guardado' => "Analizó la hoja de vida de {$nuevo('aspirante')}",
+            'formato_entrevista_guardado' => "Guardó su formato de entrevista ({$nuevo('preguntas')} preguntas)",
+            'calificacion_registrada' => "Calificó una entrevista ({$nuevo('puntaje')} puntos, " . str_replace('_', ' ', $nuevo('concepto')) . ')',
+            'seleccion_validada' => "Validó la selección del cargo «{$nuevo('cargo')}»",
+            'seleccion_ajustada' => "Ajustó la selección del cargo «{$nuevo('cargo')}»",
+            'inventario_agregado' => "Agregó «{$nuevo('item')}» al inventario de un empalme",
+            'inventario_verificado' => "Verificó «{$nuevo('item')}» en el inventario de un empalme",
+            'acta_firmada' => "Firmó el acta de recibimiento del cargo «{$nuevo('cargo')}»",
+            'visto_bueno_empalme' => "Dio el visto bueno al empalme del cargo «{$nuevo('cargo')}»",
             'acceso_denegado' => 'Intentó una acción sin permiso',
             default => Str::ucfirst(str_replace('_', ' ', $registro->event)),
         };
@@ -86,6 +122,11 @@ class DescripcionAuditoria
 
     public function seccion(object $registro): string
     {
+        foreach (self::EVENTOS_DE_SECCION as $clave => $eventos) {
+            if (in_array($registro->event, $eventos)) {
+                return self::SECCIONES[$clave][0];
+            }
+        }
         foreach (self::SECCIONES as [$titulo, $tipos]) {
             if (in_array($registro->auditable_type, $tipos)) {
                 return $titulo;

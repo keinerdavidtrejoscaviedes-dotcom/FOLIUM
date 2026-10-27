@@ -12,6 +12,20 @@ use Illuminate\Support\Facades\DB;
 class AccesoTH
 {
     /**
+     * Matriz de permisos por sección del proceso (SRS 2.5, HU-002 esc. 4): roles talentohumano.* (sin el prefijo)
+     * y designaciones vigentes que pueden entrar. El Administrador entra a todas.
+     */
+    public const PERMISOS = [
+        'activacion' => ['gestor', 'instructor_th', 'lider_estrategia'],
+        'postulaciones' => ['gestor', 'instructor_th', 'lider_estrategia'],
+        'entrevistas' => ['gestor', 'psicologo', 'instructor_th', 'instructor_tecnico', 'lider_estrategia'],
+        'seleccion' => ['instructor_th', 'lider_estrategia'],
+        'reubicaciones' => ['lider_estrategia'],
+        'empalmes' => ['gestor', 'instructor_th'],
+        'catalogo' => ['gestor', 'instructor', 'psicologo', 'aprendiz', 'instructor_th', 'instructor_tecnico', 'lider_estrategia'],
+    ];
+
+    /**
      * Administrador de FOLIUM: superadmin del ERP o rol talentohumano.admin.
      */
     public static function esAdministrador(User $user): bool
@@ -55,5 +69,37 @@ class AccesoTH
     public static function correosAdministradores(): Collection
     {
         return User::whereHas('roles', fn ($q) => $q->where('slug', 'talentohumano.admin'))->pluck('email')->filter()->unique()->values();
+    }
+
+    /**
+     * Roles de Talento Humano (sin el prefijo talentohumano.) y designaciones vigentes del usuario.
+     */
+    public static function funciones(User $user): array
+    {
+        $roles = $user->roles->pluck('slug')
+            ->filter(fn ($slug) => str_starts_with($slug, 'talentohumano.'))
+            ->map(fn ($slug) => substr($slug, strlen('talentohumano.')));
+
+        return $roles->merge(self::designaciones($user))->unique()->values()->all();
+    }
+
+    /**
+     * ¿El usuario puede entrar a esta sección del proceso? Negar por defecto: sin persona asociada, nadie más que el Administrador.
+     */
+    public static function puede(User $user, string $seccion): bool
+    {
+        if (self::esAdministrador($user)) {
+            return true;
+        }
+
+        return $user->person_id && array_intersect(self::funciones($user), self::PERMISOS[$seccion] ?? []);
+    }
+
+    /**
+     * Designación con la que el usuario valida una selección (th_selecciones.validada_con; RN-021, RN-036).
+     */
+    public static function designacionValidadora(User $user): string
+    {
+        return in_array('instructor_th', self::designaciones($user)) ? 'instructor_th' : 'lider_estrategia';
     }
 }

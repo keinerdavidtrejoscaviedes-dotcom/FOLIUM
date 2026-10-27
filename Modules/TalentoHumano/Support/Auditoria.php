@@ -46,6 +46,8 @@ class Auditoria
             !$usuario => ['Sistema', 'Sistema'],
             AccesoTH::esAdministrador($usuario) => ['Rol', 'Administrador'],
             AccesoTH::esLiderEstrategia($usuario) => ['Designación', 'Líder de la estrategia'],
+            in_array('instructor_th', AccesoTH::designaciones($usuario)) => ['Designación', 'Instructor de Talento Humano'],
+            in_array('instructor_tecnico', AccesoTH::designaciones($usuario)) => ['Designación', 'Instructor técnico'],
             default => ['Rol', $usuario->roles->first(fn ($r) => Str::startsWith($r->slug, 'talentohumano.'))?->name ?? 'Sin permisos en FOLIUM'],
         };
     }
