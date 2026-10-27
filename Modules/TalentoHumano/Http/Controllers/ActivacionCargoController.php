@@ -113,25 +113,18 @@ class ActivacionCargoController extends Controller
             }
         }
 
-        $actuales = DB::table('th_cargos_activados')->where('fase_id', $fase->id)->get()->keyBy('cargo_id');
-        $retirados = $actuales->keys()->diff($seleccion->keys());
-
-        // Un cargo que ya está en la convocatoria (en borrador) no se puede retirar desde aquí
-        $enConvocatoria = DB::table('th_convocatoria_cargos as cc')
-            ->join('th_cargos_activados as ca', 'ca.id', '=', 'cc.cargo_activado_id')
-            ->where('ca.fase_id', $fase->id)
-            ->whereIn('ca.cargo_id', $retirados)
-            ->pluck('ca.cargo_id');
-        foreach ($enConvocatoria as $cargoId) {
-            $errores->add("cargos.$cargoId.activo", ($catalogo[$cargoId]->nombre ?? 'Un cargo') . ': ya está en la convocatoria; retírelo primero de la convocatoria.');
-        }
-
         if ($errores->isNotEmpty()) {
             return back()->withErrors($errores)->withInput();
         }
 
+        $actuales = DB::table('th_cargos_activados')->where('fase_id', $fase->id)->get()->keyBy('cargo_id');
+        $retirados = $actuales->keys()->diff($seleccion->keys());
+
         DB::transaction(function () use ($fase, $seleccion, $actuales, $retirados) {
-            DB::table('th_cargos_activados')->where('fase_id', $fase->id)->whereIn('cargo_id', $retirados)->delete();
+            // Un cargo retirado sale también de la convocatoria en borrador (publicada ya no se llega hasta aquí)
+            $idsRetirados = $actuales->only($retirados->all())->pluck('id');
+            DB::table('th_convocatoria_cargos')->whereIn('cargo_activado_id', $idsRetirados)->delete();
+            DB::table('th_cargos_activados')->whereIn('id', $idsRetirados)->delete();
 
             foreach ($seleccion as $cargoId => $datos) {
                 $numero = (int) $datos['numero'];

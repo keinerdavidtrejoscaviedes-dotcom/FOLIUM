@@ -1,5 +1,6 @@
 @use('Modules\TalentoHumano\Http\Controllers\FaseController')
 @use('Modules\TalentoHumano\Http\Controllers\CronogramaController')
+@use('Modules\TalentoHumano\Http\Controllers\ConvocatoriaController')
 @php
     // Pasos de la preparación en el orden obligatorio (RF-002). Cada uno se habilita cuando el anterior está completo.
     $pasos = [
@@ -39,13 +40,16 @@
         [
             'titulo' => 'Convocatoria',
             'icono' => 'fa-bullhorn',
-            'hu' => 'HU-022',
+            'hu' => 'HU-022 · HU-023',
             'completo' => $resumen['convocatoria_publicada'],
-            'detalle' => 'Cargos ofrecidos, requisitos y fichas habilitadas.',
-            'ruta' => null,
-            'bloqueo' => $resumen['cronograma'] === 'aprobado'
-                ? 'Próximamente.'
-                : 'El cronograma aprobado es prerrequisito para publicar la convocatoria.',
+            'detalle' => $resumen['convocatoria']
+                ? 'Estado: ' . ConvocatoriaController::ESTADOS[$resumen['convocatoria']]
+                    . ($resumen['convocatoria'] === 'borrador' && $resumen['cronograma'] !== 'aprobado' ? ' · se publica cuando el cronograma esté aprobado' : '')
+                : 'Requisitos de cada cargo, umbral mínimo y política de selección.',
+            'ruta' => route('talentohumano.fases.convocatoria.edit', $fase->id),
+            'bloqueo' => in_array($resumen['cronograma'], ['enviado', 'aprobado'])
+                ? null
+                : 'Primero envíe el cronograma a aprobación del Instructor Líder.',
         ],
     ];
 @endphp

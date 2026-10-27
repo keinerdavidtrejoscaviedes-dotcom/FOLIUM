@@ -13,7 +13,7 @@ class TalentoHumanoController extends Controller
      */
     private const SECCIONES = [
         ['icono' => 'fa-layer-group', 'titulo' => 'Fases', 'texto' => 'Registra la fase, elige las fichas participantes, activa los cargos y elabora el cronograma.', 'roles' => ['admin', 'instructor', 'gestor'], 'ruta' => 'talentohumano.fases.index'],
-        ['icono' => 'fa-bullhorn', 'titulo' => 'Convocatoria y cronograma', 'texto' => 'Publica la convocatoria y define las fechas de cada etapa.', 'roles' => ['admin', 'instructor']],
+        ['icono' => 'fa-bullhorn', 'titulo' => 'Convocatoria y cronograma', 'texto' => 'Define las fechas de cada etapa y publica la convocatoria, desde la página de cada fase.', 'roles' => ['admin', 'instructor', 'gestor'], 'ruta' => 'talentohumano.fases.index'],
         ['icono' => 'fa-file-signature', 'titulo' => 'Postulaciones', 'texto' => 'Revisa a los aspirantes y analiza sus hojas de vida.', 'roles' => ['admin', 'instructor', 'gestor']],
         ['icono' => 'fa-brain', 'titulo' => 'Prueba psicotécnica', 'texto' => 'Diseña las pruebas que presentan los postulantes, con sus preguntas y puntajes.', 'roles' => ['admin', 'psicologo', 'gestor'], 'ruta' => 'talentohumano.pruebas.index'],
         ['icono' => 'fa-list-check', 'titulo' => 'Mi formato de entrevista', 'texto' => 'Tus preguntas de entrevista con su puntaje, para calificar a los aspirantes.', 'roles' => ['psicologo', 'instructor'], 'ruta' => 'talentohumano.formato.edit'],

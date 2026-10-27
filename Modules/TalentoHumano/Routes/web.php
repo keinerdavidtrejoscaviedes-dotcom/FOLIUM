@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\TalentoHumano\Http\Controllers\ActivacionCargoController;
+use Modules\TalentoHumano\Http\Controllers\ConvocatoriaController;
 use Modules\TalentoHumano\Http\Controllers\CronogramaController;
 use Modules\TalentoHumano\Http\Controllers\FaseController;
 use Modules\TalentoHumano\Http\Controllers\FichaFaseController;
@@ -63,6 +64,9 @@ Route::prefix('talento-humano')
 
                     Route::get('cronograma', [CronogramaController::class, 'edit'])->name('cronograma.edit');
                     Route::put('cronograma', [CronogramaController::class, 'update'])->name('cronograma.update');
+
+                    Route::get('convocatoria', [ConvocatoriaController::class, 'edit'])->name('convocatoria.edit');
+                    Route::put('convocatoria', [ConvocatoriaController::class, 'update'])->name('convocatoria.update');
                 });
             });
         });

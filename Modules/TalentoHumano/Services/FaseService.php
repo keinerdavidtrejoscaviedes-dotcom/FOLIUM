@@ -97,8 +97,20 @@ class FaseService
             'cargos' => (clone $cargos)->count(),
             'cupos' => (int) (clone $cargos)->sum('numero_aprendices'),
             'cronograma' => $cronograma?->estado,
+            'convocatoria' => $this->convocatoria($faseId)?->estado,
             'convocatoria_publicada' => $this->convocatoriaPublicada($faseId),
         ];
+    }
+
+    /**
+     * Convocatoria de la fase (una por fase).
+     */
+    public function convocatoria(int $faseId): ?object
+    {
+        return DB::table('th_convocatorias')
+            ->where('fase_id', $faseId)
+            ->whereNull('deleted_at')
+            ->first();
     }
 
     /**
