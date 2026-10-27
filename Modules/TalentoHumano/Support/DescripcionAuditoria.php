@@ -56,7 +56,7 @@ class DescripcionAuditoria
         'programas' => 'Tecnólogos compatibles', 'designacion' => 'Designación', 'fecha_retiro' => 'Fecha de retiro', 'motivo_retiro' => 'Motivo del retiro',
         'version' => 'Versión', 'columnas_inventario' => 'Columnas del inventario', 'items_base' => 'Lista base de implementos', 'version_vigente' => 'Versión vigente',
         'fecha_inicio' => 'Fecha de inicio', 'fecha_fin' => 'Fecha de fin', 'numero' => 'Número', 'justificacion' => 'Justificación', 'con_error' => 'Filas con error',
-        'peticion' => 'Petición', 'fecha_reunion' => 'Fecha de la reunión', 'compatible' => 'Compatible con su programa', 'documento' => 'Documento', 'unidades' => 'Unidades productivas', 'secciones' => 'Secciones del acta',
+        'peticion' => 'Petición', 'motivo' => 'Motivo', 'fecha_reunion' => 'Fecha de la reunión', 'compatible' => 'Compatible con su programa', 'documento' => 'Documento', 'unidades' => 'Unidades productivas', 'secciones' => 'Secciones del acta',
     ];
 
     /** Nombres actuales de los objetos auditados, para describir registros que solo guardan lo que cambió. */
@@ -114,6 +114,8 @@ class DescripcionAuditoria
             'formato_entrevista_guardado' => "Guardó su formato de entrevista ({$nuevo('preguntas')} preguntas)",
             'calificacion_registrada' => "Calificó una entrevista ({$nuevo('puntaje')} puntos, " . str_replace('_', ' ', $nuevo('concepto')) . ')',
             'seleccion_validada' => "Validó la selección del cargo «{$nuevo('cargo')}»",
+            'cronograma_aprobado' => "Aprobó el cronograma de la {$nuevo('fase')}",
+            'cronograma_rechazado' => "Rechazó el cronograma de la {$nuevo('fase')}",
             'reubicacion_registrada' => "Registró la reubicación de {$nuevo('aprendiz')}: {$nuevo('cargo')}",
             'seleccion_ajustada' => "Ajustó la selección del cargo «{$nuevo('cargo')}»",
             'inventario_agregado' => "Agregó «{$nuevo('item')}» al inventario de un empalme",

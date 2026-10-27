@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\TalentoHumano\Http\Controllers\ActivacionCargoController;
 use Modules\TalentoHumano\Http\Controllers\AlertasController;
+use Modules\TalentoHumano\Http\Controllers\AprobacionesController;
 use Modules\TalentoHumano\Http\Controllers\AsignacionesController;
 use Modules\TalentoHumano\Http\Controllers\AuditoriaController;
 use Modules\TalentoHumano\Http\Controllers\CatalogoCargoController;
@@ -113,6 +114,14 @@ Route::prefix('talento-humano')
                     Route::patch('{alerta}/leida', 'leer')->whereNumber('alerta')->name('leer');
                     Route::post('sicefa/probar', 'probarSicefa')->name('probar-sicefa');
                     Route::post('correos/{notificacion}/reintentar', 'reintentar')->whereNumber('notificacion')->name('reintentar');
+                });
+
+                // Aprobaciones pendientes del Instructor Líder: cronograma del proceso (HU-034)
+                Route::prefix('aprobaciones')->name('aprobaciones.')->controller(AprobacionesController::class)->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('cronogramas/{cronograma}', 'show')->whereNumber('cronograma')->name('cronograma');
+                    Route::patch('cronogramas/{cronograma}/aprobar', 'aprobar')->whereNumber('cronograma')->name('aprobar');
+                    Route::patch('cronogramas/{cronograma}/rechazar', 'rechazar')->whereNumber('cronograma')->name('rechazar');
                 });
 
                 // Auditoría: solo consulta; cualquier intento de modificarla se rechaza y se registra (HU-002)

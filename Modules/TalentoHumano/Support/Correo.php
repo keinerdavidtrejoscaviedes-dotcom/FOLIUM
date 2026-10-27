@@ -2,6 +2,7 @@
 
 namespace Modules\TalentoHumano\Support;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Modules\TalentoHumano\Entities\Alerta;
 use Modules\TalentoHumano\Entities\NotificacionFallida;
@@ -41,6 +42,19 @@ class Correo
     }
 
     /**
+     * Correo de una persona: el de su usuario del ERP o, si no tiene, el de su ficha en people.
+     */
+    public static function de(?int $personId): ?string
+    {
+        if (!$personId) {
+            return null;
+        }
+
+        return DB::table('users')->where('person_id', $personId)->whereNull('deleted_at')->value('email')
+            ?? collect((array) DB::table('people')->where('id', $personId)->first(['misena_email', 'sena_email', 'personal_email']))->filter()->first();
+    }
+
+    /**
      * Nuevo intento manual desde «Alertas y servicios».
      */
     public static function reintentar(NotificacionFallida $notificacion): bool
@@ -61,7 +75,10 @@ class Correo
     private static function intentar(array $destinatarios, string $asunto, string $cuerpo): ?string
     {
         try {
-            Mail::raw($cuerpo, fn ($m) => $m->to($destinatarios)->subject($asunto));
+            // Con varios destinatarios van en copia oculta, para que nadie vea los correos de los demás
+            Mail::raw($cuerpo, fn ($m) => count($destinatarios) > 1
+                ? $m->to(config('mail.from.address'))->bcc($destinatarios)->subject($asunto)
+                : $m->to($destinatarios)->subject($asunto));
 
             return null;
         } catch (\Throwable $e) {

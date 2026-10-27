@@ -16,7 +16,7 @@ class InstructorLiderController extends Controller
      */
     public const SECCIONES = [
         'aprobaciones' => [
-            'titulo' => 'Aprobaciones pendientes', 'icono' => 'fa-clipboard-check', 'hu' => 'HU-034, HU-035, HU-036',
+            'titulo' => 'Aprobaciones pendientes', 'icono' => 'fa-clipboard-check', 'hu' => 'HU-034, HU-035, HU-036', 'ruta' => 'talentohumano.lider.aprobaciones.index',
             'texto' => 'Lo que espera tu decisión como Instructor Líder.',
             'items' => ['Aprobar o rechazar el cronograma del proceso de selección.', 'Validar o ajustar la propuesta de selección de cada cargo.', 'Registrar la reubicación de los aprendices no seleccionados.'],
         ],

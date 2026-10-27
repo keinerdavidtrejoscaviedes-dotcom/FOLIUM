@@ -214,8 +214,7 @@ class SeleccionActasController extends Controller
         // HU-036, esc. 2: aviso al aprendiz de que quedó en un cargo distinto a sus opciones
         $aviso = '';
         if ($vacante) {
-            $correo = DB::table('users')->where('person_id', $caso->person_id)->whereNull('deleted_at')->value('email')
-                ?? $caso->person?->misena_email ?? $caso->person?->sena_email ?? $caso->person?->personal_email;
+            $correo = Correo::de($caso->person_id);
             $aviso = !$correo
                 ? ' El aprendiz no tiene correo registrado, así que no se le pudo notificar.'
                 : (Correo::enviar([$correo], 'FOLIUM: fuiste reubicado en un cargo de SENA Empresa',
