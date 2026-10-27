@@ -21,6 +21,7 @@ use Modules\TalentoHumano\Http\Controllers\PlantillasActaController;
 use Modules\TalentoHumano\Http\Controllers\PostulacionController;
 use Modules\TalentoHumano\Http\Controllers\PruebaPsicotecnicaController;
 use Modules\TalentoHumano\Http\Controllers\SeleccionActasController;
+use Modules\TalentoHumano\Http\Controllers\SupervisionController;
 use Modules\TalentoHumano\Http\Controllers\TalentoHumanoController;
 use Modules\TalentoHumano\Http\Middleware\AdministradorTH;
 use Modules\TalentoHumano\Http\Middleware\PermisoTH;
@@ -124,16 +125,19 @@ Route::prefix('talento-humano')
                     Route::patch('cronogramas/{cronograma}/rechazar', 'rechazar')->whereNumber('cronograma')->name('rechazar');
                 });
 
+                // Supervisión del proceso, solo lectura (HU-014)
+                Route::prefix('supervision')->name('supervision.')->controller(SupervisionController::class)->group(function () {
+                    Route::get('/', 'seleccion')->name('index');
+                    Route::get('empalmes', 'empalmes')->name('empalmes');
+                    Route::get('actas', 'actas')->name('actas');
+                });
+
                 // Auditoría: solo consulta; cualquier intento de modificarla se rechaza y se registra (HU-002)
                 Route::prefix('auditoria')->name('auditoria.')->controller(AuditoriaController::class)->group(function () {
                     Route::get('/', 'index')->name('index');
                     Route::get('exportar', 'exportar')->name('exportar');
                     Route::match(['post', 'put', 'patch', 'delete'], '{registro?}', 'rechazarCambio')->name('rechazar');
                 });
-
-                Route::get('{seccion}', [InstructorLiderController::class, 'seccion'])
-                    ->whereIn('seccion', InstructorLiderController::enConstruccion())
-                    ->name('seccion');
             });
 
             // Proceso de Talento Humano (rama Maicol). Cada sección valida su permiso con la matriz AccesoTH::PERMISOS (HU-002, esc. 4)

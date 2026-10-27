@@ -12,7 +12,7 @@ use Modules\TalentoHumano\Support\CondicionesMinimas;
 class InstructorLiderController extends Controller
 {
     /**
-     * Secciones del submódulo. Las que tienen 'ruta' ya están construidas; las demás muestran "En construcción".
+     * Secciones del submódulo con la ruta de cada una.
      */
     public const SECCIONES = [
         'aprobaciones' => [
@@ -21,7 +21,7 @@ class InstructorLiderController extends Controller
             'items' => ['Aprobar o rechazar el cronograma del proceso de selección.', 'Validar o ajustar la propuesta de selección de cada cargo.', 'Registrar la reubicación de los aprendices no seleccionados.'],
         ],
         'supervision' => [
-            'titulo' => 'Supervisión', 'icono' => 'fa-eye', 'hu' => 'HU-014, HU-037',
+            'titulo' => 'Supervisión', 'icono' => 'fa-eye', 'hu' => 'HU-014, HU-037', 'ruta' => 'talentohumano.lider.supervision.index',
             'texto' => 'Consulta del proceso en modo de solo lectura, sin intervenir en su contenido.',
             'items' => ['Convocatoria y cronograma de la fase.', 'Acta de seleccionados.', 'Seguimiento de empalmes y actas de recibimiento.', 'Historial de fases anteriores.'],
         ],
@@ -58,21 +58,11 @@ class InstructorLiderController extends Controller
     ];
 
     /**
-     * Claves de las secciones que todavía no están construidas.
-     */
-    public static function enConstruccion(): array
-    {
-        return array_keys(array_filter(self::SECCIONES, fn ($seccion) => !isset($seccion['ruta'])));
-    }
-
-    /**
      * Dirección de una sección del submódulo.
      */
     public static function url(string $clave): string
     {
-        return isset(self::SECCIONES[$clave]['ruta'])
-            ? route(self::SECCIONES[$clave]['ruta'])
-            : route('talentohumano.lider.seccion', $clave);
+        return route(self::SECCIONES[$clave]['ruta']);
     }
 
     /**
@@ -89,16 +79,6 @@ class InstructorLiderController extends Controller
             'alertas' => $this->alertas($fase),
             'resumen' => $this->resumen(),
         ]);
-    }
-
-    /**
-     * Página provisional de las secciones que todavía no están construidas.
-     */
-    public function seccion(string $seccion)
-    {
-        abort_unless(in_array($seccion, self::enConstruccion()), 404);
-
-        return view('talentohumano::lider.seccion', ['clave' => $seccion, 'seccion' => self::SECCIONES[$seccion]]);
     }
 
     /**
