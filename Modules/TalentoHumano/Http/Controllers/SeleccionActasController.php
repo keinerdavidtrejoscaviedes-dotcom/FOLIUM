@@ -4,6 +4,7 @@ namespace Modules\TalentoHumano\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Modules\TalentoHumano\Entities\Convocatoria;
 use Modules\TalentoHumano\Entities\ConvocatoriaCargo;
 use Modules\TalentoHumano\Entities\Seleccion;
@@ -16,6 +17,8 @@ use Modules\TalentoHumano\Entities\Fase;
 use Modules\SICA\Entities\Person;
 use Modules\TalentoHumano\Support\AccesoTH;
 use Modules\TalentoHumano\Support\Auditoria;
+use Modules\TalentoHumano\Support\ComiteReubicacion;
+use Modules\TalentoHumano\Support\Correo;
 
 class SeleccionActasController extends Controller
 {
@@ -112,28 +115,146 @@ class SeleccionActasController extends Controller
     }
 
     /**
-     * Vista de reubicaciones de no seleccionados (Mockup INS-04 · HU-036).
+     * Casos de aprendices no seleccionados en sus 3 opciones y cargos con cupos vacantes (HU-036, esc. 1, 5, 6 y 8).
      */
-    public function reubicaciones()
+    public function reubicaciones(Request $request)
     {
-        $cargosVacantes = Cargo::where('estado', 'activo')->limit(4)->get();
+        $convocatoria = ComiteReubicacion::convocatoria();
+        if (!$convocatoria) {
+            return view('talentohumano::seleccion.reubicaciones', ['convocatoria' => null]);
+        }
 
-        return view('talentohumano::seleccion.reubicaciones', compact('cargosVacantes'));
+        $pendientes = ComiteReubicacion::pendientes($convocatoria);
+        $caso = $pendientes->firstWhere('id', (int) $request->query('postulacion', old('postulacion_id'))) ?? $pendientes->first();
+        $vacantes = ComiteReubicacion::vacantes($convocatoria);
+
+        return view('talentohumano::seleccion.reubicaciones', [
+            'convocatoria' => $convocatoria,
+            'pendientes' => $pendientes,
+            'caso' => $caso,
+            'evaluacion' => $caso ? $this->evaluacionDe($caso) : null,
+            'vacantes' => $caso
+                ? $vacantes->map(fn ($v) => $v + ['compatible' => ComiteReubicacion::esCompatible($v, $caso)])->sortByDesc('compatible')->values()
+                : $vacantes,
+            'integrantes' => ComiteReubicacion::integrantes($convocatoria),
+            'decididas' => ComiteReubicacion::decididas($convocatoria),
+        ]);
     }
 
     /**
-     * Guarda la reubicación del aspirante (HU-036 · RF-011).
+     * Registra la decisión del comité y notifica al aprendiz (HU-036, esc. 2 a 4 y 6; RN-022, RN-049).
      */
     public function guardarReubicacion(Request $request)
     {
-        $request->validate([
-            'cargo_id' => 'required',
-            'justificacion' => 'required|string|min:5',
-            'participantes' => 'required|array|min:1',
+        $convocatoria = ComiteReubicacion::convocatoria();
+        abort_unless($convocatoria, 404);
+
+        $datos = $request->validate([
+            'postulacion_id' => ['required', 'integer'],
+            'cargo_activado_id' => ['required', 'regex:/^(sin_cargo|\d+)$/'],
+            'participantes' => ['required', 'array', 'min:1'],
+            'participantes.*' => ['integer'],
+            'fecha_reunion' => ['required', 'date', 'before_or_equal:today'],
+            'justificacion' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'cargo_activado_id.required' => 'Seleccione el cargo en el que se reubica al aprendiz',
+            'cargo_activado_id.regex' => 'Seleccione el cargo en el que se reubica al aprendiz',
+            'participantes.required' => 'Registre los participantes de la reunión de reubicación',
+            'participantes.min' => 'Registre los participantes de la reunión de reubicación',
+            'fecha_reunion.required' => 'Indique la fecha de la reunión del comité',
+            'fecha_reunion.before_or_equal' => 'La fecha de la reunión no puede ser posterior a hoy',
         ]);
 
-        return redirect()->route('talentohumano.seleccion.reubicaciones')
-            ->with('success', 'Reubicación registrada por el comité. Se notificó al aprendiz.');
+        $caso = ComiteReubicacion::pendientes($convocatoria)->firstWhere('id', (int) $datos['postulacion_id']);
+        if (!$caso) {
+            return redirect()->route('talentohumano.seleccion.reubicaciones')->with('error', 'Ese aprendiz ya no tiene la reubicación pendiente.');
+        }
+
+        $integrantes = ComiteReubicacion::integrantes($convocatoria)->keyBy('id');
+        $participantes = collect($datos['participantes'])->map(fn ($id) => $integrantes[(int) $id] ?? null)->filter()->values();
+        $justificacion = trim((string) ($datos['justificacion'] ?? ''));
+        $sinCargo = (string) $datos['cargo_activado_id'] === 'sin_cargo';
+        $vacante = $sinCargo ? null : ComiteReubicacion::vacantes($convocatoria)->first(fn ($v) => $v['cargo_activado']->id === (int) $datos['cargo_activado_id']);
+
+        $errores = array_filter([
+            'participantes' => $participantes->isEmpty() ? 'Registre los participantes de la reunión de reubicación' : null,
+            'cargo_activado_id' => !$sinCargo && !$vacante ? 'Ese cargo ya no tiene cupos vacantes' : null,
+            'justificacion' => match (true) {
+                $sinCargo && $justificacion === '' => 'La decisión «Sin cargo asignado» requiere justificación',
+                $vacante && !ComiteReubicacion::esCompatible($vacante, $caso) && $justificacion === '' => 'La reubicación en un cargo no compatible requiere justificación',
+                default => null,
+            },
+        ]);
+        if ($errores) {
+            return back()->withErrors($errores)->withInput();
+        }
+
+        DB::transaction(function () use ($caso, $vacante, $participantes, $datos, $justificacion) {
+            $reubicacion = Reubicacion::create([
+                'postulacion_id' => $caso->id,
+                'cargo_activado_id' => $vacante ? $vacante['cargo_activado']->id : null,
+                'participantes' => $participantes->map(fn ($p) => ['person_id' => $p->id, 'nombre' => $p->nombre, 'funcion' => $p->funcion])->all(),
+                'fecha_reunion' => $datos['fecha_reunion'],
+                'justificacion' => $justificacion ?: null,
+                'registrada_por' => auth()->user()->person_id,
+            ]);
+            if ($vacante) {
+                $caso->update(['estado' => 'reubicado']);
+            }
+            Auditoria::registrar('reubicacion_registrada', $reubicacion, ['estado' => 'no_seleccionado'], [
+                'aprendiz' => $caso->nombre_completo,
+                'cargo' => $vacante ? $vacante['cargo_activado']->cargo->nombre : 'Sin cargo asignado',
+                'compatible' => $vacante ? ComiteReubicacion::esCompatible($vacante, $caso) : null,
+                'participantes' => $participantes->pluck('nombre')->implode(', '),
+                'fecha_reunion' => $datos['fecha_reunion'],
+                'justificacion' => $justificacion ?: null,
+            ]);
+        });
+
+        // HU-036, esc. 2: aviso al aprendiz de que quedó en un cargo distinto a sus opciones
+        $aviso = '';
+        if ($vacante) {
+            $correo = DB::table('users')->where('person_id', $caso->person_id)->whereNull('deleted_at')->value('email')
+                ?? $caso->person?->misena_email ?? $caso->person?->sena_email ?? $caso->person?->personal_email;
+            $aviso = !$correo
+                ? ' El aprendiz no tiene correo registrado, así que no se le pudo notificar.'
+                : (Correo::enviar([$correo], 'FOLIUM: fuiste reubicado en un cargo de SENA Empresa',
+                    "FOLIUM · Talento Humano
+
+Hola, {$caso->nombre_completo}.
+
+No quedaste seleccionado en ninguna de tus tres opciones de la convocatoria, "
+                    . "pero el comité de reubicación te asignó el cargo {$vacante['cargo_activado']->cargo->nombre}.
+
+"
+                    . 'La reubicación quedará en el acta de seleccionados de la convocatoria.')
+                    ? ' Se le notificó por correo.'
+                    : ' El correo no se pudo entregar; quedó en «Notificaciones no entregadas».');
+        }
+
+        return redirect()->route('talentohumano.seleccion.reubicaciones')->with('success', $vacante
+            ? "Reubicación registrada: {$caso->nombre_completo} queda en el cargo {$vacante['cargo_activado']->cargo->nombre}.{$aviso}"
+            : "Decisión registrada: {$caso->nombre_completo} queda sin cargo asignado.");
+    }
+
+    /**
+     * Puntaje total, prueba psicotécnica, conceptos de entrevista y opciones del aprendiz (HU-036, esc. 1).
+     */
+    private function evaluacionDe(Postulacion $postulacion): array
+    {
+        $calificaciones = DB::table('th_calificaciones as c')->join('th_entrevistas as e', 'e.id', '=', 'c.entrevista_id')
+            ->where('c.postulacion_id', $postulacion->id)
+            ->get(['e.tipo', 'c.puntaje', 'c.concepto', 'c.observaciones']);
+
+        return [
+            'prueba' => DB::table('th_aplicaciones_prueba')->where('postulacion_id', $postulacion->id)->first(['estado', 'puntaje']),
+            'entrevistas' => $calificaciones->groupBy('tipo')->map(fn ($c) => [
+                'puntaje' => round($c->avg('puntaje'), 1),
+                'concepto' => $c->every(fn ($x) => $x->concepto === 'apto') ? 'Apto' : ($c->contains('concepto', 'apto') ? 'Dividido' : 'No apto'),
+                'observacion' => $c->pluck('observaciones')->filter()->first(),
+            ]),
+            'opciones' => $postulacion->opciones()->with('convocatoriaCargo.cargoActivado.cargo')->get(),
+        ];
     }
 
     // =========================================================================

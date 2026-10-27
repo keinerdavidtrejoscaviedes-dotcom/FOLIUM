@@ -68,6 +68,11 @@ class Postulacion extends Model
         return $this->hasMany(\Modules\TalentoHumano\Entities\Calificacion::class, 'postulacion_id');
     }
 
+    public function reubicacion()
+    {
+        return $this->hasOne(Reubicacion::class, 'postulacion_id');
+    }
+
     public function getNombreCompletoAttribute(): string
     {
         if (!$this->person) {

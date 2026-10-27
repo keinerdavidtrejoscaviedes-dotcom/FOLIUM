@@ -22,6 +22,7 @@ use Modules\TalentoHumano\Entities\Fase;
 use Modules\TalentoHumano\Entities\FaseFicha;
 use Modules\TalentoHumano\Entities\InventarioEmpalme;
 use Modules\TalentoHumano\Entities\PlantillaActa;
+use Modules\TalentoHumano\Entities\Reubicacion;
 
 /**
  * Traduce los registros de auditoría de FOLIUM a frases legibles para la pantalla de Auditoría (HU-002).
@@ -36,7 +37,7 @@ class DescripcionAuditoria
         'plantillas' => ['Plantillas de acta', [PlantillaActa::class]],
         'activacion' => ['Activación de cargos', [CargoActivado::class, FaseFicha::class, Area::class, Course::class]],
         'evaluacion' => ['Postulaciones y entrevistas', [AnalisisHv::class, Cuestionario::class, Calificacion::class]],
-        'seleccion' => ['Selección', [ConvocatoriaCargo::class]],
+        'seleccion' => ['Selección', [ConvocatoriaCargo::class, Reubicacion::class]],
         'empalmes' => ['Empalmes', [Empalme::class, Acta::class, InventarioEmpalme::class]],
         'accesos' => ['Intentos sin permiso', [Auditoria::ACCESO]],
     ];
@@ -52,7 +53,7 @@ class DescripcionAuditoria
         'programas' => 'Tecnólogos compatibles', 'designacion' => 'Designación', 'fecha_retiro' => 'Fecha de retiro', 'motivo_retiro' => 'Motivo del retiro',
         'version' => 'Versión', 'columnas_inventario' => 'Columnas del inventario', 'items_base' => 'Lista base de implementos', 'version_vigente' => 'Versión vigente',
         'fecha_inicio' => 'Fecha de inicio', 'fecha_fin' => 'Fecha de fin', 'numero' => 'Número', 'justificacion' => 'Justificación', 'con_error' => 'Filas con error',
-        'peticion' => 'Petición', 'documento' => 'Documento', 'unidades' => 'Unidades productivas', 'secciones' => 'Secciones del acta',
+        'peticion' => 'Petición', 'fecha_reunion' => 'Fecha de la reunión', 'compatible' => 'Compatible con su programa', 'documento' => 'Documento', 'unidades' => 'Unidades productivas', 'secciones' => 'Secciones del acta',
     ];
 
     /** Nombres actuales de los objetos auditados, para describir registros que solo guardan lo que cambió. */
@@ -110,6 +111,7 @@ class DescripcionAuditoria
             'formato_entrevista_guardado' => "Guardó su formato de entrevista ({$nuevo('preguntas')} preguntas)",
             'calificacion_registrada' => "Calificó una entrevista ({$nuevo('puntaje')} puntos, " . str_replace('_', ' ', $nuevo('concepto')) . ')',
             'seleccion_validada' => "Validó la selección del cargo «{$nuevo('cargo')}»",
+            'reubicacion_registrada' => "Registró la reubicación de {$nuevo('aprendiz')}: {$nuevo('cargo')}",
             'seleccion_ajustada' => "Ajustó la selección del cargo «{$nuevo('cargo')}»",
             'inventario_agregado' => "Agregó «{$nuevo('item')}» al inventario de un empalme",
             'inventario_verificado' => "Verificó «{$nuevo('item')}» en el inventario de un empalme",

@@ -13,12 +13,14 @@ class Reubicacion extends Model
         'postulacion_id',
         'cargo_activado_id',
         'participantes',
+        'fecha_reunion',
         'justificacion',
         'registrada_por',
     ];
 
     protected $casts = [
         'participantes' => 'array',
+        'fecha_reunion' => 'date',
     ];
 
     public function postulacion()
