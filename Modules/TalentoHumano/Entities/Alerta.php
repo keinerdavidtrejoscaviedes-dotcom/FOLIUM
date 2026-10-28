@@ -17,6 +17,8 @@ class Alerta extends Model
         'sicefa_caido' => ['fa-plug-circle-xmark', 'bg-red-50 text-red-600'],
         'sicefa_recuperado' => ['fa-plug-circle-check', 'bg-[#E8F3EF] text-[#064C3D]'],
         'correo_no_entregado' => ['fa-envelope-circle-check', 'bg-red-50 text-red-600'],
+        'novedad_inventario' => ['fa-boxes-stacked', 'bg-amber-50 text-amber-600'],
+        'prueba_no_presentada' => ['fa-user-clock', 'bg-amber-50 text-amber-600'],
     ];
 
     protected $table = 'th_alertas';

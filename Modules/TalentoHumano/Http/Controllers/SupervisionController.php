@@ -11,6 +11,7 @@ use Modules\TalentoHumano\Entities\Cronograma;
 use Modules\TalentoHumano\Entities\Empalme;
 use Modules\TalentoHumano\Entities\Fase;
 use Modules\TalentoHumano\Services\FaseService;
+use Modules\TalentoHumano\Support\ActaSeleccionados;
 use Modules\TalentoHumano\Support\ComiteReubicacion;
 
 /**
@@ -99,7 +100,7 @@ class SupervisionController extends Controller
             'fase' => $fase,
             'cronograma' => $fase ? Cronograma::where('fase_id', $fase->id)->where('estado', 'aprobado')->latest('fecha_aprobacion')->first() : null,
             'actaSeleccionados' => $actaSeleccionados,
-            'seleccionados' => $actaSeleccionados && $convocatoria ? $this->seleccionados($convocatoria) : collect(),
+            'seleccionados' => $actaSeleccionados && $convocatoria ? ActaSeleccionados::filas($convocatoria->id) : collect(),
             'porValidar' => $convocatoria ? $this->cargosPorValidar($convocatoria) : null,
             'recibimiento' => $fase ? DB::table('th_actas')->where('fase_id', $fase->id)->where('tipo', 'recibimiento')->selectRaw("count(*) as total, sum(estado = 'firmada') as firmadas")->first() : null,
             'historial' => $this->historial(),
@@ -234,33 +235,6 @@ class SupervisionController extends Controller
         $empalme->receptores = $empalme->participantes->where('papel', 'receptor')->map($nombre)->values();
 
         return $empalme;
-    }
-
-    /**
-     * Aprendices del acta de seleccionados: selecciones validadas y reubicaciones con cargo.
-     */
-    private function seleccionados(Convocatoria $convocatoria)
-    {
-        $nombre = "TRIM(CONCAT_WS(' ', p.first_name, p.first_last_name, p.second_last_name))";
-        $seleccionados = DB::table('th_selecciones as s')
-            ->join('th_convocatoria_cargos as cc', 'cc.id', '=', 's.convocatoria_cargo_id')
-            ->join('th_cargos_activados as ca', 'ca.id', '=', 'cc.cargo_activado_id')
-            ->join('th_cargos as c', 'c.id', '=', 'ca.cargo_id')
-            ->join('th_postulaciones as po', 'po.id', '=', 's.postulacion_id')
-            ->join('people as p', 'p.id', '=', 'po.person_id')
-            ->leftJoin('courses as co', 'co.id', '=', 'po.course_id')
-            ->where('cc.convocatoria_id', $convocatoria->id)->whereIn('s.estado', ['validada', 'ajustada'])
-            ->selectRaw("{$nombre} as aprendiz, co.code as ficha, c.nombre as cargo, NULL as observacion");
-        $reubicados = DB::table('th_reubicaciones as r')
-            ->join('th_cargos_activados as ca', 'ca.id', '=', 'r.cargo_activado_id')
-            ->join('th_cargos as c', 'c.id', '=', 'ca.cargo_id')
-            ->join('th_postulaciones as po', 'po.id', '=', 'r.postulacion_id')
-            ->join('people as p', 'p.id', '=', 'po.person_id')
-            ->leftJoin('courses as co', 'co.id', '=', 'po.course_id')
-            ->where('po.convocatoria_id', $convocatoria->id)
-            ->selectRaw("{$nombre} as aprendiz, co.code as ficha, c.nombre as cargo, 'Reubicado' as observacion");
-
-        return $seleccionados->unionAll($reubicados)->get()->sortBy('cargo')->values();
     }
 
     /**

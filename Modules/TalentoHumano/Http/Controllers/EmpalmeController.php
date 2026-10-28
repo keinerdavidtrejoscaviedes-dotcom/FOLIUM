@@ -10,7 +10,9 @@ use Modules\TalentoHumano\Entities\Acta;
 use Modules\TalentoHumano\Entities\Firma;
 use Modules\TalentoHumano\Entities\Fase;
 use Modules\SICA\Entities\Person;
+use Illuminate\Support\Facades\DB;
 use Modules\TalentoHumano\Support\AccesoTH;
+use Modules\TalentoHumano\Support\ActaRecibimiento;
 use Modules\TalentoHumano\Support\Auditoria;
 
 class EmpalmeController extends Controller
@@ -146,14 +148,29 @@ class EmpalmeController extends Controller
      */
     public function vistoBueno(Request $request, $empalmeId)
     {
-        $empalme = Empalme::findOrFail($empalmeId);
+        $empalme = Empalme::with(['acta', 'participantes.asignacion'])->findOrFail($empalmeId);
         $personId = auth()->user()->person_id ?? 1;
 
-        $empalme->update([
-            'visita_confirmada' => true,
-            'visto_bueno_por' => $personId,
-            'fecha_visto_bueno' => now(),
-        ]);
+        // RN-024 y RN-027: el empalme cierra con el acta firmada y el Formulario de Satisfacción de ambos aprendices
+        if ($empalme->acta?->estado !== 'firmada') {
+            return back()->with('error', 'El acta de recibimiento aún no tiene todas las firmas.');
+        }
+        if (!ActaRecibimiento::satisfaccionCompleta($empalme)) {
+            return back()->with('error', 'Los aprendices aún no diligencian el Formulario de Satisfacción del Empalme.');
+        }
+
+        DB::transaction(function () use ($empalme, $personId) {
+            $empalme->update([
+                'estado' => 'cerrado',
+                'visto_bueno_por' => $personId,
+                'fecha_visto_bueno' => now(),
+            ]);
+
+            // HU-055, esc. 2: el receptor queda vinculado y su asignación pasa a vigente (RN-028)
+            $empalme->participantes->where('papel', 'receptor')->pluck('asignacion')->filter()
+                ->where('estado', 'asignada')
+                ->each(fn ($asignacion) => $asignacion->update(['estado' => 'vigente']));
+        });
         Auditoria::registrar('visto_bueno_empalme', $empalme, [], ['empalme' => $empalme->id, 'cargo' => optional($empalme->cargo)->nombre]);
 
         return back()->with('success', 'Visto bueno registrado. El empalme cuenta con la aprobación del Instructor de Talento Humano.');
@@ -240,21 +257,7 @@ class EmpalmeController extends Controller
      */
     private function asegurarActaRecibimiento(Empalme $empalme): Acta
     {
-        if ($empalme->acta) {
-            return $empalme->acta;
-        }
-
-        return Acta::create([
-            'empalme_id' => $empalme->id,
-            'fase_id' => $empalme->fase_id,
-            'tipo' => 'recibimiento',
-            'contenido' => [
-                'codigo' => 'ACT-REC-F36-' . str_pad($empalme->id, 3, '0', STR_PAD_LEFT),
-                'cargo' => $empalme->cargo->nombre,
-                'fecha_reunion' => now()->toDateString(),
-            ],
-            'estado' => 'borrador',
-        ]);
+        return ActaRecibimiento::asegurar($empalme);
     }
 
     /**
@@ -270,16 +273,7 @@ class EmpalmeController extends Controller
             ]
         );
 
-        $totalFirmas = Firma::where('acta_id', $acta->id)->count();
-        if ($totalFirmas >= 2) {
-            $acta->update([
-                'estado' => 'firmada',
-                'publicada_por' => $personId,
-                'fecha_publicacion' => now(),
-            ]);
-            $empalme->update(['estado' => 'firmado']);
-        } else {
-            $empalme->update(['estado' => 'en_curso']);
-        }
+        // El acta queda firmada cuando firman los aprendices y los firmantes que exige la plantilla del área (HU-057)
+        ActaRecibimiento::actualizarEstado($empalme, $acta);
     }
 }

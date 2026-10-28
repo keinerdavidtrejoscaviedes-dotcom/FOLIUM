@@ -16,12 +16,16 @@ class Empalme extends Model
         'tipo',
         'estado',
         'visita_confirmada',
+        'fecha_visita',
+        'participantes_visita',
         'visto_bueno_por',
         'fecha_visto_bueno',
     ];
 
     protected $casts = [
         'visita_confirmada' => 'boolean',
+        'fecha_visita' => 'date',
+        'participantes_visita' => 'array',
         'fecha_visto_bueno' => 'datetime',
     ];
 

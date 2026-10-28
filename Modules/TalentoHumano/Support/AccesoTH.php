@@ -25,6 +25,7 @@ class AccesoTH
         'seleccion' => ['instructor_th', 'lider_estrategia'],
         'reubicaciones' => ['lider_estrategia'],
         'empalmes' => ['gestor', 'instructor_th'],
+        'aprendiz' => ['aprendiz'],
         'catalogo' => ['gestor', 'instructor', 'psicologo', 'aprendiz', 'instructor_th', 'instructor_tecnico', 'lider_estrategia'],
     ];
 
@@ -33,6 +34,9 @@ class AccesoTH
 
     /** Formatos de entrevista propios de cada evaluador (psicólogo e instructores): el Administrador no tiene uno. */
     public const PROPIAS_DEL_EVALUADOR = ['formato', 'formato_tecnico'];
+
+    /** Portal con la postulación, la prueba y el empalme del propio Aprendiz (RN-066): el Administrador no tiene uno. */
+    public const PROPIAS_DEL_APRENDIZ = ['aprendiz'];
 
     /**
      * Administrador de FOLIUM: superadmin del ERP o rol talentohumano.admin.
@@ -98,7 +102,7 @@ class AccesoTH
     public static function puede(User $user, string $seccion): bool
     {
         if (self::esAdministrador($user)) {
-            return !in_array($seccion, self::PROPIAS_DEL_EVALUADOR);
+            return !in_array($seccion, [...self::PROPIAS_DEL_EVALUADOR, ...self::PROPIAS_DEL_APRENDIZ]);
         }
 
         return $user->person_id && array_intersect(self::funciones($user), self::PERMISOS[$seccion] ?? []);

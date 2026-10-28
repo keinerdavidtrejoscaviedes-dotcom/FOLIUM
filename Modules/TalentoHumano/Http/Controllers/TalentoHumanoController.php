@@ -22,9 +22,7 @@ class TalentoHumanoController extends Controller
         ['icono' => 'fa-user-check', 'titulo' => 'Selección y actas', 'texto' => 'Valida a los seleccionados, haz reubicaciones y genera el acta.', 'roles' => ['instructor'], 'ruta' => 'talentohumano.seleccion.index', 'seccion' => 'seleccion'],
         ['icono' => 'fa-handshake', 'titulo' => 'Empalmes', 'texto' => 'Acta de recibimiento, inventario del cargo y firmas digitales.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.empalmes.index', 'seccion' => 'empalmes'],
         ['icono' => 'fa-book-open', 'titulo' => 'Catálogo de cargos', 'texto' => 'Rol, actividades, responsabilidades y requisitos de cada cargo.', 'roles' => ['instructor', 'psicologo', 'gestor', 'aprendiz'], 'ruta' => 'talentohumano.catalogo.index', 'seccion' => 'catalogo'],
-        ['icono' => 'fa-id-card', 'titulo' => 'Mi postulación', 'texto' => 'Postúlate a los cargos por prioridad y sigue el estado de tu proceso.', 'roles' => ['aprendiz']],
-        ['icono' => 'fa-clipboard-check', 'titulo' => 'Mi prueba psicotécnica', 'texto' => 'Presenta la prueba cuando esté habilitada en el cronograma.', 'roles' => ['aprendiz']],
-        ['icono' => 'fa-signature', 'titulo' => 'Mi empalme', 'texto' => 'Recibe tu cargo, revisa el inventario y firma el acta.', 'roles' => ['aprendiz']],
+        ['icono' => 'fa-user-graduate', 'titulo' => 'Portal del Aprendiz', 'texto' => 'Cronograma, convocatoria, tu postulación, la prueba psicotécnica, tu empalme y tu cargo.', 'roles' => ['aprendiz'], 'ruta' => 'talentohumano.aprendiz.index', 'seccion' => 'aprendiz'],
     ];
 
     /**
@@ -49,6 +47,11 @@ class TalentoHumanoController extends Controller
 
         $roles = $user->roles->filter(fn ($role) => Str::startsWith($role->slug, 'talentohumano.'))->values();
         $tipos = $roles->map(fn ($role) => Str::after($role->slug, 'talentohumano.'))->all();
+
+        // Si el usuario es únicamente Aprendiz en Talento Humano, llevarlo a su panel dedicado (HU-056)
+        if ($tipos === ['aprendiz']) {
+            return redirect()->route('talentohumano.aprendiz.index');
+        }
 
         $esInstructor = in_array('instructor', $tipos);
 

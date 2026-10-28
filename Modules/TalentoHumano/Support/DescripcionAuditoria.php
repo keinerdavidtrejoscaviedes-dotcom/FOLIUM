@@ -24,6 +24,7 @@ use Modules\TalentoHumano\Entities\Fase;
 use Modules\TalentoHumano\Entities\FaseFicha;
 use Modules\TalentoHumano\Entities\InventarioEmpalme;
 use Modules\TalentoHumano\Entities\PlantillaActa;
+use Modules\TalentoHumano\Entities\Postulacion;
 use Modules\TalentoHumano\Entities\Reubicacion;
 
 /**
@@ -39,7 +40,7 @@ class DescripcionAuditoria
         'plantillas' => ['Plantillas de acta', [PlantillaActa::class]],
         'activacion' => ['Activación de cargos', [CargoActivado::class, FaseFicha::class, Area::class, Course::class]],
         'convocatoria' => ['Cronograma y convocatoria', [Cronograma::class, Convocatoria::class]],
-        'evaluacion' => ['Postulaciones y entrevistas', [AnalisisHv::class, Cuestionario::class, Calificacion::class]],
+        'evaluacion' => ['Postulaciones y entrevistas', [Postulacion::class, AnalisisHv::class, Cuestionario::class, Calificacion::class]],
         'seleccion' => ['Selección', [ConvocatoriaCargo::class, Reubicacion::class]],
         'empalmes' => ['Empalmes', [Empalme::class, Acta::class, InventarioEmpalme::class]],
         'accesos' => ['Intentos sin permiso', [Auditoria::ACCESO]],
@@ -122,6 +123,13 @@ class DescripcionAuditoria
             'inventario_verificado' => "Verificó «{$nuevo('item')}» en el inventario de un empalme",
             'acta_firmada' => "Firmó el acta de recibimiento del cargo «{$nuevo('cargo')}»",
             'visto_bueno_empalme' => "Dio el visto bueno al empalme del cargo «{$nuevo('cargo')}»",
+            'postulacion_registrada' => "Se postuló a la convocatoria ({$nuevo('opciones')})",
+            'prueba_presentada' => 'Presentó la prueba psicotécnica',
+            'prueba_no_evaluado' => "Quedó como no evaluado por no presentar la prueba psicotécnica en el plazo",
+            'inventario_registrado' => "Registró el inventario de entrega del cargo «{$nuevo('cargo')}» ({$nuevo('items')} ítems)",
+            'inventario_recibido' => "Verificó el inventario recibido del cargo «{$nuevo('cargo')}» ({$nuevo('novedades')} novedades)",
+            'visita_confirmada' => "Confirmó la visita a la unidad productiva del cargo «{$nuevo('cargo')}»",
+            'satisfaccion_registrada' => "Diligenció el Formulario de Satisfacción del empalme del cargo «{$nuevo('cargo')}»",
             'acceso_denegado' => 'Intentó una acción sin permiso',
             default => Str::ucfirst(str_replace('_', ' ', $registro->event)),
         };

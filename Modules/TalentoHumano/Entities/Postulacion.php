@@ -20,6 +20,7 @@ class Postulacion extends Model
         'course_id',
         'municipality_id',
         'vereda_ruta',
+        'telefono',
         'estado',
         'puntaje_total',
     ];

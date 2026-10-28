@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\TalentoHumano\Http\Controllers\ActivacionCargoController;
 use Modules\TalentoHumano\Http\Controllers\AlertasController;
+use Modules\TalentoHumano\Http\Controllers\AprendizController;
 use Modules\TalentoHumano\Http\Controllers\AprobacionesController;
 use Modules\TalentoHumano\Http\Controllers\AsignacionesController;
 use Modules\TalentoHumano\Http\Controllers\AuditoriaController;
@@ -237,5 +238,31 @@ Route::prefix('talento-humano')
                     Route::put('convocatoria', [ConvocatoriaController::class, 'update'])->name('convocatoria.update');
                 });
             });
+
+            // Portal del Aprendiz: cronograma, convocatoria, postulación, prueba, acta, empalme y cargo (HU-043 a HU-057)
+            Route::prefix('aprendiz')->name('aprendiz.')->controller(AprendizController::class)
+                ->middleware(PermisoTH::class . ':aprendiz')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('cronograma', 'cronograma')->name('cronograma');
+                Route::get('convocatoria', 'convocatoria')->name('convocatoria');
+                Route::get('postularme', 'postularme')->name('postularme');
+                Route::post('postulacion', 'guardarPostulacion')->name('postulacion.guardar');
+                Route::get('mi-postulacion', 'miPostulacion')->name('postulacion');
+                Route::get('documentos/{documento}', 'documento')->whereNumber('documento')->name('documento');
+                Route::get('prueba', 'prueba')->name('prueba');
+                Route::get('prueba/preguntas/{pregunta}/imagen', 'imagenPregunta')->whereNumber('pregunta')->name('prueba.imagen');
+                Route::post('prueba/progreso', 'guardarProgresoPrueba')->name('prueba.progreso');
+                Route::post('prueba/enviar', 'enviarPrueba')->name('prueba.enviar');
+                Route::get('acta', 'acta')->name('acta');
+                Route::get('empalme', 'empalme')->name('empalme');
+                Route::post('empalme/inventario', 'guardarInventarioEmpalme')->name('empalme.inventario');
+                Route::post('empalme/verificacion', 'verificarInventarioEmpalme')->name('empalme.verificacion');
+                Route::post('empalme/visita', 'confirmarVisitaEmpalme')->name('empalme.visita');
+                Route::post('empalme/firmar', 'firmarActaEmpalme')->name('empalme.firmar');
+                Route::get('satisfaccion', 'satisfaccion')->name('satisfaccion');
+                Route::post('satisfaccion/enviar', 'enviarSatisfaccion')->name('satisfaccion.enviar');
+                Route::get('cargo', 'miCargo')->name('cargo');
+            });
         });
     });
+
