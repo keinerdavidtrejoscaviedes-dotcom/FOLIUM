@@ -74,7 +74,7 @@
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                             <i class="fas fa-screwdriver-wrench text-[#064C3D]"></i>
-                            <span>{{ ucfirst($entr->tipo) }} · {{ ucfirst($entr->modalidad) }} · {{ $entr->fecha_hora ? $entr->fecha_hora->isoFormat('ddd D MMM · h:mm a') : 'Fecha por programar' }}</span>
+                            <span>{{ $entr->tipo === 'psicologica' ? 'Psicológica' : 'Técnica' }} · {{ ucfirst($entr->modalidad) }} · {{ $entr->fecha_hora ? $entr->fecha_hora->locale('es')->isoFormat('ddd D MMM · h:mm a') : 'Fecha por programar' }}</span>
                         </p>
                         <h2 class="mt-1 text-lg font-bold text-slate-900">
                             {{ $aspirante ? $aspirante->nombre_completo : 'Aspirante por definir' }}

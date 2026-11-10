@@ -98,7 +98,7 @@
                             <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#E8F3EF] text-[#064C3D]"><i class="fas {{ $icono }}" aria-hidden="true"></i></span>
                             <div class="text-sm">
                                 <p class="font-semibold text-slate-800">Entrevista {{ $tipo }} · {{ ucfirst($entrevista->modalidad) }}</p>
-                                <p class="text-slate-600">{{ $fecha->translatedFormat('l j \d\e F \d\e Y') }}, {{ $fecha->format('h:i a') }}</p>
+                                <p class="text-slate-600">{{ $fecha->locale('es')->translatedFormat('l j \d\e F \d\e Y') }}, {{ $fecha->format('h:i a') }}</p>
                                 <p class="text-xs text-slate-500"><i class="fas fa-location-dot mr-1" aria-hidden="true"></i>{{ $entrevista->lugar ?: 'Lugar por confirmar' }}</p>
                             </div>
                         </div>
