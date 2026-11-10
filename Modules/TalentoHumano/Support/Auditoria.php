@@ -22,9 +22,31 @@ class Auditoria
     /** Tipo de registro para las peticiones rechazadas por falta de permisos (HU-002, esc. 4). */
     public const ACCESO = 'FOLIUM\\Acceso';
 
+    /**
+     * Acciones del proceso que habilita una designación, con las designaciones que las permiten en orden de preferencia.
+     * Aunque quien las hace sea también Administrador, el origen del permiso es la designación (RN-036).
+     */
+    public const POR_DESIGNACION = [
+        'cronograma_aprobado' => ['lider_estrategia'],
+        'cronograma_rechazado' => ['lider_estrategia'],
+        'reubicacion_registrada' => ['lider_estrategia'],
+        'seleccion_validada' => ['instructor_th', 'lider_estrategia'],
+        'seleccion_ajustada' => ['instructor_th', 'lider_estrategia'],
+        'analisis_hv_guardado' => ['instructor_th', 'lider_estrategia'],
+        'formato_entrevista_guardado' => ['lider_estrategia', 'instructor_th', 'instructor_tecnico'],
+        'calificacion_registrada' => ['lider_estrategia', 'instructor_th', 'instructor_tecnico'],
+        'acta_firmada' => ['instructor_th'],
+    ];
+
+    private const DESIGNACIONES = [
+        'lider_estrategia' => 'Líder de la estrategia',
+        'instructor_th' => 'Instructor de Talento Humano',
+        'instructor_tecnico' => 'Instructor técnico',
+    ];
+
     public static function registrar(string $evento, Model $modelo, array $anterior = [], array $nuevo = [], ?array $origen = null): void
     {
-        self::insertar($evento, $modelo::class, (int) $modelo->getKey(), $anterior, $nuevo, $origen ?? self::origen());
+        self::insertar($evento, $modelo::class, (int) $modelo->getKey(), $anterior, $nuevo, $origen ?? self::origen($evento));
     }
 
     /**
@@ -32,7 +54,7 @@ class Auditoria
      */
     public static function registrarTipo(string $evento, string $tipo, int $id, array $nuevo = []): void
     {
-        self::insertar($evento, $tipo, $id, [], $nuevo, self::origen());
+        self::insertar($evento, $tipo, $id, [], $nuevo, self::origen($evento));
     }
 
     /**
@@ -44,11 +66,21 @@ class Auditoria
     }
 
     /**
-     * Origen del permiso del usuario actual: [tipo, fuente].
+     * Origen del permiso del usuario actual: [tipo, fuente]. Con el evento, las acciones de POR_DESIGNACION se atribuyen
+     * a la designación vigente que las habilita.
      */
-    public static function origen(): array
+    public static function origen(?string $evento = null): array
     {
         $usuario = auth()->user();
+
+        if ($usuario && isset(self::POR_DESIGNACION[$evento])) {
+            $suyas = AccesoTH::designaciones($usuario);
+            foreach (self::POR_DESIGNACION[$evento] as $tipo) {
+                if (in_array($tipo, $suyas)) {
+                    return ['Designación', self::DESIGNACIONES[$tipo]];
+                }
+            }
+        }
 
         return match (true) {
             !$usuario => ['Sistema', 'Sistema'],

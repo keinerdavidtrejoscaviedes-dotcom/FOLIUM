@@ -128,7 +128,7 @@ class PostulacionController extends Controller
             'aspirante' => trim(optional($postulacion->person)->first_name . ' ' . optional($postulacion->person)->first_last_name),
             'formacion' => $request->formacion, 'habilidades' => $request->habilidades, 'observaciones' => $request->observaciones,
         ]);
-        [, $designacion] = Auditoria::origen();
+        [, $designacion] = Auditoria::origen('analisis_hv_guardado');
 
         return back()->with('success', "Concepto guardado con tu designación {$designacion}.");
     }

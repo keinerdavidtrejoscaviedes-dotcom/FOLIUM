@@ -115,13 +115,13 @@ class SeleccionActasController extends Controller
         $this->ejecutarRegistroSeleccion($convocatoriaCargo, $elegidos->all(), $calculo, $esAjuste, $justificacion);
         PropuestaSeleccion::sincronizar($convocatoriaCargo->convocatoria);
 
-        // La validación la habilita la designación, aunque quien valide también sea Administrador (RN-021, RN-036)
-        $designacion = AccesoTH::designacionValidadora(auth()->user()) === 'instructor_th' ? 'Instructor de Talento Humano' : 'Líder de la estrategia';
-        Auditoria::registrar($esAjuste ? 'seleccion_ajustada' : 'seleccion_validada', $convocatoriaCargo, ['postulaciones' => $propuesta->propuestos], [
+        $evento = $esAjuste ? 'seleccion_ajustada' : 'seleccion_validada';
+        Auditoria::registrar($evento, $convocatoriaCargo, ['postulaciones' => $propuesta->propuestos], [
             'cargo' => $nombreCargo,
             'postulaciones' => $elegidos->all(),
             'justificacion' => $justificacion ?: null,
-        ], ['Designación', $designacion]);
+        ]);
+        [, $designacion] = Auditoria::origen($evento);
 
         return redirect()->route('talentohumano.seleccion.index')->with('success', $elegidos->isEmpty()
             ? "«{$nombreCargo}» quedó declarado vacante con tu designación {$designacion}."
