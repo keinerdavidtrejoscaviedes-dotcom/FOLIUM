@@ -8,7 +8,7 @@
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Propuesta de selección · {{ $convocatoria->fase->romano ?? 'Fase XXXVI' }}
+                    Propuesta de selección · {{ $convocatoria->fase?->nombre_completo }}
                 </p>
                 <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">
                     {{ $cargo->nombre }}
@@ -19,10 +19,10 @@
                     {{ $convocatoriaCargo->cupos }} {{ $convocatoriaCargo->cupos == 1 ? 'cupo' : 'cupos' }}
                 </span>
                 <span class="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 ring-1 ring-slate-200 shadow-sm">
-                    Umbral 120 de 200
+                    Umbral {{ rtrim(rtrim(number_format($umbral, 2, ',', '.'), '0'), ',') }} puntos
                 </span>
                 <span class="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 ring-1 ring-slate-200 shadow-sm">
-                    {{ $esVacante ? 'Si nadie alcanza: declarar vacante' : 'Si nadie alcanza: mayor puntaje' }}
+                    {{ $politica === 'declarar_vacante' ? 'Si nadie alcanza: declarar vacante' : 'Si nadie alcanza: mayor puntaje' }}
                 </span>
             </div>
         </div>
@@ -34,15 +34,20 @@
             <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm" role="alert">
                 <i class="fas fa-scale-unbalanced mt-0.5 text-base text-red-600"></i>
                 <div>
-                    <strong class="font-bold">Empate por resolver:</strong> dos candidatos de 1.ª opción con 147 puntos. Elige uno y escribe la justificación.
+                    <strong class="font-bold">Empate por resolver:</strong> candidatos con el mismo puntaje total y la misma opción compiten por el último cupo. Elige y escribe la justificación.
                 </div>
             </div>
         @elseif ($esVacante)
             <div class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 shadow-sm" role="alert">
                 <i class="fas fa-ban mt-0.5 text-base text-slate-500"></i>
                 <div>
-                    Ningún candidato alcanza el umbral de 120. Según la política de la convocatoria, el sistema propone <strong>declarar el cargo vacante</strong>.
+                    {{ $candidatos->isEmpty() ? 'Nadie se postuló a este cargo.' : 'Ningún candidato evaluado alcanza el umbral.' }} El sistema propone <strong>declarar el cargo vacante</strong>; queda disponible para las reubicaciones.
                 </div>
+            </div>
+        @elseif ($sinAptos)
+            <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm" role="status">
+                <i class="fas fa-triangle-exclamation mt-0.5 text-base text-amber-600"></i>
+                <div>Ningún candidato alcanza el umbral. Según la política de la convocatoria, el sistema propone al de <strong>mayor puntaje</strong>.</div>
             </div>
         @endif
 

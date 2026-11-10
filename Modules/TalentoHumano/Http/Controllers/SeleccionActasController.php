@@ -19,6 +19,7 @@ use Modules\TalentoHumano\Support\AccesoTH;
 use Modules\TalentoHumano\Support\Auditoria;
 use Modules\TalentoHumano\Support\ComiteReubicacion;
 use Modules\TalentoHumano\Support\Correo;
+use Modules\TalentoHumano\Support\PropuestaSeleccion;
 
 class SeleccionActasController extends Controller
 {
@@ -27,23 +28,19 @@ class SeleccionActasController extends Controller
      */
     public function index(Request $request)
     {
-        $convocatoria = Convocatoria::with(['fase', 'convocatoriaCargos.cargoActivado.cargo'])->orderByDesc('id')->first();
-        $fase = $convocatoria ? $convocatoria->fase : Fase::first();
+        $convocatoria = ComiteReubicacion::convocatoria();
+        $fase = $convocatoria?->fase ?? Fase::actual();
 
-        // Bloque 1: Procesamiento de propuestas de selección por cargo
-        $cargosConvocatoria = $convocatoria ? $convocatoria->convocatoriaCargos : collect();
-        $cargosProcesados = $this->procesarPropuestasCargos($cargosConvocatoria);
+        // Propuesta calculada por puntaje total y jerarquía de preferencia (RF-010)
+        $cargosProcesados = $convocatoria ? $this->procesarPropuestasCargos(PropuestaSeleccion::sincronizar($convocatoria)) : collect();
 
-        // Bloque 2: Clasificación en pendientes y validadas
-        $pendientes = $cargosProcesados->where('es_validado', false)->values();
-        $validadas = $cargosProcesados->where('es_validado', true)->values();
-
-        return view('talentohumano::seleccion.index', compact(
-            'convocatoria',
-            'fase',
-            'pendientes',
-            'validadas'
-        ));
+        return view('talentohumano::seleccion.index', [
+            'convocatoria' => $convocatoria,
+            'fase' => $fase,
+            'pendientes' => $cargosProcesados->where('es_validado', false)->values(),
+            'validadas' => $cargosProcesados->where('es_validado', true)->values(),
+            'porReubicar' => $convocatoria ? ComiteReubicacion::pendientes($convocatoria)->count() : 0,
+        ]);
     }
 
     /**
@@ -52,66 +49,83 @@ class SeleccionActasController extends Controller
     public function validarCargo($id)
     {
         $convocatoriaCargo = ConvocatoriaCargo::with(['convocatoria.fase', 'cargoActivado.cargo'])->findOrFail($id);
-        $cargo = $convocatoriaCargo->cargoActivado->cargo;
         $convocatoria = $convocatoriaCargo->convocatoria;
+        $calculo = PropuestaSeleccion::sincronizar($convocatoria);
+        $propuesta = $calculo->cargos[$convocatoriaCargo->id];
 
-        $selecciones = Seleccion::where('convocatoria_cargo_id', $convocatoriaCargo->id)
-            ->with(['postulacion.person', 'validadaPor'])
-            ->get();
+        $primeraSeleccion = Seleccion::with('validadaPor')->where('convocatoria_cargo_id', $convocatoriaCargo->id)
+            ->whereIn('estado', ['validada', 'ajustada'])->first();
 
-        $esValidado = $selecciones->whereIn('estado', ['validada', 'ajustada'])->isNotEmpty();
-        $primeraSeleccion = $selecciones->first();
-
-        // Bloque 1: Clasificación de candidatos por orden de mérito y umbrales (RN-021)
-        $candidatos = $this->obtenerCandidatosPorMerito($convocatoriaCargo, $selecciones);
-
-        // Casos especiales para el flujo interactivo
-        $esEmpate = $cargo->nombre === 'Gestor Pecuario';
-        $esVacante = $cargo->nombre === 'Líder Semillero SEBI';
-
-        return view('talentohumano::seleccion.validar', compact(
-            'convocatoriaCargo',
-            'cargo',
-            'convocatoria',
-            'candidatos',
-            'esValidado',
-            'primeraSeleccion',
-            'esEmpate',
-            'esVacante'
-        ));
+        return view('talentohumano::seleccion.validar', [
+            'convocatoriaCargo' => $convocatoriaCargo,
+            'cargo' => $convocatoriaCargo->cargoActivado->cargo,
+            'convocatoria' => $convocatoria,
+            'candidatos' => $this->obtenerCandidatosPorMerito($propuesta, $calculo),
+            'esValidado' => $propuesta->validado,
+            'primeraSeleccion' => $primeraSeleccion,
+            'esEmpate' => (bool) $propuesta->empatados,
+            'esVacante' => $propuesta->vacante,
+            'sinAptos' => $propuesta->sin_aptos,
+            'umbral' => $calculo->umbral,
+            'politica' => $calculo->politica,
+        ]);
     }
 
     /**
-     * Guarda la validación o ajuste de la selección (HU-038 · RN-021).
+     * Valida o ajusta la propuesta de un cargo; todo ajuste o empate exige justificación (HU-035, HU-038 · RN-021).
      */
     public function guardarValidacion(Request $request, $id)
     {
-        $convocatoriaCargo = ConvocatoriaCargo::with('cargoActivado.cargo')->findOrFail($id);
-        $personId = auth()->user()->person_id ?? 1;
-
+        $convocatoriaCargo = ConvocatoriaCargo::with(['convocatoria', 'cargoActivado.cargo'])->findOrFail($id);
+        $nombreCargo = $convocatoriaCargo->cargoActivado->cargo->nombre;
         $request->validate([
             'candidatos_ids' => 'nullable|array',
-            'justificacion' => 'nullable|string',
+            'candidatos_ids.*' => 'integer',
+            'justificacion' => 'nullable|string|max:2000',
         ]);
 
-        $esAjuste = $request->input('es_ajuste') == '1';
+        $calculo = PropuestaSeleccion::calcular($convocatoriaCargo->convocatoria);
+        $propuesta = $calculo->cargos[$convocatoriaCargo->id];
 
-        if ($esAjuste && empty($request->justificacion)) {
-            return back()->withErrors(['justificacion' => 'Todo ajuste a la propuesta de selección exige una justificación obligatoria (RN-021).'])->withInput();
+        // Cada cargo se valida una sola vez, por el Instructor Líder o por el Instructor de TH (HU-035 esc. 6, HU-038 esc. 5)
+        if ($propuesta->validado) {
+            return redirect()->route('talentohumano.seleccion.validar', $convocatoriaCargo->id)->with('error', 'Este cargo ya fue validado y no se puede volver a validar.');
         }
 
-        // Bloque de persistencia: ejecutar selección
-        $anteriores = Seleccion::where('convocatoria_cargo_id', $convocatoriaCargo->id)->pluck('postulacion_id')->all();
-        $this->ejecutarRegistroSeleccion($request, $convocatoriaCargo, $personId, $esAjuste);
-        Auditoria::registrar($esAjuste ? 'seleccion_ajustada' : 'seleccion_validada', $convocatoriaCargo, ['postulaciones' => $anteriores], [
-            'cargo' => $convocatoriaCargo->cargoActivado->cargo->nombre,
-            'postulaciones' => array_map('intval', (array) $request->candidatos_ids),
-            'justificacion' => $request->justificacion,
+        $elegidos = collect($request->input('candidatos_ids', []))->map(fn ($v) => (int) $v)->unique()->sort()->values();
+        $yaSeleccionados = $calculo->cargos->where('validado', true)->pluck('validados')->flatten();
+        $disponibles = $propuesta->candidatos->where('elegible', true)->pluck('postulacion_id')->diff($yaSeleccionados);
+        $errores = array_filter([
+            'candidatos_ids' => match (true) {
+                $elegidos->count() > $propuesta->cupos => "El cargo tiene {$propuesta->cupos} " . ($propuesta->cupos == 1 ? 'cupo' : 'cupos') . '.',
+                $elegidos->diff($disponibles)->isNotEmpty() => 'Solo puede elegir aspirantes evaluados que no estén seleccionados en otro cargo.',
+                default => null,
+            },
         ]);
-        [, $designacion] = Auditoria::origen();
 
-        return redirect()->route('talentohumano.seleccion.index')
-            ->with('success', "Selección de «{$convocatoriaCargo->cargoActivado->cargo->nombre}» validada con éxito con tu designación {$designacion}.");
+        $esAjuste = $elegidos->all() !== collect($propuesta->propuestos)->sort()->values()->all();
+        $justificacion = trim((string) $request->justificacion);
+        if (($esAjuste || $propuesta->empatados) && $justificacion === '') {
+            $errores['justificacion'] = 'Todo ajuste a la selección requiere justificación';
+        }
+        if ($errores) {
+            return back()->withErrors($errores)->withInput();
+        }
+
+        $this->ejecutarRegistroSeleccion($convocatoriaCargo, $elegidos->all(), $calculo, $esAjuste, $justificacion);
+        PropuestaSeleccion::sincronizar($convocatoriaCargo->convocatoria);
+
+        // La validación la habilita la designación, aunque quien valide también sea Administrador (RN-021, RN-036)
+        $designacion = AccesoTH::designacionValidadora(auth()->user()) === 'instructor_th' ? 'Instructor de Talento Humano' : 'Líder de la estrategia';
+        Auditoria::registrar($esAjuste ? 'seleccion_ajustada' : 'seleccion_validada', $convocatoriaCargo, ['postulaciones' => $propuesta->propuestos], [
+            'cargo' => $nombreCargo,
+            'postulaciones' => $elegidos->all(),
+            'justificacion' => $justificacion ?: null,
+        ], ['Designación', $designacion]);
+
+        return redirect()->route('talentohumano.seleccion.index')->with('success', $elegidos->isEmpty()
+            ? "«{$nombreCargo}» quedó declarado vacante con tu designación {$designacion}."
+            : "Selección de «{$nombreCargo}» validada con éxito con tu designación {$designacion}.");
     }
 
     /**
@@ -260,115 +274,91 @@ No quedaste seleccionado en ninguna de tus tres opciones de la convocatoria, "
     // FUNCIONES DE APOYO Y MODULARIZACIÓN POR BLOQUES
     // =========================================================================
 
-    /**
-     * Procesa y enriquece las propuestas de selección para cada cargo convocado.
-     */
-    private function procesarPropuestasCargos($cargosConvocatoria)
-    {
-        return $cargosConvocatoria->map(function ($cc) {
-            $cargo = $cc->cargoActivado->cargo;
-            $selecciones = Seleccion::where('convocatoria_cargo_id', $cc->id)->with('postulacion.person')->get();
-
-            return $this->clasificarEstadoCargo($cc, $cargo, $selecciones);
-        });
-    }
 
     /**
-     * Clasifica el estado, chips y descripción de propuesta de un cargo.
+     * Fila de la bandeja por cargo, con el estado de su propuesta.
      */
-    private function clasificarEstadoCargo($cc, $cargo, $selecciones): object
+    private function procesarPropuestasCargos(object $calculo)
     {
-        $esValidado = $selecciones->whereIn('estado', ['validada', 'ajustada'])->isNotEmpty();
-        $esEmpate = $cargo->nombre === 'Gestor Pecuario';
-        $esVacante = $cargo->nombre === 'Líder Semillero SEBI';
+        $nombres = Postulacion::with('person')->whereIn('id', $calculo->totales->keys())->get()->keyBy('id');
+        $listar = fn (array $ids) => collect($ids)->map(fn ($id) => ($nombres[$id]->nombre_completo ?? 'Aspirante') . ' (' . ($calculo->totales[$id]->total ?? '—') . ')')->join(' · ');
 
-        if ($esValidado) {
-            $estado = 'Validada';
-            $chip = 'bg-emerald-100 text-emerald-800';
-            $accion = 'Consultar';
-        } elseif ($esEmpate) {
-            $estado = 'Empate por resolver';
-            $chip = 'bg-red-100 text-red-700';
-            $accion = 'Validar';
-        } elseif ($esVacante) {
-            $estado = 'Vacante por política';
-            $chip = 'bg-slate-100 text-slate-600';
-            $accion = 'Validar';
-        } else {
-            $estado = 'Propuesta';
-            $chip = 'bg-amber-100 text-amber-800';
-            $accion = 'Validar';
-        }
-
-        $propuestaTexto = $selecciones->isNotEmpty()
-            ? $selecciones->map(fn ($s) => ($s->postulacion->nombre_completo ?? 'Aspirante') . ' (' . (int)$s->puntaje_total . ')')->join(' · ')
-            : 'Candidatos por jerarquía de mérito';
-
-        return (object) [
-            'id' => $cc->id,
-            'cargo_nombre' => $cargo->nombre,
-            'cupos' => $cc->cupos,
-            'propuesta' => $propuestaTexto,
-            'estado' => $estado,
-            'chip' => $chip,
-            'accion' => $accion,
-            'es_validado' => $esValidado,
-        ];
-    }
-
-    /**
-     * Obtiene y clasifica los candidatos ordenados por jerarquía de mérito.
-     */
-    private function obtenerCandidatosPorMerito($convocatoriaCargo, $selecciones)
-    {
-        $opciones = PostulacionOpcion::where('convocatoria_cargo_id', $convocatoriaCargo->id)
-            ->with(['postulacion.person'])
-            ->orderBy('preferencia')
-            ->get();
-
-        return $opciones->map(function ($op) use ($selecciones) {
-            $post = $op->postulacion;
-            $seleccionado = $selecciones->contains(fn ($s) => $s->postulacion_id === $post->id);
-            $total = (int)($post->puntaje_total ?: 140);
-            $prueba = round($total * 0.5);
-            $entrevista = $total - $prueba;
+        return $calculo->cargos->map(function ($cargo) use ($listar) {
+            [$estado, $chip] = match (true) {
+                $cargo->validado => ['Validada', 'bg-emerald-100 text-emerald-800'],
+                (bool) $cargo->empatados => ['Empate por resolver', 'bg-red-100 text-red-700'],
+                $cargo->vacante => [$cargo->candidatos->isEmpty() ? 'Sin postulantes' : 'Vacante por política', 'bg-slate-100 text-slate-600'],
+                $cargo->sin_aptos => ['Nadie alcanza el umbral', 'bg-amber-100 text-amber-800'],
+                default => ['Propuesta', 'bg-amber-100 text-amber-800'],
+            };
 
             return (object) [
-                'postulacion_id' => $post->id,
-                'nombre' => $post->nombre_completo,
-                'preferencia' => $op->preferencia,
-                'prueba' => $prueba,
-                'entrevista' => $entrevista,
-                'total' => $total,
-                'seleccionado' => $seleccionado,
-                'alcanza_umbral' => $total >= 120,
+                'id' => $cargo->id,
+                'cargo_nombre' => $cargo->nombre,
+                'cupos' => $cargo->cupos,
+                'propuesta' => match (true) {
+                    $cargo->validado => $cargo->validados ? $listar($cargo->validados) : 'Declarado vacante',
+                    (bool) $cargo->propuestos => $listar($cargo->propuestos),
+                    default => $cargo->candidatos->isEmpty() ? 'Sin postulantes' : 'Sin candidatos disponibles',
+                },
+                'estado' => $estado,
+                'chip' => $chip,
+                'accion' => $cargo->validado ? 'Consultar' : 'Validar',
+                'es_validado' => $cargo->validado,
             ];
-        })->sortByDesc('total')->values();
+        })->values();
     }
 
     /**
-     * Persiste la validación o ajuste en la base de datos.
+     * Candidatos del cargo ordenados por opción y puntaje total, marcando la propuesta del sistema.
      */
-    private function ejecutarRegistroSeleccion(Request $request, $convocatoriaCargo, int $personId, bool $esAjuste): void
+    private function obtenerCandidatosPorMerito(object $propuesta, object $calculo)
     {
-        Seleccion::where('convocatoria_cargo_id', $convocatoriaCargo->id)->delete();
+        $nombres = Postulacion::with('person')->whereIn('id', $propuesta->candidatos->pluck('postulacion_id'))->get()->keyBy('id');
+        $otrosValidados = $calculo->cargos->where('validado', true)->where('id', '!=', $propuesta->id)->pluck('validados')->flatten()->flip();
+        $marcados = $propuesta->validado ? $propuesta->validados : $propuesta->propuestos;
 
-        if ($request->has('candidatos_ids') && is_array($request->candidatos_ids)) {
-            foreach ($request->candidatos_ids as $postId) {
-                $post = Postulacion::find($postId);
-                if ($post) {
-                    Seleccion::create([
-                        'convocatoria_cargo_id' => $convocatoriaCargo->id,
-                        'postulacion_id' => $post->id,
-                        'puntaje_total' => $post->puntaje_total ?: 150.00,
-                        'estado' => $esAjuste ? 'ajustada' : 'validada',
-                        'justificacion' => $request->justificacion,
-                        'validada_por' => $personId,
-                        'validada_con' => AccesoTH::designacionValidadora(auth()->user()),
-                        'fecha_validacion' => now(),
-                    ]);
-                }
+        return $propuesta->candidatos->map(fn ($c) => (object) [
+            'postulacion_id' => $c->postulacion_id,
+            'nombre' => $nombres[$c->postulacion_id]->nombre_completo ?? 'Aspirante',
+            'preferencia' => $c->preferencia,
+            'prueba' => $c->prueba,
+            'entrevista' => $c->entrevista,
+            'evaluadores' => $c->evaluadores,
+            'total' => $c->total,
+            'seleccionado' => in_array($c->postulacion_id, $marcados),
+            'empate' => in_array($c->postulacion_id, $propuesta->empatados),
+            'alcanza_umbral' => $c->total !== null && $c->total >= $calculo->umbral,
+            'nota' => match (true) {
+                !$c->elegible => 'Sin prueba presentada o sin entrevista calificada',
+                isset($otrosValidados[$c->postulacion_id]) => 'Ya seleccionado en otro cargo',
+                default => null,
+            },
+        ])->sortBy([['preferencia', 'asc'], ['total', 'desc']])->values();
+    }
+
+    /**
+     * Guarda la decisión: una fila por seleccionado o, si no hay ninguno, el cargo declarado vacante (RN-020).
+     */
+    private function ejecutarRegistroSeleccion(ConvocatoriaCargo $convocatoriaCargo, array $elegidos, object $calculo, bool $esAjuste, string $justificacion): void
+    {
+        $comun = [
+            'convocatoria_cargo_id' => $convocatoriaCargo->id,
+            'estado' => $esAjuste ? 'ajustada' : 'validada',
+            'justificacion' => $justificacion ?: null,
+            'validada_por' => auth()->user()->person_id,
+            'validada_con' => AccesoTH::designacionValidadora(auth()->user()),
+            'fecha_validacion' => now(),
+        ];
+
+        DB::transaction(function () use ($convocatoriaCargo, $elegidos, $calculo, $comun) {
+            Seleccion::where('convocatoria_cargo_id', $convocatoriaCargo->id)->delete();
+            foreach ($elegidos ?: [null] as $postulacionId) {
+                Seleccion::create($comun + [
+                    'postulacion_id' => $postulacionId,
+                    'puntaje_total' => $postulacionId ? $calculo->totales[$postulacionId]->total : null,
+                ]);
             }
-        }
+        });
     }
 }

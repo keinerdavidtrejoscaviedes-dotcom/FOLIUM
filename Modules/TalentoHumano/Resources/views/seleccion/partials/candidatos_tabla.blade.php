@@ -23,7 +23,7 @@
                 @forelse ($candidatos as $cand)
                     @php
                         $filaClase = '';
-                        if ($esEmpate && $cand->total == 147) {
+                        if ($cand->empate) {
                             $filaClase = 'bg-red-50/40';
                         } elseif ($cand->seleccionado) {
                             $filaClase = 'bg-emerald-50/60';
@@ -66,16 +66,16 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-center text-slate-600 font-medium">
-                            {{ $cand->prueba }}
+                            {{ $cand->prueba ?? '—' }}
                         </td>
                         <td class="px-4 py-3 text-center text-slate-600 font-medium">
-                            {{ $cand->entrevista }} <span class="text-[11px] text-slate-400">· 3 ev.</span>
+                            {{ $cand->entrevista ?? '—' }}@if ($cand->evaluadores) <span class="text-[11px] text-slate-400">· {{ $cand->evaluadores }} ev.</span>@endif
                         </td>
-                        <td class="px-4 py-3 text-center font-extrabold {{ $cand->total >= 120 ? 'text-[#064C3D]' : 'text-red-600' }}">
-                            {{ $cand->total }}
+                        <td class="px-4 py-3 text-center font-extrabold {{ $cand->alcanza_umbral ? 'text-[#064C3D]' : 'text-red-600' }}">
+                            {{ $cand->total ?? '—' }}
                         </td>
                         <td class="px-4 py-3">
-                            @if ($esEmpate && $cand->total == 147)
+                            @if ($cand->empate)
                                 <span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700">
                                     Empate
                                 </span>
@@ -83,7 +83,7 @@
                                 <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
                                     Seleccionado
                                 </span>
-                            @elseif ($cand->total < 120)
+                            @elseif ($cand->total !== null && !$cand->alcanza_umbral)
                                 <span class="text-xs font-semibold text-red-600">
                                     Bajo el umbral
                                 </span>

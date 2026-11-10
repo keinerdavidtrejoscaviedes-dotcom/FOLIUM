@@ -20,11 +20,11 @@
                 </div>
             </div>
 
-            @if ($postulacion->puntaje_total)
+            @if ($verResultados && $postulacion->puntaje_total)
                 <div class="rounded-2xl bg-white px-5 py-3 text-right shadow-sm ring-1 ring-slate-200">
                     <p class="text-xs text-slate-400">Puntaje total</p>
                     <p class="text-3xl font-extrabold text-[#064C3D]">
-                        {{ (int)$postulacion->puntaje_total }} <span class="text-sm font-semibold text-slate-400">/ 200</span>
+                        {{ rtrim(rtrim(number_format($postulacion->puntaje_total, 2, ',', '.'), '0'), ',') }} <span class="text-sm font-semibold text-slate-400">puntos</span>
                     </p>
                 </div>
             @endif
@@ -33,18 +33,24 @@
         {{-- Aviso de visibilidad para Instructor de Talento Humano --}}
         <p class="mt-4 flex items-start gap-2 rounded-2xl bg-sky-50 px-4 py-2.5 text-xs text-sky-900 ring-1 ring-sky-200/60">
             <i class="fas fa-shield-halved mt-0.5 text-sky-600"></i>
-            <span>Ves los resultados porque tienes la designación <strong>Instructor de Talento Humano</strong>. El Gestor de Talento Humano no los ve.</span>
+            @if ($verResultados)
+                <span>Ves los resultados porque tienes la designación <strong>{{ $designacion }}</strong>. El Gestor de Talento Humano no los ve.</span>
+            @else
+                <span>Los resultados de la prueba y de las entrevistas solo los ven el Instructor Líder y el Instructor de Talento Humano.</span>
+            @endif
         </p>
     </div>
 
     {{-- Cuadrícula modular por bloques (2 columnas) --}}
     <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div class="space-y-4">
-            {{-- Bloque 1: Prueba psicotécnica --}}
-            @include('talentohumano::postulaciones.partials.prueba_psicotecnica')
+            @if ($verResultados)
+                {{-- Bloque 1: Prueba psicotécnica --}}
+                @include('talentohumano::postulaciones.partials.prueba_psicotecnica')
 
-            {{-- Bloque 2: Evaluaciones de Entrevista --}}
-            @include('talentohumano::postulaciones.partials.entrevistas')
+                {{-- Bloque 2: Evaluaciones de Entrevista --}}
+                @include('talentohumano::postulaciones.partials.entrevistas')
+            @endif
 
             {{-- Bloque 3: Análisis y Concepto de Hoja de Vida --}}
             @include('talentohumano::postulaciones.partials.analisis_hv')

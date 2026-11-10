@@ -63,6 +63,7 @@ class ComiteReubicacion
         $selecciones = DB::table('th_selecciones as s')
             ->join('th_convocatoria_cargos as cc', 'cc.id', '=', 's.convocatoria_cargo_id')
             ->where('cc.convocatoria_id', $convocatoria->id)
+            ->whereIn('s.estado', ['validada', 'ajustada'])->whereNotNull('s.postulacion_id')
             ->selectRaw('cc.cargo_activado_id, count(*) as total')->groupBy('cc.cargo_activado_id')->pluck('total', 'cargo_activado_id');
         $reubicaciones = DB::table('th_reubicaciones')->whereNotNull('cargo_activado_id')
             ->selectRaw('cargo_activado_id, count(*) as total')->groupBy('cargo_activado_id')->pluck('total', 'cargo_activado_id');

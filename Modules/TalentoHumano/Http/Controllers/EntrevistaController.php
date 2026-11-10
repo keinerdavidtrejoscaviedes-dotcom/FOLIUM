@@ -15,6 +15,7 @@ use Modules\TalentoHumano\Entities\Convocatoria;
 use Modules\TalentoHumano\Entities\Fase;
 use Modules\SICA\Entities\Person;
 use Modules\TalentoHumano\Support\Auditoria;
+use Modules\TalentoHumano\Support\PropuestaSeleccion;
 
 class EntrevistaController extends Controller
 {
@@ -143,6 +144,8 @@ class EntrevistaController extends Controller
         // Bloque: Persistir evaluación y cálculo de puntaje total
         $totalPuntaje = $this->registrarCalificacionAspirante($request, $entrevistaId, $postulacionId, $personId);
         $calificacion = Calificacion::where('entrevista_id', $entrevistaId)->where('postulacion_id', $postulacionId)->where('evaluador_id', $personId)->first();
+        // El puntaje total y la propuesta de selección se actualizan con cada calificación (RF-010)
+        PropuestaSeleccion::sincronizar(Entrevista::findOrFail($entrevistaId)->convocatoria);
         Auditoria::registrar('calificacion_registrada', $calificacion, [], [
             'entrevista' => (int) $entrevistaId, 'postulacion' => (int) $postulacionId, 'puntaje' => $totalPuntaje, 'concepto' => $request->concepto,
         ]);

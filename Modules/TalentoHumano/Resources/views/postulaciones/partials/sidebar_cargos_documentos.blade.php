@@ -7,14 +7,17 @@
             <span>Cargos postulados</span>
         </h2>
         <ol class="mt-4 space-y-2 text-sm">
-            @foreach ($postulacion->opciones as $op)
+            @foreach ($postulacion->opciones->sortBy('preferencia') as $op)
                 <li class="flex items-center gap-2.5 p-2 rounded-2xl ring-1 ring-slate-100 hover:bg-slate-50">
                     <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full {{ $op->preferencia == 1 ? 'bg-[#064C3D] text-white' : ($op->preferencia == 2 ? 'bg-emerald-500 text-white' : 'bg-[#34D399] text-[#043A2F]') }} text-xs font-bold">
                         {{ $op->preferencia }}
                     </span>
-                    <span class="font-semibold text-xs text-slate-800">
+                    <span class="min-w-0 flex-1 font-semibold text-xs text-slate-800">
                         {{ $op->cargo_nombre }}
                     </span>
+                    <a href="{{ route('talentohumano.postulaciones.documento', [$postulacion->id, $op->id, 'tipo' => 'propuesta']) }}" class="rounded-lg p-1.5 text-slate-500 hover:text-[#064C3D]" title="Descargar la propuesta de trabajo" aria-label="Descargar la propuesta de trabajo para {{ $op->cargo_nombre }}">
+                        <i class="fas fa-file-arrow-down"></i>
+                    </a>
                 </li>
             @endforeach
         </ol>
@@ -34,7 +37,7 @@
                         <p class="font-bold text-slate-800 truncate">{{ $doc->nombre_original }}</p>
                         <span class="text-[10px] uppercase text-slate-400">{{ $doc->tipo }}</span>
                     </div>
-                    <a href="#" class="rounded-lg p-1.5 text-slate-500 hover:text-[#064C3D]" title="Descargar documento">
+                    <a href="{{ route('talentohumano.postulaciones.documento', [$postulacion->id, $doc->id]) }}" class="rounded-lg p-1.5 text-slate-500 hover:text-[#064C3D]" title="Descargar documento" aria-label="Descargar {{ $doc->nombre_original }}">
                         <i class="fas fa-download"></i>
                     </a>
                 </li>

@@ -6,6 +6,9 @@
           class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70 mb-6">
         @csrf
         <input type="hidden" name="es_ajuste" id="input-es-ajuste" value="0">
+        @error('candidatos_ids')
+            <p class="mb-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700" role="alert">{{ $message }}</p>
+        @enderror
 
         <h2 class="font-bold text-[#064C3D] text-lg">Tu decisión</h2>
         <p class="mt-1 text-sm text-slate-600">
@@ -28,7 +31,7 @@
 
         <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-2">
             <p class="text-xs text-slate-500">
-                <i class="fas fa-clock-rotate-left mr-1"></i> Se registra con tu designación de Instructor de Talento Humano y queda en la auditoría del sistema.
+                <i class="fas fa-clock-rotate-left mr-1"></i> Se registra con tu designación de {{ \Modules\TalentoHumano\Support\AccesoTH::designacionValidadora(auth()->user()) === 'instructor_th' ? 'Instructor de Talento Humano' : 'Líder de la estrategia' }} y queda en la auditoría del sistema. Sin candidatos marcados, el cargo se declara vacante.
             </p>
             <button type="submit"
                     class="rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F] transition flex items-center gap-2">
@@ -44,9 +47,9 @@
             <span>Validación en firme</span>
         </h2>
         <p class="mt-2 text-sm text-slate-700 leading-relaxed">
-            Validada por <strong>{{ $primeraSeleccion->validadaPor->full_name ?? 'Instructor de TH' }}</strong> con la designación
+            {{ $primeraSeleccion->postulacion_id ? 'Validada' : 'Declarado vacante' }} por <strong>{{ trim(($primeraSeleccion->validadaPor->first_name ?? '') . ' ' . ($primeraSeleccion->validadaPor->first_last_name ?? '')) ?: 'Sin registro' }}</strong> con la designación
             <span class="font-semibold text-emerald-800">{{ $primeraSeleccion->validada_con === 'instructor_th' ? 'Instructor de Talento Humano' : 'Líder de la estrategia' }}</span>
-            el {{ optional($primeraSeleccion->fecha_validacion)->format('d/m/Y \a \l\a\s g:i a') ?? '21/10/2026' }}.
+            el {{ optional($primeraSeleccion->fecha_validacion)->format('d/m/Y \a \l\a\s g:i a') }}.
             @if ($primeraSeleccion->justificacion)
                 <br><span class="text-xs text-slate-500 font-medium">Motivo / Justificación: «{{ $primeraSeleccion->justificacion }}»</span>
             @endif

@@ -148,6 +148,7 @@ Route::prefix('talento-humano')
                 ->middleware(PermisoTH::class . ':postulaciones')->group(function () {
                     Route::get('/', 'index')->name('index');
                     Route::get('/{id}', 'show')->name('show');
+                    Route::get('/{id}/documentos/{documento}', 'documento')->whereNumber('documento')->name('documento');
                     Route::post('/{id}/analisis', 'guardarAnalisis')->name('analisis');
                 });
 

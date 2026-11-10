@@ -10,6 +10,11 @@ use Modules\TalentoHumano\Entities\Convocatoria;
 use Modules\TalentoHumano\Entities\Fase;
 use Modules\TalentoHumano\Entities\Cargo;
 use Modules\SICA\Entities\Course;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Modules\TalentoHumano\Entities\PostulacionDocumento;
+use Modules\TalentoHumano\Entities\PostulacionOpcion;
+use Modules\TalentoHumano\Support\AccesoTH;
 use Modules\TalentoHumano\Support\Auditoria;
 
 class PostulacionController extends Controller
@@ -55,16 +60,39 @@ class PostulacionController extends Controller
         $user = auth()->user();
         $esInstructor = $user->roles->contains(fn ($r) => in_array($r->slug, ['talentohumano.instructor', 'talentohumano.admin']));
 
-        // Bloques de datos complementarios de evaluación
-        $pruebaPsicotecnica = $this->prepararPruebaPsicotecnica($postulacion);
-        $entrevistas = $this->prepararEvaluacionesEntrevista($postulacion);
+        // Resultados de la prueba y de las entrevistas: Líder, Instructor de TH y Administrador; el Gestor no los ve (SRS 2.6)
+        $designaciones = AccesoTH::designaciones($user);
+        $verResultados = AccesoTH::esAdministrador($user) || array_intersect(['lider_estrategia', 'instructor_th'], $designaciones);
+        $designacion = match (true) {
+            in_array('lider_estrategia', $designaciones) => 'Líder de la estrategia',
+            in_array('instructor_th', $designaciones) => 'Instructor de Talento Humano',
+            default => 'Administrador',
+        };
 
-        return view('talentohumano::postulaciones.show', compact(
-            'postulacion',
-            'esInstructor',
-            'pruebaPsicotecnica',
-            'entrevistas'
-        ));
+        return view('talentohumano::postulaciones.show', [
+            'postulacion' => $postulacion,
+            'esInstructor' => $esInstructor,
+            'verResultados' => $verResultados,
+            'designacion' => $designacion,
+            'pruebaPsicotecnica' => $verResultados ? $this->prepararPruebaPsicotecnica($postulacion) : null,
+            'entrevistas' => $verResultados ? $this->prepararEvaluacionesEntrevista($postulacion) : null,
+        ]);
+    }
+
+    /**
+     * Descarga un documento o una propuesta de trabajo de la postulación (almacenamiento privado).
+     */
+    public function documento(Request $request, $id, $documento)
+    {
+        $registro = $request->query('tipo') === 'propuesta'
+            ? PostulacionOpcion::where('postulacion_id', $id)->findOrFail($documento)
+            : PostulacionDocumento::where('postulacion_id', $id)->findOrFail($documento);
+        $ruta = $registro instanceof PostulacionOpcion ? $registro->propuesta_trabajo : $registro->ruta_archivo;
+        abort_unless($ruta && Storage::disk('local')->exists($ruta), 404);
+
+        return Storage::disk('local')->download($ruta, $registro instanceof PostulacionOpcion
+            ? 'propuesta-' . $registro->preferencia . '.' . pathinfo($ruta, PATHINFO_EXTENSION)
+            : $registro->nombre_original);
     }
 
     /**
@@ -208,51 +236,51 @@ class PostulacionController extends Controller
     }
 
     /**
-     * Estructura los resultados de pruebas psicotécnicas para visualización.
+     * Resultado de la prueba psicotécnica presentada, con el puntaje de cada pregunta (RF-007).
      */
-    private function prepararPruebaPsicotecnica(Postulacion $postulacion): array
+    private function prepararPruebaPsicotecnica(Postulacion $postulacion): ?array
     {
+        $aplicacion = DB::table('th_aplicaciones_prueba')->where('postulacion_id', $postulacion->id)->latest('id')->first();
+        if (!$aplicacion) {
+            return null;
+        }
+
+        $preguntas = DB::table('th_cuestionario_preguntas as p')
+            ->leftJoin('th_respuestas_prueba as r', fn ($j) => $j->on('r.pregunta_id', '=', 'p.id')->where('r.aplicacion_id', $aplicacion->id))
+            ->where('p.cuestionario_id', $aplicacion->cuestionario_id)->orderBy('p.orden')
+            ->get(['p.enunciado', 'p.tipo', 'p.puntaje_maximo', 'r.puntaje', 'r.respuesta']);
+
         return [
-            'puntaje' => $postulacion->puntaje_total ? round($postulacion->puntaje_total / 2) : 82,
-            'fecha' => '23/09/2026',
-            'competencias' => [
-                ['nombre' => 'Razonamiento', 'puntaje' => 88],
-                ['nombre' => 'Trabajo en equipo', 'puntaje' => 84],
-                ['nombre' => 'Manejo de la presión', 'puntaje' => 74],
-            ],
+            'estado' => $aplicacion->estado,
+            'puntaje' => $aplicacion->puntaje !== null ? (float) $aplicacion->puntaje : null,
+            'maximo' => (float) $preguntas->where('tipo', '!=', 'abierta')->sum('puntaje_maximo'),
+            'fecha' => $aplicacion->fecha_presentacion ? \Illuminate\Support\Carbon::parse($aplicacion->fecha_presentacion)->format('d/m/Y') : null,
+            'preguntas' => $preguntas,
         ];
     }
 
     /**
-     * Estructura los conceptos de entrevistas técnicas y psicológicas.
+     * Calificaciones de cada evaluador en las entrevistas técnica y psicológica (RF-009).
      */
     private function prepararEvaluacionesEntrevista(Postulacion $postulacion): array
     {
+        $evaluaciones = DB::table('th_calificaciones as c')
+            ->join('th_entrevistas as e', 'e.id', '=', 'c.entrevista_id')
+            ->leftJoin('people as p', 'p.id', '=', 'c.evaluador_id')
+            ->where('c.postulacion_id', $postulacion->id)
+            ->orderBy('e.fecha_hora')
+            ->selectRaw("TRIM(CONCAT_WS(' ', p.first_name, p.first_last_name)) as evaluador, e.tipo, e.modalidad, c.puntaje, c.concepto, c.observaciones")
+            ->get();
+
         return [
-            'puntaje' => $postulacion->puntaje_total ? round($postulacion->puntaje_total / 2) : 82,
-            'evaluaciones' => [
-                [
-                    'evaluador' => 'Yina',
-                    'rol' => 'técnica · Líder',
-                    'puntaje' => 84,
-                    'concepto' => 'Apto',
-                    'comentarios' => 'Conoce bien los procesos de selección y propone mejorar el clima organizacional con pausas activas.',
-                ],
-                [
-                    'evaluador' => 'Carlos Andrés Medina',
-                    'rol' => 'técnica',
-                    'puntaje' => 80,
-                    'concepto' => 'Apto',
-                    'comentarios' => 'Buena expresión oral; le falta experiencia con nómina.',
-                ],
-                [
-                    'evaluador' => 'Adriana Carolina Muñoz',
-                    'rol' => 'psicológica grupal',
-                    'puntaje' => 82,
-                    'concepto' => 'Apto',
-                    'comentarios' => 'Comunicación asertiva, actitud proactiva y proyección laboral clara.',
-                ],
-            ],
+            'puntaje' => $evaluaciones->isNotEmpty() ? round($evaluaciones->avg('puntaje'), 2) : null,
+            'evaluaciones' => $evaluaciones->map(fn ($e) => [
+                'evaluador' => $e->evaluador ?: 'Evaluador',
+                'rol' => ($e->tipo === 'psicologica' ? 'psicológica' : 'técnica') . ' ' . $e->modalidad,
+                'puntaje' => (float) $e->puntaje,
+                'concepto' => $e->concepto === 'apto' ? 'Apto' : 'No apto',
+                'comentarios' => $e->observaciones,
+            ])->all(),
         ];
     }
 

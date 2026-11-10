@@ -27,7 +27,7 @@
         {{-- Acceso a Reubicaciones (Mockup INS-04) --}}
         <a href="{{ route('talentohumano.seleccion.reubicaciones') }}" class="folium-btn folium-btn-mint">
             <i class="fas fa-arrows-rotate text-emerald-600"></i>
-            <span>Comité de reubicaciones (3)</span>
+            <span>Comité de reubicaciones ({{ $porReubicar }})</span>
         </a>
     </div>
 
