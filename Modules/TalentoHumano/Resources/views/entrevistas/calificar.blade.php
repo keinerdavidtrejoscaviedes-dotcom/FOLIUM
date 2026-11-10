@@ -22,7 +22,7 @@
                         Calificar: {{ $postulacion->nombre_completo }}
                     </h1>
                     <p class="text-xs text-slate-500 sm:text-sm">
-                        Entrevista técnica individual · Lugar: {{ $entrevista->lugar }} · Ficha {{ $postulacion->course->code ?? 'N/A' }}
+                        Entrevista {{ $entrevista->tipo === 'psicologica' ? 'psicológica' : 'técnica' }} {{ $entrevista->modalidad }} · Lugar: {{ $entrevista->lugar }} · Ficha {{ $postulacion->course->code ?? 'N/A' }}
                     </p>
                 </div>
             </div>
@@ -44,7 +44,7 @@
         <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <h2 class="font-bold text-base text-[#064C3D]">Preguntas del formato técnico</h2>
+                    <h2 class="font-bold text-base text-[#064C3D]">Preguntas del formato {{ $entrevista->tipo === 'psicologica' ? 'psicológico' : 'técnico' }}</h2>
                     <p class="text-xs text-slate-500">Asigna la puntuación individual para cada aspecto evaluado (HU-041).</p>
                 </div>
                 <div class="text-right">
@@ -89,7 +89,7 @@
                             <input type="radio" name="concepto" value="apto" {{ old('concepto', $calificacion->concepto ?? 'apto') === 'apto' ? 'checked' : '' }} class="accent-[#064C3D]">
                             <div>
                                 <p class="text-xs font-bold text-slate-800">Apto</p>
-                                <p class="text-[11px] text-slate-500">Cumple competencias técnicas</p>
+                                <p class="text-[11px] text-slate-500">Cumple el perfil evaluado</p>
                             </div>
                         </label>
                         <label class="flex items-center gap-2 rounded-2xl p-3 ring-1 ring-slate-200 bg-white flex-1 cursor-pointer has-[:checked]:bg-red-50 has-[:checked]:ring-red-500">
@@ -106,7 +106,7 @@
                     <label for="observaciones" class="block text-xs font-semibold text-slate-700 mb-1">
                         Observaciones / Justificación de la evaluación:
                     </label>
-                    <textarea id="observaciones" name="observaciones" rows="3" placeholder="Escribe tus observaciones técnicas sobre la entrevista..."
+                    <textarea id="observaciones" name="observaciones" rows="3" placeholder="Escribe tus observaciones sobre la entrevista..."
                               class="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-800 focus:border-[#064C3D] focus:ring-1 focus:ring-[#34D399]">{{ old('observaciones', $calificacion->observaciones ?? '') }}</textarea>
                 </div>
             </div>

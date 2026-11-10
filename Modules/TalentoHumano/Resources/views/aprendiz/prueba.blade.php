@@ -95,8 +95,9 @@
                             document.getElementById('barra').style.width = (total ? Math.round(n * 100 / total) : 0) + '%';
                         };
 
-                        // Guardado progresivo (HU-047, esc. 2)
-                        const guardar = (fieldset) => fetch(@json(route('talentohumano.aprendiz.prueba.progreso')), {
+                        // Guardado progresivo (HU-047, esc. 2). Al enviar ya no se guarda aparte: lo hace el envío
+                        let enviando = false;
+                        const guardar = (fieldset) => enviando ? null : fetch(@json(route('talentohumano.aprendiz.prueba.progreso')), {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
                             body: JSON.stringify({ pregunta_id: Number(fieldset.dataset.pregunta), respuesta: valor(fieldset) }),
@@ -106,17 +107,19 @@
 
                         form.querySelectorAll('[data-pregunta]').forEach((fieldset) => {
                             let espera;
-                            fieldset.addEventListener('change', () => { contar(); guardar(fieldset); });
+                            // Las respuestas abiertas se guardan al escribir; así el clic en «Enviar prueba» no dispara otro guardado
+                            fieldset.addEventListener('change', (e) => { contar(); if (e.target.tagName !== 'TEXTAREA') guardar(fieldset); });
                             fieldset.querySelector('textarea')?.addEventListener('input', () => { contar(); clearTimeout(espera); espera = setTimeout(() => guardar(fieldset), 800); });
                         });
 
                         // Preguntas sin responder: no se envía y se lleva a la primera pendiente (HU-047, esc. 5)
                         form.addEventListener('submit', (e) => {
                             const pendiente = [...form.querySelectorAll('[data-pregunta]')].find((f) => valor(f) === '');
-                            if (!pendiente) return;
+                            if (!pendiente) { enviando = true; return; }
                             e.preventDefault();
-                            form.querySelectorAll('[data-pregunta]').forEach((f) => f.classList.remove('ring-2', 'ring-red-400'));
-                            pendiente.classList.add('ring-2', 'ring-red-400');
+                            form.querySelectorAll('[data-pregunta]').forEach((f) => f.classList.replace('ring-red-400', 'ring-slate-200/70'));
+                            pendiente.classList.replace('ring-slate-200/70', 'ring-red-400');
+                            pendiente.classList.add('ring-2');
                             pendiente.scrollIntoView({ behavior: 'smooth' });
                             aviso.textContent = 'Responda todas las preguntas antes de enviar';
                         });

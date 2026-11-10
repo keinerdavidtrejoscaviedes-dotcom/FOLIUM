@@ -101,7 +101,13 @@ class EntrevistaController extends Controller
         $postulacion = Postulacion::with(['person', 'course.program', 'opciones.convocatoriaCargo.cargoActivado.cargo'])->findOrFail($postulacionId);
 
         // Bloques: Cuestionario aplicable y calificación previa
-        $cuestionario = $this->resolverCuestionarioVigente($personId);
+        $cuestionario = $this->resolverCuestionarioVigente($personId, $entrevista);
+        if (!$cuestionario) {
+            // Cada evaluador califica con su propio formato del tipo de la entrevista (HU-040, RN-018)
+            return $entrevista->tipo === 'psicologica'
+                ? redirect()->route('talentohumano.formato.edit')->with('warning', 'Primero arme su formato de entrevista psicológica para poder calificar.')
+                : redirect()->route('talentohumano.entrevistas.formato')->with('warning', 'Primero arme su formato de entrevista técnica para poder calificar.');
+        }
         $calificacion = Calificacion::where('entrevista_id', $entrevista->id)
             ->where('postulacion_id', $postulacion->id)
             ->where('evaluador_id', $personId)
@@ -121,7 +127,7 @@ class EntrevistaController extends Controller
     public function guardarCalificacion(Request $request, $entrevistaId, $postulacionId)
     {
         $request->validate([
-            'cuestionario_id' => 'required|exists:th_cuestionarios,id',
+            'cuestionario_id' => 'required|integer',
             'concepto' => 'required|in:apto,no_apto',
             'observaciones' => 'nullable|string',
             'puntajes' => 'required|array',
@@ -129,6 +135,10 @@ class EntrevistaController extends Controller
 
         $personId = auth()->user()->person_id ?? 1;
         $this->verificarEvaluador((int) $entrevistaId, (int) $postulacionId, $personId);
+
+        // La calificación se registra con el formato vigente del evaluador para ese tipo de entrevista
+        $cuestionario = $this->resolverCuestionarioVigente($personId, Entrevista::findOrFail($entrevistaId));
+        abort_unless($cuestionario && (int) $request->cuestionario_id === $cuestionario->id, 422, 'El formato de la entrevista cambió; vuelva a abrir la calificación.');
 
         // Bloque: Persistir evaluación y cálculo de puntaje total
         $totalPuntaje = $this->registrarCalificacionAspirante($request, $entrevistaId, $postulacionId, $personId);
@@ -307,15 +317,16 @@ class EntrevistaController extends Controller
     }
 
     /**
-     * Resuelve el cuestionario vigente del evaluador o el institucional general.
+     * Formato vigente del evaluador para el tipo de la entrevista: técnico del instructor o psicológico del psicólogo.
      */
-    private function resolverCuestionarioVigente(int $personId): ?Cuestionario
+    private function resolverCuestionarioVigente(int $personId, Entrevista $entrevista): ?Cuestionario
     {
         return Cuestionario::with('preguntas')
             ->where('autor_id', $personId)
-            ->where('tipo', 'entrevista_tecnica')
+            ->where('tipo', $entrevista->tipo === 'psicologica' ? 'entrevista_psicologica' : 'entrevista_tecnica')
             ->where('estado', 'vigente')
-            ->first() ?? Cuestionario::with('preguntas')->where('tipo', 'entrevista_tecnica')->first();
+            ->orderByDesc('version')
+            ->first();
     }
 
     /**

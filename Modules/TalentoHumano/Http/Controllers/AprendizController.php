@@ -309,6 +309,9 @@ class AprendizController extends Controller
      */
     public function guardarProgresoPrueba(Request $request)
     {
+        // Un guardado que coincide con el envío no debe consumir el mensaje de la página siguiente
+        $request->session()->reflash();
+
         $p = $this->portal();
         if ($this->situacionPrueba($p) !== 'disponible') {
             return response()->json(['ok' => false, 'mensaje' => 'La prueba no está disponible.'], 422);

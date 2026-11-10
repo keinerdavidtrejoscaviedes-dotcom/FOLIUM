@@ -75,9 +75,13 @@
                     <span class="grid h-7 w-7 place-items-center rounded-full bg-[#34D399] text-xs font-black text-[#043A2F]" aria-hidden="true">{{ $iniciales }}</span>
                     <span class="hidden max-w-[180px] truncate text-xs font-semibold sm:inline">{{ $persona->first_name ?? $nombre }}</span>
                 </div>
-                <a href="{{ route('talentohumano.index') }}" class="grid h-8 w-8 place-items-center rounded-full text-emerald-100/80 hover:bg-white/10 hover:text-white" title="Ir a la presentación de FOLIUM" aria-label="Ir a la presentación de FOLIUM">
-                    <i class="fas fa-right-from-bracket text-sm" aria-hidden="true"></i>
-                </a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <input type="hidden" name="redirect" value="{{ route('talentohumano.index', [], false) }}">
+                    <button type="submit" class="rounded-full px-3 py-1.5 text-sm text-emerald-100 hover:bg-white/10 hover:text-white" title="Cerrar sesión">
+                        <i class="fas fa-right-from-bracket" aria-hidden="true"></i><span class="ml-1 hidden sm:inline">Salir</span>
+                    </button>
+                </form>
             </div>
         </div>
     </header>
