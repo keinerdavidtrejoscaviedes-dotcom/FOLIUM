@@ -82,7 +82,7 @@ class CargaMasiva
                 $cargo->estado !== 'activo' => 'El cargo está inactivo en el catálogo.',
                 !$fecha => 'La fecha de inicio no es válida (use dd/mm/aaaa).',
                 (bool) $faltantes => 'La unidad productiva «' . reset($faltantes) . '» no existe.',
-                (bool) $ocupada => "Ya tiene el cargo {$ocupada?->cargo->nombre} en la {$fase->nombre()}.",
+                (bool) $ocupada => "El aprendiz ya tiene un cargo en esta fase ({$ocupada?->cargo->nombre}).",
                 isset($vistos[$aprendiz->id]) => "El aprendiz ya aparece en la fila {$vistos[$aprendiz->id]} del archivo.",
                 default => null,
             };

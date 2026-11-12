@@ -41,6 +41,23 @@
 
         <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
             <div class="min-w-0 space-y-4">
+                @if ($alertas->isNotEmpty())
+                    <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+                        <h2 class="font-bold text-[#064C3D]">Alertas emitidas en la fase</h2>
+                        <ul class="mt-3 divide-y divide-slate-100 text-sm">
+                            @foreach ($alertas as $alerta)
+                                <li class="flex flex-wrap items-start justify-between gap-2 py-2.5">
+                                    <span class="min-w-0 flex-1">
+                                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">{{ $alerta->etapa ?? 'Proceso' }}</span>
+                                        <span class="ml-1 text-slate-700">{{ $alerta->texto }}</span>
+                                    </span>
+                                    <span class="shrink-0 text-xs text-slate-400">{{ $alerta->created_at->format('d/m/Y h:i a') }}{{ $alerta->leida_en ? ' · atendida' : '' }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+
                 @if ($cronograma)
                     <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
                         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -63,6 +80,13 @@
                             @endforeach
                         </ol>
                     </section>
+                @endif
+
+                @if (!$convocatoria && ($cronograma || $hayEmpalmes))
+                    {{-- HU-038C, esc. 2 --}}
+                    <p class="rounded-3xl bg-white px-6 py-8 text-center text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200/70">
+                        <i class="fas fa-bullhorn mb-2 block text-2xl text-slate-300" aria-hidden="true"></i>La fase aún no tiene convocatoria
+                    </p>
                 @endif
 
                 {{-- HU-014, esc. 1: la convocatoria completa, sin botones de edición ni de publicación --}}

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\TalentoHumano\Services\Auditoria;
 use Modules\TalentoHumano\Services\FaseService;
+use Modules\TalentoHumano\Support\AccesoTH;
 
 /**
  * Fichas de formación de la fase (HU-017, RF-018, RN-038).
@@ -30,6 +31,9 @@ class FichaFaseController extends Controller
             'fichas' => $disponibles->concat($asociadas),
             'seleccionadas' => DB::table('th_fase_fichas')->where('fase_id', $fase->id)->pluck('course_id')->all(),
             'bloqueada' => $this->fases->convocatoriaPublicada($fase->id),
+            'soloConsulta' => !AccesoTH::puedeModificar(auth()->user(), 'fichas_cargos'),
+            'avisoConsulta' => AccesoTH::esLiderEstrategia(auth()->user()) && AccesoTH::hayGestorDisponible()
+                ? 'La selección de fichas corresponde al Gestor de Talento Humano' : 'Consulta de las fichas de la fase, sin modificarlas.',
         ]);
     }
 

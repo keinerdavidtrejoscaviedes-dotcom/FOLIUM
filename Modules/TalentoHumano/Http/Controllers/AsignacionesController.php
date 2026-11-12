@@ -4,6 +4,7 @@ namespace Modules\TalentoHumano\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -94,6 +95,50 @@ class AsignacionesController extends Controller
     }
 
     /**
+     * Registro de una fase con su número y sus fechas (HU-011).
+     */
+    public function registrarFase(Request $request)
+    {
+        $validador = Validator::make($request->all(), [
+            'numero' => ['required', 'integer', 'min:1', 'max:65535', Rule::unique('th_fases', 'numero')->whereNull('deleted_at')],
+            'fecha_inicio' => ['required', 'date'],
+            'fecha_fin' => ['required', 'date', 'after:fecha_inicio'],
+        ], [
+            'required' => 'Este campo es obligatorio',
+            'numero.unique' => 'Ya existe una fase con ese número',
+            'fecha_fin.after' => 'La fecha de fin debe ser posterior a la de inicio',
+        ]);
+
+        // Las fechas no pueden cruzarse con otra fase; una fase sin fecha de fin ocupa solo su día de inicio
+        $validador->after(function ($v) use ($request) {
+            if ($v->errors()->isNotEmpty()) {
+                return;
+            }
+            $inicio = $request->input('fecha_inicio');
+            $fin = $request->input('fecha_fin');
+            $cruce = Fase::where('fecha_inicio', '<=', $fin)
+                ->where(fn ($q) => $q->where('fecha_fin', '>=', $inicio)->orWhere(fn ($s) => $s->whereNull('fecha_fin')->where('fecha_inicio', '>=', $inicio)))
+                ->exists();
+            if ($cruce) {
+                $v->errors()->add('fecha_inicio', 'Las fechas se cruzan con otra fase');
+            }
+        });
+
+        if ($validador->fails()) {
+            $faltan = collect($validador->errors()->all())->contains('Este campo es obligatorio');
+
+            return back()->withErrors($validador, 'fase')->withInput()
+                ->with('error', $faltan ? 'Debe completar los campos obligatorios' : $validador->errors()->first());
+        }
+
+        $datos = $validador->validated();
+        $fase = Fase::create($datos + ['estado' => 'planeacion']);
+        Auditoria::registrar('fase_registrada', $fase, [], ['numero' => $fase->numero, 'fecha_inicio' => $datos['fecha_inicio'], 'fecha_fin' => $datos['fecha_fin']]);
+
+        return redirect()->route('talentohumano.lider.asignaciones.index', ['fase' => $fase->id])->with('success', 'Fase registrada correctamente');
+    }
+
+    /**
      * Formulario de asignación inicial, una por una (HU-013, esc. 1).
      */
     public function create(Request $request)
@@ -133,7 +178,7 @@ class AsignacionesController extends Controller
             throw ValidationException::withMessages(['documento' => 'Solo se pueden asignar aprendices registrados en SICEFA']);
         }
         if ($ocupada = GestionAsignaciones::ocupada($aprendiz->id, $fase->id)) {
-            throw ValidationException::withMessages(['documento' => "Ya tiene una asignación en la {$fase->nombre()}: {$ocupada->cargo->nombre}. Un aprendiz solo puede tener una asignación por fase."]);
+            throw ValidationException::withMessages(['documento' => "El aprendiz ya tiene un cargo en esta fase ({$ocupada->cargo->nombre})."]);
         }
 
         $asignacion = DB::transaction(fn () => GestionAsignaciones::crearCargaInicial(
@@ -200,7 +245,7 @@ class AsignacionesController extends Controller
             foreach ($revision['correctas'] as $fila) {
                 // Pudo cambiar algo entre la revisión y la confirmación
                 if ($ocupada = GestionAsignaciones::ocupada($fila['person_id'], $fase->id)) {
-                    $errores[] = ['fila' => $fila['fila'], 'documento' => $fila['documento'], 'cargo' => $fila['cargo'], 'motivo' => "Ya tiene el cargo {$ocupada->cargo->nombre} en la {$fase->nombre()}."];
+                    $errores[] = ['fila' => $fila['fila'], 'documento' => $fila['documento'], 'cargo' => $fila['cargo'], 'motivo' => "El aprendiz ya tiene un cargo en esta fase ({$ocupada->cargo->nombre})."];
                     continue;
                 }
                 $correctas[] = $fila;
@@ -249,7 +294,8 @@ class AsignacionesController extends Controller
     {
         abort_unless($asignacion->estado === $desde, 409, 'La asignación no está en estado ' . $desde);
         $justificacion = $request->validateWithBag($hacia === 'suspendida' ? 'suspender' : 'reactivar',
-            ['justificacion' => ['required', 'string', 'max:2000']], ['justificacion.required' => self::MENSAJE_JUSTIFICACION])['justificacion'];
+            ['justificacion' => ['required', 'string', 'max:2000']],
+            ['justificacion.required' => $hacia === 'suspendida' ? 'Registre el motivo de la suspensión' : 'Registre el motivo de la reactivación'])['justificacion'];
 
         GestionAsignaciones::cambiarEstado($asignacion, $hacia, trim($justificacion), $request->user());
 

@@ -19,17 +19,37 @@ class Alerta extends Model
         'correo_no_entregado' => ['fa-envelope-circle-check', 'bg-red-50 text-red-600'],
         'novedad_inventario' => ['fa-boxes-stacked', 'bg-amber-50 text-amber-600'],
         'prueba_no_presentada' => ['fa-user-clock', 'bg-amber-50 text-amber-600'],
+        'prerrequisito' => ['fa-triangle-exclamation', 'bg-amber-50 text-amber-600'],
     ];
 
     protected $table = 'th_alertas';
 
-    protected $fillable = ['tipo', 'titulo', 'texto', 'enlace', 'leida_en'];
+    protected $fillable = ['fase_id', 'etapa', 'tipo', 'titulo', 'texto', 'enlace', 'leida_en'];
 
     protected $casts = ['leida_en' => 'datetime'];
 
     public static function crear(string $tipo, string $titulo, ?string $texto = null, ?string $enlace = null): self
     {
         return self::create(compact('tipo', 'titulo', 'texto', 'enlace'));
+    }
+
+    /**
+     * Alerta de prerrequisitos de una etapa de la fase; no se repite mientras siga igual y sin leer (HU-008, HU-013A).
+     * Devuelve null si ya existía.
+     */
+    public static function prerrequisito(int $faseId, string $etapa, array $faltantes, ?string $enlace = null): ?self
+    {
+        $texto = implode(' · ', $faltantes);
+        $existe = self::where('fase_id', $faseId)->where('etapa', $etapa)->where('texto', $texto)->whereNull('leida_en')->exists();
+
+        return $existe ? null : self::create([
+            'fase_id' => $faseId,
+            'etapa' => $etapa,
+            'tipo' => 'prerrequisito',
+            'titulo' => "{$etapa}: faltan prerrequisitos",
+            'texto' => $texto,
+            'enlace' => $enlace,
+        ]);
     }
 
     public function scopeSinLeer($query)

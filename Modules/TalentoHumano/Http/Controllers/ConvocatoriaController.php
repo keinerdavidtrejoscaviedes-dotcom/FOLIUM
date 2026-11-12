@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
 use Modules\TalentoHumano\Services\Auditoria;
 use Modules\TalentoHumano\Services\FaseService;
+use Modules\TalentoHumano\Entities\Alerta;
 
 /**
  * Convocatoria de la fase: requisitos de cada cargo, umbral y política de selección (HU-022, RF-004),
@@ -56,6 +57,8 @@ class ConvocatoriaController extends Controller
         $publicar = $request->input('accion') === 'publicar';
 
         if ($contexto['bloqueo']) {
+            Alerta::prerrequisito($fase->id, 'Convocatoria', [$contexto['bloqueo']]);
+
             return back()->with('error', $contexto['bloqueo']);
         }
         if (!$contexto['editable']) {
@@ -77,6 +80,7 @@ class ConvocatoriaController extends Controller
             // HU-021 escenario 3
             if ($contexto['cronograma']->estado !== 'aprobado') {
                 $errores->add('convocatoria', 'El cronograma aprobado es prerrequisito para publicar la convocatoria.');
+                Alerta::prerrequisito($fase->id, 'Convocatoria', ['El cronograma aprobado es prerrequisito para publicar la convocatoria']);
             }
             // HU-022 escenario 5
             if (blank($request->umbral) || blank($request->politica_sin_aptos)) {

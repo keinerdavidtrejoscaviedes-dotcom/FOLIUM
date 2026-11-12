@@ -19,7 +19,7 @@
         <div class="relative isolate mt-4 overflow-hidden rounded-3xl bg-[#064C3D] p-8 text-white sm:p-10">
             <i class="fas fa-handshake absolute -bottom-6 -right-2 -z-10 text-[9rem] text-white/5" aria-hidden="true"></i>
             <span class="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-2xl text-[#34D399] ring-1 ring-white/20"><i class="fas fa-hourglass-start" aria-hidden="true"></i></span>
-            <h2 class="mt-5 text-xl font-extrabold sm:text-2xl">Los empalmes todavía no han empezado</h2>
+            <h2 class="mt-5 text-xl font-extrabold sm:text-2xl">No hay empalmes en curso en esta fase</h2>
             <p class="mt-2 max-w-xl text-emerald-50/85">
                 Se habilitan cuando el Gestor de Talento Humano publique el acta de seleccionados.
                 @if ($etapaEmpalme)

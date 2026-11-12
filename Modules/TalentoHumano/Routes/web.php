@@ -64,6 +64,7 @@ Route::prefix('talento-humano')
                         Route::patch('{cargo}/inactivar', 'inactivar')->whereNumber('cargo')->name('inactivar');
                         Route::patch('{cargo}/reactivar', 'reactivar')->whereNumber('cargo')->name('reactivar');
                         Route::delete('{cargo}', 'destroy')->whereNumber('cargo')->name('destroy');
+                        Route::put('{cargo}/inventario', 'guardarInventario')->whereNumber('cargo')->name('inventario');
                     });
                     Route::get('{cargo}', 'show')->whereNumber('cargo')->name('show');
                 });
@@ -75,6 +76,7 @@ Route::prefix('talento-humano')
                         Route::post('/', 'store')->name('store');
                         Route::post('{designacion}/reasignar', 'reasignar')->whereNumber('designacion')->name('reasignar');
                         Route::patch('{designacion}/retirar', 'retirar')->whereNumber('designacion')->name('retirar');
+                        Route::patch('{designacion}', 'actualizar')->whereNumber('designacion')->name('actualizar');
                     });
                 });
 
@@ -97,6 +99,7 @@ Route::prefix('talento-humano')
                     Route::patch('{asignacion}/suspender', 'suspender')->whereNumber('asignacion')->name('suspender');
                     Route::patch('{asignacion}/reactivar', 'reactivar')->whereNumber('asignacion')->name('reactivar');
                     Route::middleware(AdministradorTH::class)->group(function () {
+                        Route::post('fase', 'registrarFase')->name('fase');
                         Route::get('inicial', 'create')->name('create');
                         Route::post('inicial', 'store')->name('store');
                         Route::get('carga-masiva', 'cargaMasiva')->name('carga-masiva');
@@ -225,19 +228,22 @@ Route::prefix('talento-humano')
                 Route::prefix('{fase}')->whereNumber('fase')->group(function () {
                     Route::get('/', [FaseController::class, 'show'])->name('show');
 
-                    Route::get('fichas', [FichaFaseController::class, 'index'])->name('fichas.index');
-                    Route::put('fichas', [FichaFaseController::class, 'update'])->name('fichas.update');
-                    Route::get('fichas/{ficha}/aprendices', [FichaFaseController::class, 'aprendices'])->whereNumber('ficha')->name('fichas.aprendices');
-
-                    Route::get('cargos', [ActivacionCargoController::class, 'edit'])->name('cargos.edit');
-                    Route::put('cargos', [ActivacionCargoController::class, 'update'])->name('cargos.update');
-
                     Route::get('cronograma', [CronogramaController::class, 'edit'])->name('cronograma.edit');
                     Route::put('cronograma', [CronogramaController::class, 'update'])->name('cronograma.update');
 
                     Route::get('convocatoria', [ConvocatoriaController::class, 'edit'])->name('convocatoria.edit');
                     Route::put('convocatoria', [ConvocatoriaController::class, 'update'])->name('convocatoria.update');
                 });
+            });
+
+            // Fichas y cargos de la fase: el Gestor, o el Instructor Líder si no hay Gestor disponible (HU-017, HU-019)
+            Route::prefix('fases/{fase}')->whereNumber('fase')->name('fases.')->middleware(PermisoTH::class . ':fichas_cargos')->group(function () {
+                Route::get('fichas', [FichaFaseController::class, 'index'])->name('fichas.index');
+                Route::put('fichas', [FichaFaseController::class, 'update'])->name('fichas.update');
+                Route::get('fichas/{ficha}/aprendices', [FichaFaseController::class, 'aprendices'])->whereNumber('ficha')->name('fichas.aprendices');
+
+                Route::get('cargos', [ActivacionCargoController::class, 'edit'])->name('cargos.edit');
+                Route::put('cargos', [ActivacionCargoController::class, 'update'])->name('cargos.update');
             });
 
             // Portal del Aprendiz: cronograma, convocatoria, postulación, prueba, acta, empalme y cargo (HU-043 a HU-057)

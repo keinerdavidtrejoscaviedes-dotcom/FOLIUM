@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
 use Modules\TalentoHumano\Services\Auditoria;
 use Modules\TalentoHumano\Services\FaseService;
+use Modules\TalentoHumano\Entities\Alerta;
+use Modules\TalentoHumano\Support\AccesoTH;
+use Modules\TalentoHumano\Support\Correo;
 
 /**
  * Cronograma del proceso de selección: el Gestor de TH lo elabora y lo envía a aprobación
@@ -70,6 +73,9 @@ class CronogramaController extends Controller
 
         if ($enviar && $errores->isEmpty()) {
             $errores = $this->validarEnvio($fase, $fechas);
+            if ($errores->has('cronograma')) {
+                $this->avisarCondicionesMinimas($fase, $errores->get('cronograma'));
+            }
         }
 
         if ($errores->isNotEmpty()) {
@@ -159,6 +165,21 @@ class CronogramaController extends Controller
         }
 
         return [$fechas, $errores];
+    }
+
+    /**
+     * Faltan condiciones mínimas para enviar el cronograma: queda en el historial de alertas de la fase y se avisa al
+     * Administrador por correo y en su panel (HU-008, RN-033). No se repite mientras la alerta siga igual y sin leer.
+     */
+    private function avisarCondicionesMinimas(object $fase, array $faltantes): void
+    {
+        $faltantes = array_map(fn ($m) => rtrim($m, '.'), $faltantes);
+        $alerta = Alerta::prerrequisito($fase->id, 'Cronograma', $faltantes, InstructorLiderController::url('designaciones'));
+        if ($alerta) {
+            Correo::enviar(AccesoTH::correosAdministradores()->all(), "FOLIUM: faltan condiciones para iniciar la selección de la Fase {$fase->numero}",
+                "El Gestor de Talento Humano no pudo enviar el cronograma de la Fase {$fase->numero} a aprobación porque:\n\n- "
+                . implode("\n- ", $faltantes) . "\n\nRevise las designaciones y los psicólogos en " . InstructorLiderController::url('designaciones'));
+        }
     }
 
     /**

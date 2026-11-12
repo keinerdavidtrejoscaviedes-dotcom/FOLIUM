@@ -2,6 +2,13 @@
     <x-talentohumano::encabezado titulo="Activación de cargos · Fase {{ $fase->numero }}" :volver="route('talentohumano.fases.show', $fase->id)" hu="HU-019 · RF-001 · RN-037 · RN-056"
         subtitulo="El sistema propone los cargos del catálogo compatibles con los programas de las fichas de la fase y todos los cargos de nivel Gestor. Ajuste la lista y el número de aprendices de cada cargo." />
 
+    @if ($soloConsulta)
+        <div class="mb-6 rounded-2xl bg-sky-50 p-4 text-sm text-sky-900 ring-1 ring-sky-200" role="status">
+            <i class="fas fa-eye mr-1" aria-hidden="true"></i> {{ $avisoConsulta }}
+        </div>
+    @endif
+
+
     @if ($fichas->isEmpty())
         {{-- HU-019 escenario 11 --}}
         <div class="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-slate-200">
@@ -90,7 +97,7 @@
                 </details>
             @endif
 
-            @unless ($bloqueada)
+            @unless ($bloqueada || $soloConsulta)
                 <div class="sticky bottom-0 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/95 p-4 shadow-lg ring-1 ring-slate-200 backdrop-blur">
                     <p class="text-sm text-slate-600">
                         <strong id="total-cargos">0</strong> cargos activados · <strong id="total-aprendices">0</strong> aprendices requeridos

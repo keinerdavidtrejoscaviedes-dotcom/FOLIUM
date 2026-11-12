@@ -17,6 +17,13 @@
             <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Asignaciones</h1>
             <p class="mt-1 text-sm text-slate-600">Quién ocupa cada cargo en cada fase, con su estado y su origen.</p>
         </div>
+        @if ($esAdministrador)
+            <div class="flex flex-wrap gap-2">
+                <button type="button" data-abrir="#modal-fase" class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-[#E8F3EF]">
+                    <i class="fas fa-flag" aria-hidden="true"></i> Registrar fase
+                </button>
+            </div>
+        @endif
         @if ($esAdministrador && $fase && !$cerrada)
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('talentohumano.lider.asignaciones.create') }}" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#064C3D]/20 hover:bg-[#043A2F]">
@@ -36,7 +43,7 @@
             <span class="grid h-14 w-14 place-items-center rounded-2xl bg-white/10 text-2xl text-[#34D399] ring-1 ring-white/20"><i class="fas fa-flag-checkered" aria-hidden="true"></i></span>
             <h2 class="mt-5 text-xl font-extrabold sm:text-2xl">Puesta en marcha de FOLIUM</h2>
             <p class="mt-2 max-w-2xl text-emerald-50/85">
-                Aún no hay fases registradas. El Gestor de Talento Humano registra la fase desde «Fases»; después podrás cargar las asignaciones
+                Aún no hay fases registradas. Registra la fase en curso con «Registrar fase»; después podrás cargar las asignaciones
                 de los aprendices que ya ocupan cargos, una por una o desde Excel.
             </p>
         </div>
@@ -173,6 +180,39 @@
     @endif
 
     {{-- Suspender (HU-012) --}}
+    {{-- Registrar fase (HU-011) --}}
+    @if ($esAdministrador)
+        @php $errorFase = fn ($campo) => $errors->fase->has($campo) ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200 focus:border-[#064C3D]'; @endphp
+        <dialog id="modal-fase" aria-labelledby="titulo-fase" class="m-auto w-[min(94vw,30rem)] rounded-3xl p-0 shadow-2xl backdrop:bg-slate-900/50" @if ($errors->fase->any()) data-abrir-al-cargar @endif>
+            <form method="POST" action="{{ route('talentohumano.lider.asignaciones.fase') }}" class="p-6" novalidate>
+                @csrf
+                <h2 id="titulo-fase" class="text-lg font-bold text-slate-900">Registrar fase</h2>
+                <p class="text-sm text-slate-500">Número de la fase y sus fechas de inicio y fin.</p>
+                <div class="mt-4 grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label for="fase-numero" class="mb-1 block text-sm font-semibold text-slate-700">Número <span class="text-red-500">*</span></label>
+                        <input id="fase-numero" name="numero" type="number" min="1" value="{{ old('numero', ($fases->max('numero') ?? 0) + 1) }}" class="{{ $campo }} w-full {{ $errorFase('numero') }}">
+                        @if ($errors->fase->has('numero')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $errors->fase->first('numero') }}</p> @endif
+                    </div>
+                    <div>
+                        <label for="fase-inicio" class="mb-1 block text-sm font-semibold text-slate-700">Inicio <span class="text-red-500">*</span></label>
+                        <input id="fase-inicio" name="fecha_inicio" type="date" value="{{ old('fecha_inicio') }}" class="{{ $campo }} w-full {{ $errorFase('fecha_inicio') }}">
+                        @if ($errors->fase->has('fecha_inicio')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $errors->fase->first('fecha_inicio') }}</p> @endif
+                    </div>
+                    <div>
+                        <label for="fase-fin" class="mb-1 block text-sm font-semibold text-slate-700">Fin <span class="text-red-500">*</span></label>
+                        <input id="fase-fin" name="fecha_fin" type="date" value="{{ old('fecha_fin') }}" class="{{ $campo }} w-full {{ $errorFase('fecha_fin') }}">
+                        @if ($errors->fase->has('fecha_fin')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $errors->fase->first('fecha_fin') }}</p> @endif
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-2">
+                    <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                    <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Registrar</button>
+                </div>
+            </form>
+        </dialog>
+    @endif
+
     <dialog id="modal-suspender" aria-labelledby="titulo-suspender" class="m-auto w-[min(94vw,32rem)] rounded-3xl p-0 shadow-2xl backdrop:bg-slate-900/50"
             @if ($errors->suspender->any()) data-abrir-al-cargar data-id="{{ old('asignacion_id') }}" @endif>
         <form method="POST" data-accion="{{ route('talentohumano.lider.asignaciones.suspender', '__ID__') }}" class="p-6" novalidate>

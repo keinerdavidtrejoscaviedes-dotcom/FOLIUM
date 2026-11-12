@@ -130,6 +130,8 @@ class DescripcionAuditoria
             'inventario_recibido' => "Verificó el inventario recibido del cargo «{$nuevo('cargo')}» ({$nuevo('novedades')} novedades)",
             'visita_confirmada' => "Confirmó la visita a la unidad productiva del cargo «{$nuevo('cargo')}»",
             'satisfaccion_registrada' => "Diligenció el Formulario de Satisfacción del empalme del cargo «{$nuevo('cargo')}»",
+            'designacion_modificada' => "Modificó la designación {$nuevo('designacion')} de {$nuevo('instructor')}",
+            'inventario_cargo_guardado' => "Registró el inventario actual del cargo «{$nombre()}» ({$nuevo('items')} implementos)",
             'acceso_denegado' => 'Intentó una acción sin permiso',
             default => Str::ucfirst(str_replace('_', ' ', $registro->event)),
         };

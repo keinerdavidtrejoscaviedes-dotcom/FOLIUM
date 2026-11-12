@@ -5,6 +5,13 @@
     <x-talentohumano::encabezado titulo="Fichas de la fase {{ $fase->numero }}" :volver="route('talentohumano.fases.show', $fase->id)" hu="HU-017 · RF-018 · RN-038"
         subtitulo="Marque las fichas que ingresan a la fase. Solo se muestran las fichas activas de nivel tecnólogo y modalidad presencial; sus aprendices serán los que vean la convocatoria." />
 
+    @if ($soloConsulta)
+        <div class="mb-6 rounded-2xl bg-sky-50 p-4 text-sm text-sky-900 ring-1 ring-sky-200" role="status">
+            <i class="fas fa-eye mr-1" aria-hidden="true"></i> {{ $avisoConsulta }}
+        </div>
+    @endif
+
+
     @if ($bloqueada)
         <div class="mb-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-200">
             <i class="fas fa-lock mr-1" aria-hidden="true"></i>
@@ -78,7 +85,7 @@
                 El trimestre se calcula con la fecha de inicio de la ficha (tres meses por trimestre). Se cuentan los aprendices en formación, inducción o condicionados.
             </p>
 
-            @unless ($bloqueada)
+            @unless ($bloqueada || $soloConsulta)
                 <div class="mt-6 flex justify-end">
                     <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]">
                         <i class="fas fa-check" aria-hidden="true"></i> Confirmar selección

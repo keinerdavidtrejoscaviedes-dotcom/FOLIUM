@@ -15,7 +15,8 @@ class PlantillaActaRequest extends FormRequest
 {
     private const ESTRUCTURA = ['secciones', 'columnas_inventario', 'items_base', 'firmantes'];
 
-    public const MENSAJE_INCOMPLETA = 'Debe definir al menos una columna de inventario y los firmantes requeridos';
+    public const MENSAJE_SIN_COLUMNAS = 'Debe definir al menos una columna de inventario';
+    public const MENSAJE_SIN_FIRMANTES = 'Debe indicar los firmantes requeridos';
 
     public function authorize(): bool
     {
@@ -66,10 +67,10 @@ class PlantillaActaRequest extends FormRequest
     {
         return [
             'required' => 'Este campo es obligatorio',
-            'columnas_inventario.required' => self::MENSAJE_INCOMPLETA,
-            'columnas_inventario.min' => self::MENSAJE_INCOMPLETA,
-            'firmantes.required' => self::MENSAJE_INCOMPLETA,
-            'firmantes.min' => self::MENSAJE_INCOMPLETA,
+            'columnas_inventario.required' => self::MENSAJE_SIN_COLUMNAS,
+            'columnas_inventario.min' => self::MENSAJE_SIN_COLUMNAS,
+            'firmantes.required' => self::MENSAJE_SIN_FIRMANTES,
+            'firmantes.min' => self::MENSAJE_SIN_FIRMANTES,
             'secciones.required' => 'El acta debe tener al menos una sección',
             'secciones.*.titulo.required' => 'Todas las secciones necesitan un título',
             'secciones.*.campos.*.etiqueta.required' => 'Todos los campos necesitan un nombre',

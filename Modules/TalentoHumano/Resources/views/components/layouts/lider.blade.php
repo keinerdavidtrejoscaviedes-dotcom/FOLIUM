@@ -14,6 +14,16 @@
         'Líder de la estrategia' => in_array('lider_estrategia', $designaciones),
         'Instructor de TH' => in_array('instructor_th', $designaciones),
     ]));
+    // Funciones del proceso que la Líder ejerce fuera del submódulo (HU-024B, HU-040 a HU-042, HU-017C, HU-019D)
+    $usuario = auth()->user();
+    $faseActual = \Modules\TalentoHumano\Entities\Fase::actual();
+    $suple = $faseActual && \Modules\TalentoHumano\Support\AccesoTH::supleAlGestor($usuario);
+    $trabajo = array_filter([
+        \Modules\TalentoHumano\Support\AccesoTH::puede($usuario, 'postulaciones') ? ['Hojas de vida', 'fa-file-lines', route('talentohumano.postulaciones.index')] : null,
+        \Modules\TalentoHumano\Support\AccesoTH::puede($usuario, 'formato_tecnico') ? ['Mis entrevistas', 'fa-comments', route('talentohumano.entrevistas.index')] : null,
+        $suple ? ['Fichas de la fase', 'fa-users-rectangle', route('talentohumano.fases.fichas.index', $faseActual->id)] : null,
+        $suple ? ['Cargos de la fase', 'fa-briefcase', route('talentohumano.fases.cargos.edit', $faseActual->id)] : null,
+    ]);
     $enlace = fn (bool $actual) => $actual
         ? 'bg-[#064C3D] text-white shadow-md shadow-[#064C3D]/20'
         : 'text-slate-600 hover:bg-[#E8F3EF] hover:text-[#064C3D]';
@@ -57,6 +67,19 @@
                             </div>
                         </div>
                     @endforeach
+
+                    @if ($trabajo)
+                        <div class="contents lg:block">
+                            <p class="hidden px-4 pb-1.5 text-[11px] font-bold uppercase tracking-[.18em] text-slate-400 lg:block">Mi trabajo</p>
+                            <div class="contents lg:block lg:space-y-1">
+                                @foreach ($trabajo as [$texto, $icono, $url])
+                                    <a href="{{ $url }}" class="flex shrink-0 items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold transition {{ $enlace(false) }}">
+                                        <i class="fas {{ $icono }} w-4 text-center" aria-hidden="true"></i> {{ $texto }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </nav>
             </div>
         </aside>
@@ -112,7 +135,9 @@
                     }
                     Object.entries(datos).forEach(([clave, valor]) => {
                         ventana.querySelectorAll(`[data-campo-${clave}]:not(input)`).forEach((e) => { e.textContent = valor; });
+                        ventana.querySelectorAll(`[data-valor-${clave}]`).forEach((e) => { if (!e.dataset.conservar) e.value = valor; });
                     });
+                    ventana.querySelectorAll('[data-solo-tipo]').forEach((e) => { e.hidden = e.dataset.soloTipo !== datos.tipo; });
                     if (datos.marcar) ventana.querySelector(`input[value="${datos.marcar}"]`)?.click();
                     ventana.showModal();
                 };

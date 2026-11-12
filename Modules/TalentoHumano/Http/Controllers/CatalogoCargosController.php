@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\SICA\Entities\Program;
 use Modules\TalentoHumano\Entities\Area;
 use Modules\TalentoHumano\Entities\Cargo;
+use Modules\TalentoHumano\Entities\PlantillaActa;
 use Modules\TalentoHumano\Http\Requests\CargoRequest;
 use Modules\TalentoHumano\Support\Auditoria;
 
@@ -43,7 +44,58 @@ class CatalogoCargosController extends Controller
     {
         $cargo->load(['area', 'superior', 'subordinados' => fn ($q) => $q->orderBy('nombre'), 'programas' => fn ($q) => $q->orderBy('name'), 'requisitosAdicionales']);
 
-        return view('talentohumano::lider.catalogo.show', ['cargo' => $cargo]);
+        $plantilla = PlantillaActa::deLaMismaArea($cargo->area_id)->where('estado', 'vigente')->latest('version')->first()
+            ?? PlantillaActa::deLaMismaArea(null)->where('estado', 'vigente')->latest('version')->first();
+
+        return view('talentohumano::lider.catalogo.show', [
+            'cargo' => $cargo,
+            'inventario' => DB::table('th_inventario_cargo')->where('cargo_id', $cargo->id)->orderBy('id')->get(['item', 'cantidad', 'estado']),
+            'estadosInventario' => collect($plantilla?->columnas_inventario ?? [])->firstWhere('tipo', 'lista')['opciones'] ?? ['Bueno', 'Regular', 'Malo'],
+        ]);
+    }
+
+    /**
+     * Inventario actual del cargo al poner en marcha el sistema; el acta de su primer empalme se precarga con él (HU-012).
+     * Si algún implemento está incompleto no se guarda nada y se conservan los datos diligenciados.
+     */
+    public function guardarInventario(Request $request, Cargo $cargo)
+    {
+        $filas = collect((array) $request->input('items', []))
+            ->map(fn ($f) => ['item' => trim((string) ($f['item'] ?? '')), 'cantidad' => trim((string) ($f['cantidad'] ?? '')), 'estado' => trim((string) ($f['estado'] ?? ''))])
+            ->reject(fn ($f) => $f['item'] === '' && $f['cantidad'] === '' && $f['estado'] === '')
+            ->values();
+
+        $errores = [];
+        foreach ($filas as $i => $fila) {
+            if ($fila['item'] === '') {
+                $errores["items.{$i}.item"] = 'Este campo es obligatorio';
+            }
+            if (!ctype_digit($fila['cantidad']) || (int) $fila['cantidad'] < 1) {
+                $errores["items.{$i}.cantidad"] = 'Indique una cantidad mayor que cero';
+            }
+            if ($fila['estado'] === '') {
+                $errores["items.{$i}.estado"] = 'Este campo es obligatorio';
+            }
+        }
+        if ($errores) {
+            return back()->withErrors($errores, 'inventario')->withInput()
+                ->with('error', 'El inventario no se guardó: complete los datos marcados en rojo.');
+        }
+
+        $anterior = DB::table('th_inventario_cargo')->where('cargo_id', $cargo->id)->count();
+        DB::transaction(function () use ($cargo, $filas) {
+            DB::table('th_inventario_cargo')->where('cargo_id', $cargo->id)->delete();
+            foreach ($filas as $fila) {
+                DB::table('th_inventario_cargo')->insert([
+                    'cargo_id' => $cargo->id, 'custodio_cargo_id' => $cargo->id,
+                    'item' => mb_substr($fila['item'], 0, 255), 'cantidad' => (int) $fila['cantidad'], 'estado' => mb_substr($fila['estado'], 0, 80),
+                    'created_at' => now(), 'updated_at' => now(),
+                ]);
+            }
+        });
+        Auditoria::registrar('inventario_cargo_guardado', $cargo, ['items' => $anterior], ['items' => $filas->count(), 'implementos' => $filas->pluck('item')->implode(', ')]);
+
+        return redirect()->route('talentohumano.lider.catalogo.show', $cargo)->with('success', 'Inventario guardado correctamente');
     }
 
     public function create()

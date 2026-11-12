@@ -108,6 +108,10 @@
                                     @if ($esAdministrador)
                                         <td class="px-4 py-3 text-right">
                                             <div class="flex justify-end gap-1">
+                                                <button type="button" data-abrir="#modal-modificar" data-id="{{ $designacion->id }}" data-nombre="{{ $persona }}" data-funcion="{{ $designacion->nombreTipo() }}"
+                                                        data-tipo="{{ $designacion->tipo }}" data-vigencia="{{ $designacion->fase_id ? 'fase' : 'indefinida' }}" data-programa="{{ $designacion->program_id }}"
+                                                        class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#064C3D]" title="Modificar" aria-label="Modificar la designación de {{ $persona }}">
+                                                    <i class="fas fa-pen" aria-hidden="true"></i></button>
                                                 <button type="button" data-abrir="#modal-reasignar" data-id="{{ $designacion->id }}" data-nombre="{{ $persona }}" data-funcion="{{ $designacion->nombreTipo() }}"
                                                         class="grid h-8 w-8 place-items-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[#064C3D]" title="Reasignar" aria-label="Reasignar la designación de {{ $persona }}">
                                                     <i class="fas fa-right-left" aria-hidden="true"></i></button>
@@ -239,6 +243,44 @@
                 <div class="mt-6 flex justify-end gap-2">
                     <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
                     <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]"><i class="fas fa-check mr-1" aria-hidden="true"></i> Asignar</button>
+                </div>
+            </form>
+        </dialog>
+
+        {{-- Modificar la vigencia o el programa (HU-007B) --}}
+        <dialog id="modal-modificar" aria-labelledby="titulo-modificar" class="m-auto w-[min(94vw,32rem)] rounded-3xl p-0 shadow-2xl backdrop:bg-slate-900/50"
+                @if ($errors->modificar->any()) data-abrir-al-cargar data-id="{{ old('designacion_id') }}" @endif>
+            <form method="POST" data-accion="{{ route('talentohumano.lider.designaciones.actualizar', '__ID__') }}" class="p-6" novalidate>
+                @csrf @method('PATCH')
+                <input type="hidden" name="designacion_id" data-campo-id value="{{ old('designacion_id') }}">
+                <h2 id="titulo-modificar" class="text-lg font-bold text-slate-900">Modificar designación</h2>
+                <div class="mt-4 rounded-2xl bg-[#E8F3EF]/60 px-4 py-3 text-sm">
+                    <p class="font-semibold text-slate-800" data-campo-nombre></p>
+                    <p class="text-xs text-slate-500" data-campo-funcion></p>
+                </div>
+                <div class="mt-4 space-y-4">
+                    <div>
+                        <label for="modificar-vigencia" class="mb-1 block text-sm font-semibold text-slate-700">Vigencia <span class="text-red-500">*</span></label>
+                        <select id="modificar-vigencia" name="vigencia" data-valor-vigencia class="{{ $campo }} {{ $error('modificar', 'vigencia') ? 'border-red-400' : 'border-slate-200 focus:border-[#064C3D]' }}">
+                            <option value="indefinida">Indefinida</option>
+                            @if ($fase) <option value="fase">Solo la {{ $fase->nombre() }}</option> @endif
+                        </select>
+                        @if ($error('modificar', 'vigencia')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $error('modificar', 'vigencia') }}</p> @endif
+                    </div>
+                    <div data-solo-tipo="instructor_tecnico" @unless ($errors->modificar->has('program_id')) hidden @endunless>
+                        <label for="modificar-programa" class="mb-1 block text-sm font-semibold text-slate-700">Programa de formación <span class="text-red-500">*</span></label>
+                        <select id="modificar-programa" name="program_id" data-valor-programa class="{{ $campo }} {{ $error('modificar', 'program_id') ? 'border-red-400' : 'border-slate-200 focus:border-[#064C3D]' }}">
+                            <option value="">Seleccione…</option>
+                            @foreach ($programas as $programa)
+                                <option value="{{ $programa->id }}">{{ $programa->name }} · SOFIA {{ $programa->sofia_code }}</option>
+                            @endforeach
+                        </select>
+                        @if ($error('modificar', 'program_id')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $error('modificar', 'program_id') }}</p> @endif
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-2">
+                    <button type="button" data-cerrar class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Cancelar</button>
+                    <button class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Guardar cambios</button>
                 </div>
             </form>
         </dialog>

@@ -99,6 +99,37 @@ class DesignacionesController extends Controller
     }
 
     /**
+     * Cambia la vigencia o el programa de una designación vigente (HU-007B).
+     */
+    public function actualizar(Request $request, Designacion $designacion)
+    {
+        abort_if($designacion->fecha_retiro, 404);
+        $tecnico = $designacion->tipo === 'instructor_tecnico';
+        $datos = $request->validateWithBag('modificar', [
+            'vigencia' => ['required', Rule::in(Fase::actual() ? ['indefinida', 'fase'] : ['indefinida'])],
+            'program_id' => [$tecnico ? 'required' : 'nullable', Rule::in($this->programas()->pluck('id'))],
+        ], [
+            'required' => 'Este campo es obligatorio',
+            'program_id.required' => 'Indique el programa de formación del instructor técnico',
+            'vigencia.in' => 'No hay una fase en curso: la vigencia debe ser indefinida',
+        ]);
+
+        $nuevos = [
+            'fase_id' => $datos['vigencia'] === 'fase' ? Fase::actual()->id : null,
+            'program_id' => $tecnico ? (int) $datos['program_id'] : null,
+        ];
+        if ($nuevos['fase_id'] == $designacion->fase_id && $nuevos['program_id'] == $designacion->program_id) {
+            return back()->with('info', 'No se detectaron cambios');
+        }
+
+        $antes = $this->instantanea($designacion);
+        $designacion->update($nuevos);
+        Auditoria::registrar('designacion_modificada', $designacion, $antes, $this->instantanea($designacion->fresh()));
+
+        return back()->with('success', 'Designación actualizada correctamente');
+    }
+
+    /**
      * Retiro de una designación sin borrarla (HU-010, esc. 1 y 3).
      */
     public function retirar(Request $request, Designacion $designacion)
@@ -168,6 +199,7 @@ class DesignacionesController extends Controller
         return [
             'instructor' => $this->nombre($designacion),
             'designacion' => $designacion->nombreTipo(),
+            'programa' => $designacion->programa?->name,
             'vigencia' => $designacion->fase?->nombre() ?? 'Indefinida',
             'fecha_retiro' => $designacion->fecha_retiro?->toDateString(),
             'motivo_retiro' => $designacion->motivo_retiro,

@@ -100,6 +100,83 @@
                     <p class="mt-2 text-sm text-slate-400">Sin requisitos registrados.</p>
                 @endif
             </section>
+
+            {{-- Inventario actual del cargo (HU-012): con él se precarga el acta del primer empalme --}}
+            @php
+                $filasInventario = old('items', $inventario->map(fn ($i) => (array) $i)->all()) ?: [['item' => '', 'cantidad' => '', 'estado' => '']];
+                $errorInventario = fn ($i, $campo) => $errors->inventario->has("items.{$i}.{$campo}") ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200';
+                $campoInventario = 'w-full rounded-xl border bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40';
+            @endphp
+            <section class="{{ $tarjeta }}" id="inventario">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="font-bold text-[#064C3D]">Inventario actual del cargo</h2>
+                    <span class="text-xs text-slate-500">{{ $inventario->count() }} {{ $inventario->count() === 1 ? 'implemento' : 'implementos' }}</span>
+                </div>
+                <p class="mt-1 text-xs text-slate-500">El acta de recibimiento del primer empalme del cargo se precarga con este inventario; si está vacío, parte de la lista base de la plantilla del área.</p>
+                @if ($esAdministrador)
+                    <form method="POST" action="{{ route('talentohumano.lider.catalogo.inventario', $cargo) }}" class="mt-4">
+                        @csrf @method('PUT')
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[520px] text-left text-sm">
+                                <thead class="text-xs uppercase tracking-wider text-slate-500"><tr><th class="py-2 pr-2">Implemento</th><th class="w-28 px-2 py-2">Cantidad</th><th class="w-40 px-2 py-2">Estado</th><th class="w-10"><span class="sr-only">Quitar</span></th></tr></thead>
+                                <tbody id="filas-inventario-cargo">
+                                    @foreach ($filasInventario as $i => $fila)
+                                        <tr class="border-t border-slate-100" data-fila>
+                                            <td class="py-2 pr-2"><input name="items[{{ $i }}][item]" value="{{ $fila['item'] }}" maxlength="255" aria-label="Implemento" class="{{ $campoInventario }} {{ $errorInventario($i, 'item') }}"></td>
+                                            <td class="px-2 py-2"><input name="items[{{ $i }}][cantidad]" value="{{ $fila['cantidad'] }}" type="number" min="1" inputmode="numeric" aria-label="Cantidad" class="{{ $campoInventario }} {{ $errorInventario($i, 'cantidad') }}"></td>
+                                            <td class="px-2 py-2">
+                                                <select name="items[{{ $i }}][estado]" aria-label="Estado" class="{{ $campoInventario }} {{ $errorInventario($i, 'estado') }}">
+                                                    <option value="">—</option>
+                                                    @foreach (collect($estadosInventario)->push($fila['estado'])->filter()->unique() as $estado)
+                                                        <option @selected($fila['estado'] === $estado)>{{ $estado }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td class="py-2 text-right"><button type="button" data-quitar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Quitar implemento"><i class="fas fa-trash" aria-hidden="true"></i></button></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3 flex flex-wrap justify-between gap-2">
+                            <button type="button" id="agregar-implemento" class="rounded-full bg-[#E8F3EF] px-4 py-2 text-sm font-semibold text-[#064C3D] hover:bg-[#d5ebe3]"><i class="fas fa-plus mr-1" aria-hidden="true"></i> Agregar implemento</button>
+                            <button type="submit" class="rounded-full bg-[#064C3D] px-5 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Guardar inventario</button>
+                        </div>
+                    </form>
+                    <script>
+                        (() => {
+                            const cuerpo = document.getElementById('filas-inventario-cargo');
+                            let indice = cuerpo.querySelectorAll('[data-fila]').length;
+                            document.getElementById('agregar-implemento').addEventListener('click', () => {
+                                const fila = cuerpo.querySelector('[data-fila]').cloneNode(true);
+                                fila.querySelectorAll('input, select').forEach((c) => {
+                                    c.name = c.name.replace(/items\[\d+\]/, `items[${indice}]`);
+                                    c.value = '';
+                                    c.classList.remove('border-red-400', 'ring-1', 'ring-red-200');
+                                });
+                                indice++;
+                                cuerpo.appendChild(fila);
+                                fila.querySelector('input').focus();
+                            });
+                            cuerpo.addEventListener('click', (e) => {
+                                const boton = e.target.closest('[data-quitar]');
+                                if (!boton) return;
+                                const fila = boton.closest('[data-fila]');
+                                if (cuerpo.querySelectorAll('[data-fila]').length > 1) fila.remove();
+                                else fila.querySelectorAll('input, select').forEach((c) => { c.value = ''; });
+                            });
+                        })();
+                    </script>
+                @else
+                    <ul class="mt-3 divide-y divide-slate-100 text-sm">
+                        @forelse ($inventario as $item)
+                            <li class="flex justify-between py-2"><span class="text-slate-700">{{ $item->item }}</span><span class="text-slate-500">{{ $item->cantidad }} · {{ $item->estado }}</span></li>
+                        @empty
+                            <li class="py-2 text-slate-500">Sin inventario registrado.</li>
+                        @endforelse
+                    </ul>
+                @endif
+            </section>
         </div>
 
         <aside class="space-y-4">

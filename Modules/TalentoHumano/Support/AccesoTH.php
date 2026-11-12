@@ -17,6 +17,8 @@ class AccesoTH
      */
     public const PERMISOS = [
         'activacion' => ['gestor'],
+        // Fichas y cargos de la fase: el Gestor, o el Líder de la estrategia cuando no hay Gestor (HU-017C, HU-019D)
+        'fichas_cargos' => ['gestor'],
         'postulaciones' => ['gestor', 'instructor_th', 'lider_estrategia'],
         'pruebas' => ['psicologo', 'gestor'],
         'formato' => ['psicologo'],
@@ -30,7 +32,7 @@ class AccesoTH
     ];
 
     /** Secciones que el Administrador solo supervisa: puede consultarlas, pero no registrar ni cambiar nada. */
-    public const SOLO_SUPERVISION = ['activacion'];
+    public const SOLO_SUPERVISION = ['activacion', 'fichas_cargos'];
 
     /** Formatos de entrevista propios de cada evaluador (psicólogo e instructores): el Administrador no tiene uno. */
     public const PROPIAS_DEL_EVALUADOR = ['formato', 'formato_tecnico'];
@@ -69,6 +71,22 @@ class AccesoTH
     }
 
     /**
+     * ¿Hay un Gestor de Talento Humano que pueda hacer su trabajo? (usuario activo con el rol)
+     */
+    public static function hayGestorDisponible(): bool
+    {
+        return User::whereHas('roles', fn ($q) => $q->where('slug', 'talentohumano.gestor'))->exists();
+    }
+
+    /**
+     * El Líder de la estrategia elige las fichas y activa los cargos solo si no hay un Gestor disponible (HU-017C, HU-019D).
+     */
+    public static function supleAlGestor(User $user): bool
+    {
+        return self::esLiderEstrategia($user) && !self::hayGestorDisponible();
+    }
+
+    /**
      * Submódulo "Instructor Líder de TH" (HU-037): lo ven el Administrador y el Líder de la estrategia.
      */
     public static function veSubmoduloLider(User $user): bool
@@ -101,8 +119,14 @@ class AccesoTH
      */
     public static function puede(User $user, string $seccion): bool
     {
-        if (self::esAdministrador($user)) {
-            return !in_array($seccion, [...self::PROPIAS_DEL_EVALUADOR, ...self::PROPIAS_DEL_APRENDIZ]);
+        if ($seccion === 'fichas_cargos' && self::supleAlGestor($user)) {
+            return true;
+        }
+
+        // Las secciones propias de un evaluador o del aprendiz no se abren por ser Administrador, pero sí por el rol o la
+        // designación que las habilita (la Administradora que también es Líder califica entrevistas técnicas, RN-018)
+        if (self::esAdministrador($user) && !in_array($seccion, [...self::PROPIAS_DEL_EVALUADOR, ...self::PROPIAS_DEL_APRENDIZ])) {
+            return true;
         }
 
         return $user->person_id && array_intersect(self::funciones($user), self::PERMISOS[$seccion] ?? []);
@@ -113,6 +137,10 @@ class AccesoTH
      */
     public static function puedeModificar(User $user, string $seccion): bool
     {
+        if ($seccion === 'fichas_cargos' && self::supleAlGestor($user)) {
+            return true;
+        }
+
         if (self::esAdministrador($user) && in_array($seccion, self::SOLO_SUPERVISION)) {
             return false;
         }

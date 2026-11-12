@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
 use Modules\TalentoHumano\Services\Auditoria;
 use Modules\TalentoHumano\Services\FaseService;
+use Modules\TalentoHumano\Support\AccesoTH;
 
 /**
  * Activación de los cargos que operarán en la fase (HU-019, RF-001).
@@ -70,6 +71,9 @@ class ActivacionCargoController extends Controller
                 ->get(),
             'hayActivacion' => $hayActivacion,
             'bloqueada' => $this->fases->convocatoriaPublicada($fase->id),
+            'soloConsulta' => !AccesoTH::puedeModificar(auth()->user(), 'fichas_cargos'),
+            'avisoConsulta' => AccesoTH::esLiderEstrategia(auth()->user()) && AccesoTH::hayGestorDisponible()
+                ? 'La activación de cargos corresponde al Gestor de Talento Humano' : 'Consulta de los cargos activados, sin modificarlos.',
         ]);
     }
 

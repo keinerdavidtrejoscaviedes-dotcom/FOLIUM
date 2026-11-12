@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\TalentoHumano\Entities\Acta;
+use Modules\TalentoHumano\Entities\Alerta;
 use Modules\TalentoHumano\Entities\Convocatoria;
 use Modules\TalentoHumano\Entities\Cronograma;
 use Modules\TalentoHumano\Entities\Empalme;
@@ -54,6 +55,8 @@ class SupervisionController extends Controller
             'evaluadores' => $convocatoria ? ComiteReubicacion::integrantes($convocatoria) : collect(),
             'bloqueos' => $this->bloqueos($fase, $cronograma, $convocatoria, $avance),
             'hayEmpalmes' => DB::table('th_empalmes')->where('fase_id', $fase->id)->exists(),
+            // Historial de alertas de prerrequisitos de la fase (HU-013A, esc. 3 y 4)
+            'alertas' => Alerta::where('fase_id', $fase->id)->latest('id')->get(),
         ]);
     }
 

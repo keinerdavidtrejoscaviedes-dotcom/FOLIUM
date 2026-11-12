@@ -36,6 +36,8 @@ class Auditoria
         'formato_entrevista_guardado' => ['lider_estrategia', 'instructor_th', 'instructor_tecnico'],
         'calificacion_registrada' => ['lider_estrategia', 'instructor_th', 'instructor_tecnico'],
         'acta_firmada' => ['instructor_th'],
+        'Confirmar fichas de la fase' => ['lider_estrategia'],
+        'Confirmar activación de cargos' => ['lider_estrategia'],
     ];
 
     private const DESIGNACIONES = [

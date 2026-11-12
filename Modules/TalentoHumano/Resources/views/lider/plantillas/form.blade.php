@@ -12,7 +12,8 @@
     $firmantes = old('firmantes', $plantilla->firmantes);
     $area = (string) old('area_id', $areaInicial);
     $mensajes = collect($errors->all())->unique();
-    $incompleta = $mensajes->contains(PlantillaActaRequest::MENSAJE_INCOMPLETA);
+    $sinColumnas = $mensajes->contains(PlantillaActaRequest::MENSAJE_SIN_COLUMNAS);
+    $sinFirmantes = $mensajes->contains(PlantillaActaRequest::MENSAJE_SIN_FIRMANTES);
     $volver = $editando ? route('talentohumano.lider.plantillas.show', $plantilla) : route('talentohumano.lider.plantillas.index');
 @endphp
 
@@ -94,7 +95,7 @@
         </section>
 
         {{-- Columnas del inventario --}}
-        <section id="bloque-columnas" @class([$tarjeta, 'ring-2 ring-red-300' => $incompleta && empty($estado['columnas'])])>
+        <section id="bloque-columnas" @class([$tarjeta, 'ring-2 ring-red-300' => $sinColumnas])>
             <h2 class="font-bold text-[#064C3D]">Columnas del inventario <span class="text-red-500">*</span></h2>
             <p class="mt-1 text-sm text-slate-600">El aprendiz saliente diligencia estas columnas por cada implemento y el receptor verifica cada uno. La columna «Implemento» siempre está.</p>
             <div id="editor-columnas" class="mt-4 space-y-2"></div>
@@ -110,7 +111,7 @@
         </section>
 
         {{-- Firmas --}}
-        <section id="bloque-firmantes" @class([$tarjeta, 'ring-2 ring-red-300' => $incompleta && empty($firmantes)])>
+        <section id="bloque-firmantes" @class([$tarjeta, 'ring-2 ring-red-300' => $sinFirmantes])>
             <h2 class="font-bold text-[#064C3D]">Firmas requeridas <span class="text-red-500">*</span></h2>
             <p class="mt-1 text-sm text-slate-600">El acta solo queda válida cuando firman todas las partes marcadas. El visto bueno del Gestor de Talento Humano se registra aparte.</p>
             <div class="mt-4 grid gap-2 sm:grid-cols-2">
@@ -136,7 +137,8 @@
             (() => {
                 const TIPOS_CAMPO = @json(PlantillaActa::TIPOS_CAMPO);
                 const TIPOS_COLUMNA = @json(PlantillaActa::TIPOS_COLUMNA);
-                const MENSAJE_INCOMPLETA = @json(PlantillaActaRequest::MENSAJE_INCOMPLETA);
+                const MENSAJE_SIN_COLUMNAS = @json(PlantillaActaRequest::MENSAJE_SIN_COLUMNAS);
+                const MENSAJE_SIN_FIRMANTES = @json(PlantillaActaRequest::MENSAJE_SIN_FIRMANTES);
                 const estado = @json($estado);
                 estado.secciones = (estado.secciones || []).map((s) => ({ titulo: s.titulo || '', fija: !!s.fija, campos: s.campos || [] }));
                 estado.columnas = (estado.columnas || []).map((c) => ({ nombre: c.nombre || '', tipo: c.tipo || 'texto', opciones: c.opciones || [] }));
@@ -240,7 +242,8 @@
                     const errores = [];
                     const vacios = [...form.querySelectorAll('[data-obligatorio]')].filter((c) => !c.disabled && !c.value.trim());
                     if (vacios.length) errores.push('Debe completar los campos obligatorios');
-                    if (!estado.columnas.length || !firmantes.length) errores.push(MENSAJE_INCOMPLETA);
+                    if (!estado.columnas.length) errores.push(MENSAJE_SIN_COLUMNAS);
+                    if (!firmantes.length) errores.push(MENSAJE_SIN_FIRMANTES);
                     vacios.forEach((c) => c.classList.add('border-red-400'));
                     document.getElementById('bloque-columnas').classList.toggle('ring-red-300', !estado.columnas.length);
                     document.getElementById('bloque-columnas').classList.toggle('ring-2', !estado.columnas.length);
