@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\TalentoHumano\Support\AccesoTH;
 use Modules\TalentoHumano\Support\ActaRecibimiento;
 use Modules\TalentoHumano\Support\Auditoria;
+use Modules\TalentoHumano\Support\GestionAsignaciones;
 
 class EmpalmeController extends Controller
 {
@@ -158,6 +159,10 @@ class EmpalmeController extends Controller
         if (!ActaRecibimiento::satisfaccionCompleta($empalme)) {
             return back()->with('error', 'Los aprendices aún no diligencian el Formulario de Satisfacción del Empalme.');
         }
+        // HU-030 esc. 4: sin saliente, el inventario es inicial y debe estar validado por el Gestor (HU-033)
+        if ($empalme->participantes->where('papel', 'saliente')->isEmpty() && empty($empalme->acta->contenido['inventario_validado'])) {
+            return back()->with('error', 'Falta validar el inventario inicial del cargo.');
+        }
 
         DB::transaction(function () use ($empalme, $personId) {
             $empalme->update([
@@ -169,7 +174,11 @@ class EmpalmeController extends Controller
             // HU-055, esc. 2: el receptor queda vinculado y su asignación pasa a vigente (RN-028)
             $empalme->participantes->where('papel', 'receptor')->pluck('asignacion')->filter()
                 ->where('estado', 'asignada')
-                ->each(fn ($asignacion) => $asignacion->update(['estado' => 'vigente']));
+                ->each(function ($asignacion) {
+                    $asignacion->update(['estado' => 'vigente']);
+                    // HU-030 esc. 6: el aprendiz del cargo Gestor de TH recibe el rol (RN-067)
+                    GestionAsignaciones::sincronizarRolGestor($asignacion);
+                });
         });
         Auditoria::registrar('visto_bueno_empalme', $empalme, [], ['empalme' => $empalme->id, 'cargo' => optional($empalme->cargo)->nombre]);
 

@@ -36,11 +36,17 @@ class EntrevistaController extends Controller
         // Bloque 3: Métricas de progreso del evaluador
         $metricas = $this->calcularMetricasEntrevistas($entrevistas);
 
+        // Mis calificaciones de procesos terminados: solo puntaje y concepto, sin datos del aspirante (HU-041B esc. 3, HU-042B esc. 4)
+        $terminadas = Calificacion::with('entrevista')->where('evaluador_id', $personId)
+            ->whereHas('entrevista.convocatoria', fn ($q) => $q->where('estado', 'finalizada'))
+            ->latest('updated_at')->get();
+
         return view('talentohumano::entrevistas.index', array_merge([
             'convocatoria' => $convocatoria,
             'fase' => $fase,
             'entrevistas' => $entrevistas,
             'user' => $user,
+            'terminadas' => $terminadas,
         ], $metricas));
     }
 
@@ -98,7 +104,11 @@ class EntrevistaController extends Controller
         $personId = auth()->user()->person_id ?? 1;
         $this->verificarEvaluador((int) $entrevistaId, (int) $postulacionId, $personId);
 
-        $entrevista = Entrevista::findOrFail($entrevistaId);
+        $entrevista = Entrevista::with('convocatoria')->findOrFail($entrevistaId);
+        // HU-042B esc. 4: terminado el proceso, el evaluador ya no ve los datos de los aspirantes
+        if ($entrevista->convocatoria?->estado === 'finalizada') {
+            return redirect()->route('talentohumano.entrevistas.index')->with('info', 'El proceso de selección terminó: solo puede consultar sus propias calificaciones.');
+        }
         $postulacion = Postulacion::with(['person', 'course.program', 'opciones.convocatoriaCargo.cargoActivado.cargo'])->findOrFail($postulacionId);
 
         // Bloques: Cuestionario aplicable y calificación previa
@@ -114,11 +124,20 @@ class EntrevistaController extends Controller
             ->where('evaluador_id', $personId)
             ->first();
 
+        // HU-041B: las de los demás evaluadores solo se ven después de registrar la propia (RN-043)
+        $otras = $calificacion
+            ? Calificacion::with('evaluador')->where('entrevista_id', $entrevista->id)->where('postulacion_id', $postulacion->id)
+                ->where('evaluador_id', '!=', $personId)->get()
+            : collect();
+        $umbral = (float) ($entrevista->convocatoria?->umbral ?? 0);
+
         return view('talentohumano::entrevistas.calificar', compact(
             'entrevista',
             'postulacion',
             'cuestionario',
-            'calificacion'
+            'calificacion',
+            'otras',
+            'umbral'
         ));
     }
 
@@ -127,31 +146,48 @@ class EntrevistaController extends Controller
      */
     public function guardarCalificacion(Request $request, $entrevistaId, $postulacionId)
     {
+        // HU-041A esc. 3: las observaciones son obligatorias; el concepto lo calcula el sistema (esc. 1)
         $request->validate([
             'cuestionario_id' => 'required|integer',
-            'concepto' => 'required|in:apto,no_apto',
-            'observaciones' => 'nullable|string',
+            'observaciones' => 'required|string',
             'puntajes' => 'required|array',
-        ]);
+        ], ['observaciones.required' => 'Escriba sus observaciones de la entrevista.']);
 
         $personId = auth()->user()->person_id ?? 1;
         $this->verificarEvaluador((int) $entrevistaId, (int) $postulacionId, $personId);
 
+        $entrevista = Entrevista::with('convocatoria')->findOrFail($entrevistaId);
+        if ($entrevista->convocatoria?->estado === 'finalizada') {
+            return redirect()->route('talentohumano.entrevistas.index')->with('error', 'El proceso de selección terminó: ya no se pueden registrar calificaciones.');
+        }
+
         // La calificación se registra con el formato vigente del evaluador para ese tipo de entrevista
-        $cuestionario = $this->resolverCuestionarioVigente($personId, Entrevista::findOrFail($entrevistaId));
+        $cuestionario = $this->resolverCuestionarioVigente($personId, $entrevista);
         abort_unless($cuestionario && (int) $request->cuestionario_id === $cuestionario->id, 422, 'El formato de la entrevista cambió; vuelva a abrir la calificación.');
 
+        // HU-041A esc. 2: cada pregunta con un puntaje entre 0 y su máximo
+        $sinCalificar = [];
+        foreach ($cuestionario->preguntas as $pregunta) {
+            $valor = $request->input("puntajes.{$pregunta->id}");
+            if (!is_numeric($valor) || $valor < 0 || $valor > $pregunta->puntaje_maximo) {
+                $sinCalificar["puntajes.{$pregunta->id}"] = "Califique la pregunta «{$pregunta->enunciado}» con un puntaje entre 0 y " . (float) $pregunta->puntaje_maximo . '.';
+            }
+        }
+        if ($sinCalificar) {
+            return back()->withErrors($sinCalificar)->withInput();
+        }
+
         // Bloque: Persistir evaluación y cálculo de puntaje total
-        $totalPuntaje = $this->registrarCalificacionAspirante($request, $entrevistaId, $postulacionId, $personId);
+        $totalPuntaje = $this->registrarCalificacionAspirante($request, $cuestionario, $entrevista, $postulacionId, $personId);
         $calificacion = Calificacion::where('entrevista_id', $entrevistaId)->where('postulacion_id', $postulacionId)->where('evaluador_id', $personId)->first();
         // El puntaje total y la propuesta de selección se actualizan con cada calificación (RF-010)
-        PropuestaSeleccion::sincronizar(Entrevista::findOrFail($entrevistaId)->convocatoria);
+        PropuestaSeleccion::sincronizar($entrevista->convocatoria);
         Auditoria::registrar('calificacion_registrada', $calificacion, [], [
-            'entrevista' => (int) $entrevistaId, 'postulacion' => (int) $postulacionId, 'puntaje' => $totalPuntaje, 'concepto' => $request->concepto,
+            'entrevista' => (int) $entrevistaId, 'postulacion' => (int) $postulacionId, 'puntaje' => $totalPuntaje, 'concepto' => $calificacion->concepto,
         ]);
 
         return redirect()->route('talentohumano.entrevistas.index')
-            ->with('success', "Calificación guardada exitosamente ({$totalPuntaje} pts · " . ucfirst($request->concepto) . ").");
+            ->with('success', "Calificación guardada exitosamente ({$totalPuntaje} de 100 · " . ($calificacion->concepto === 'apto' ? 'Apto' : 'No apto') . ').');
     }
 
     // =========================================================================
@@ -191,9 +227,11 @@ class EntrevistaController extends Controller
      */
     private function obtenerEntrevistasEvaluador(int $personId)
     {
+        // HU-042B esc. 4: las de procesos terminados salen de la lista (se consultan aparte, sin datos de aspirantes)
         return Entrevista::whereHas('evaluadores', function ($q) use ($personId) {
             $q->where('person_id', $personId);
         })
+        ->whereHas('convocatoria', fn ($q) => $q->where('estado', '!=', 'finalizada'))
         ->with([
             'postulaciones.person',
             'postulaciones.course.program',
@@ -335,22 +373,26 @@ class EntrevistaController extends Controller
     /**
      * Registra o actualiza la calificación del aspirante.
      */
-    private function registrarCalificacionAspirante(Request $request, int $entrevistaId, int $postulacionId, int $personId): float
+    private function registrarCalificacionAspirante(Request $request, Cuestionario $cuestionario, Entrevista $entrevista, int $postulacionId, int $personId): float
     {
-        $totalPuntaje = (float) array_sum($request->puntajes);
+        // RF-009: el puntaje de cada evaluador se lleva a una escala común de 0 a 100
+        $detalle = $cuestionario->preguntas->mapWithKeys(fn ($p) => [$p->id => (float) $request->input("puntajes.{$p->id}")])->all();
+        $maximo = (float) $cuestionario->preguntas->sum('puntaje_maximo');
+        $totalPuntaje = $maximo > 0 ? round(array_sum($detalle) * 100 / $maximo, 2) : 0.0;
 
         Calificacion::updateOrCreate(
             [
-                'entrevista_id' => $entrevistaId,
+                'entrevista_id' => $entrevista->id,
                 'postulacion_id' => $postulacionId,
                 'evaluador_id' => $personId,
             ],
             [
-                'cuestionario_id' => $request->cuestionario_id,
+                'cuestionario_id' => $cuestionario->id,
                 'puntaje' => $totalPuntaje,
-                'concepto' => $request->concepto,
+                // RN-017: apto si alcanza el umbral de la convocatoria
+                'concepto' => $totalPuntaje >= (float) ($entrevista->convocatoria?->umbral ?? 0) ? 'apto' : 'no_apto',
                 'observaciones' => $request->observaciones,
-                'detalle' => $request->puntajes,
+                'detalle' => $detalle,
             ]
         );
 

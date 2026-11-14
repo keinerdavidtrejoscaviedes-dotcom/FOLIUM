@@ -33,6 +33,14 @@
 
     {{-- Contenido del Dashboard con los 6 módulos oficiales --}}
     <section class="relative z-10 mx-auto -mt-14 max-w-6xl px-4 pb-16 sm:px-6">
+        {{-- Avisos del Gestor de TH: plazos por vencer y aprendices sin vincular (HU-021 esc. 4, HU-031A esc. 2) --}}
+        @foreach ($avisos ?? [] as [$titulo, $texto, $enlace])
+            <a href="{{ $enlace }}" class="mb-4 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900 shadow-sm ring-1 ring-amber-200 hover:bg-amber-100" role="alert">
+                <i class="fas fa-bell mt-0.5" aria-hidden="true"></i>
+                <span><strong>{{ $titulo }}</strong><span class="block">{{ $texto }}</span></span>
+            </a>
+        @endforeach
+
         @if ($secciones->isEmpty())
             <div class="entrada rounded-3xl bg-white p-8 text-center shadow-xl shadow-[#064C3D]/10 ring-1 ring-slate-200/70 sm:p-12">
                 <span class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#E8F3EF] text-2xl text-[#064C3D]">

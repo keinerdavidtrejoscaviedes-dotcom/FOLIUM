@@ -197,7 +197,8 @@
                 <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-xl text-slate-400">
                     <i class="fas fa-user-xmark"></i>
                 </span>
-                <p class="mt-3 font-semibold text-slate-700">No se encontraron aspirantes con los filtros seleccionados</p>
+                {{-- HU-024A esc. 4 --}}
+                <p class="mt-3 font-semibold text-slate-700">{{ request('estado_analisis') === 'pendientes' ? 'No hay hojas de vida pendientes de análisis' : 'No se encontraron aspirantes con los filtros seleccionados' }}</p>
                 <p class="mt-1 text-xs text-slate-400">Intenta restablecer los filtros de búsqueda.</p>
                 <a href="{{ route('talentohumano.postulaciones.index') }}"
                    class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-4 py-2 text-xs font-semibold text-white">

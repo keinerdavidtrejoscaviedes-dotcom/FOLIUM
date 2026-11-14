@@ -49,4 +49,22 @@ class Convocatoria extends Model
     {
         return $this->hasMany(ConvocatoriaCargo::class, 'convocatoria_id');
     }
+
+    public function evaluadores()
+    {
+        return $this->hasMany(ConvocatoriaEvaluador::class, 'convocatoria_id');
+    }
+
+    public function postulaciones()
+    {
+        return $this->hasMany(Postulacion::class, 'convocatoria_id');
+    }
+
+    /**
+     * La postulación terminó: pasó la fecha de cierre (nadie cambia el estado a "cerrada" a mano; RN-004).
+     */
+    public function estaCerrada(): bool
+    {
+        return $this->estado !== 'borrador' && $this->fecha_cierre && today()->gt($this->fecha_cierre);
+    }
 }

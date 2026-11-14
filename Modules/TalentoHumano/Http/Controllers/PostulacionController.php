@@ -56,6 +56,7 @@ class PostulacionController extends Controller
             'analisisHv.evaluador',
             'convocatoria.fase',
         ])->findOrFail($id);
+        $this->verificarFaseDelGestor($postulacion);
 
         $user = auth()->user();
         $esInstructor = $user->roles->contains(fn ($r) => in_array($r->slug, ['talentohumano.instructor', 'talentohumano.admin']));
@@ -76,7 +77,23 @@ class PostulacionController extends Controller
             'designacion' => $designacion,
             'pruebaPsicotecnica' => $verResultados ? $this->prepararPruebaPsicotecnica($postulacion) : null,
             'entrevistas' => $verResultados ? $this->prepararEvaluacionesEntrevista($postulacion) : null,
+            'analisisHabilitado' => (bool) $postulacion->convocatoria?->estaCerrada(),
         ]);
+    }
+
+    /**
+     * HU-032 esc. 4: el Gestor de TH solo opera la convocatoria de su fase (la fase actual). El Administrador,
+     * el Líder y el Instructor de TH consultan cualquiera.
+     */
+    private function verificarFaseDelGestor(Postulacion $postulacion): void
+    {
+        $user = auth()->user();
+        $supervisa = AccesoTH::esAdministrador($user) || array_intersect(['lider_estrategia', 'instructor_th'], AccesoTH::designaciones($user));
+
+        if (!$supervisa && $postulacion->convocatoria?->fase_id != \Modules\TalentoHumano\Entities\Fase::actual()?->id) {
+            Auditoria::registrarIntentoDenegado(request());
+            abort(403, 'No tiene permisos para realizar esta acción');
+        }
     }
 
     /**
@@ -107,7 +124,13 @@ class PostulacionController extends Controller
             'observaciones' => 'nullable|string',
         ]);
 
-        $postulacion = Postulacion::with('opciones.convocatoriaCargo.cargoActivado.cargo')->findOrFail($id);
+        $postulacion = Postulacion::with(['opciones.convocatoriaCargo.cargoActivado.cargo', 'convocatoria'])->findOrFail($id);
+        $this->verificarFaseDelGestor($postulacion);
+
+        // HU-024A esc. 2: el análisis se hace con la convocatoria cerrada (RN-004)
+        if (!$postulacion->convocatoria?->estaCerrada()) {
+            return back()->with('error', 'El análisis de hojas de vida se habilita al cerrar la convocatoria.');
+        }
         $evaluadorId = auth()->user()->person_id ?? 1;
 
         // Bloque: Construcción de afinidad estructurada

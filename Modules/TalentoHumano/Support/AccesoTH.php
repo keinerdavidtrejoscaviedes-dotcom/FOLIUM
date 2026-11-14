@@ -19,6 +19,10 @@ class AccesoTH
         'activacion' => ['gestor'],
         // Fichas y cargos de la fase: el Gestor, o el Líder de la estrategia cuando no hay Gestor (HU-017C, HU-019D)
         'fichas_cargos' => ['gestor'],
+        // Habilitar la prueba, programar entrevistas y publicar el acta de seleccionados (HU-025, HU-027, HU-028)
+        'programacion' => ['gestor'],
+        // Evaluadores de la convocatoria: el Gestor con el Instructor de Talento Humano (HU-026A, HU-026B)
+        'evaluadores' => ['gestor', 'instructor_th'],
         'postulaciones' => ['gestor', 'instructor_th', 'lider_estrategia'],
         'pruebas' => ['psicologo', 'gestor'],
         'formato' => ['psicologo'],
@@ -32,7 +36,7 @@ class AccesoTH
     ];
 
     /** Secciones que el Administrador solo supervisa: puede consultarlas, pero no registrar ni cambiar nada. */
-    public const SOLO_SUPERVISION = ['activacion', 'fichas_cargos'];
+    public const SOLO_SUPERVISION = ['activacion', 'fichas_cargos', 'programacion', 'evaluadores'];
 
     /** Formatos de entrevista propios de cada evaluador (psicólogo e instructores): el Administrador no tiene uno. */
     public const PROPIAS_DEL_EVALUADOR = ['formato', 'formato_tecnico'];

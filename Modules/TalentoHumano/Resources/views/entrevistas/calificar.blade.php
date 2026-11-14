@@ -36,6 +36,26 @@
         </div>
     </div>
 
+    {{-- HU-041B: después de registrar la suya, el evaluador ve las de los demás, sin poder modificarlas --}}
+    @if ($otras->isNotEmpty())
+        <section class="mt-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <h2 class="font-bold text-base text-[#064C3D]">Calificaciones de los demás evaluadores</h2>
+            <ul class="mt-3 divide-y divide-slate-100 text-sm">
+                @foreach ($otras as $otra)
+                    <li class="flex flex-wrap items-start justify-between gap-2 py-2">
+                        <span>
+                            <span class="font-semibold text-slate-800">{{ trim(($otra->evaluador->first_name ?? '') . ' ' . ($otra->evaluador->first_last_name ?? '')) }}</span>
+                            <span class="block text-xs text-slate-500">{{ $otra->observaciones }}</span>
+                        </span>
+                        <span class="text-xs font-semibold text-[#064C3D]">{{ (float) $otra->puntaje }} / 100 · {{ $otra->concepto === 'apto' ? 'Apto' : 'No apto' }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
+    <x-talentohumano::errores />
+
     {{-- Formulario de Calificación (HU-041 · RF-009) --}}
     <form method="POST" action="{{ route('talentohumano.entrevistas.calificar.guardar', ['entrevista' => $entrevista->id, 'postulacion' => $postulacion->id]) }}" class="mt-6 space-y-6">
         @csrf
@@ -56,16 +76,18 @@
             <div class="mt-4 space-y-4">
                 @foreach ($cuestionario->preguntas as $idx => $preg)
                     @php
-                        $detallePuntaje = $calificacion && isset($calificacion->detalle[$preg->id]) ? $calificacion->detalle[$preg->id] : round($preg->puntaje_maximo * 0.8);
+                        // Sin valor por defecto: cada pregunta se califica (HU-041A esc. 2)
+                        $detallePuntaje = old("puntajes.{$preg->id}", $calificacion->detalle[$preg->id] ?? '');
+                        $faltaPuntaje = $errors->has("puntajes.{$preg->id}");
                     @endphp
-                    <div class="rounded-2xl p-4 ring-1 ring-slate-200 bg-slate-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div @class(['rounded-2xl p-4 ring-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3', 'ring-red-300 bg-red-50' => $faltaPuntaje, 'ring-slate-200 bg-slate-50/40' => !$faltaPuntaje])>
                         <div class="min-w-0 flex-1">
                             <span class="text-[10px] font-bold uppercase text-slate-400">Pregunta {{ $idx + 1 }} · Máx: {{ (int)$preg->puntaje_maximo }} pts</span>
                             <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ $preg->enunciado }}</p>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             <label class="text-xs font-semibold text-slate-500">Puntaje obtenido:</label>
-                            <input type="number" name="puntajes[{{ $preg->id }}]" min="0" max="{{ (int)$preg->puntaje_maximo }}"
+                            <input type="number" name="puntajes[{{ $preg->id }}]" min="0" max="{{ (float) $preg->puntaje_maximo }}" step="0.01" data-maximo="{{ (float) $preg->puntaje_maximo }}"
                                    value="{{ $detallePuntaje }}" required
                                    oninput="sumarTotal()"
                                    class="input-nota w-20 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-center text-sm font-extrabold text-[#064C3D] focus:border-[#064C3D] focus:ring-1 focus:ring-[#34D399]">
@@ -80,34 +102,19 @@
             <h2 class="font-bold text-base text-[#064C3D] mb-4">Concepto y observaciones finales</h2>
 
             <div class="grid gap-4 sm:grid-cols-2">
+                {{-- HU-041A esc. 1 y RN-017: el concepto lo calcula el sistema con el umbral de la convocatoria --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2">
-                        Concepto del evaluador <span class="text-red-500">*</span>:
-                    </label>
-                    <div class="flex gap-4">
-                        <label class="flex items-center gap-2 rounded-2xl p-3 ring-1 ring-slate-200 bg-white flex-1 cursor-pointer has-[:checked]:bg-[#E8F3EF] has-[:checked]:ring-[#064C3D]">
-                            <input type="radio" name="concepto" value="apto" {{ old('concepto', $calificacion->concepto ?? 'apto') === 'apto' ? 'checked' : '' }} class="accent-[#064C3D]">
-                            <div>
-                                <p class="text-xs font-bold text-slate-800">Apto</p>
-                                <p class="text-[11px] text-slate-500">Cumple el perfil evaluado</p>
-                            </div>
-                        </label>
-                        <label class="flex items-center gap-2 rounded-2xl p-3 ring-1 ring-slate-200 bg-white flex-1 cursor-pointer has-[:checked]:bg-red-50 has-[:checked]:ring-red-500">
-                            <input type="radio" name="concepto" value="no_apto" {{ old('concepto', $calificacion->concepto ?? '') === 'no_apto' ? 'checked' : '' }} class="accent-red-600">
-                            <div>
-                                <p class="text-xs font-bold text-slate-800">No apto</p>
-                                <p class="text-[11px] text-slate-500">No alcanza el perfil requerido</p>
-                            </div>
-                        </label>
-                    </div>
+                    <p class="block text-xs font-semibold text-slate-700 mb-2">Concepto</p>
+                    <p id="concepto" class="rounded-2xl bg-slate-50 p-3 text-sm font-bold text-slate-800 ring-1 ring-slate-200">—</p>
+                    <p class="mt-1 text-[11px] text-slate-500">Apto si el puntaje llega al umbral de la convocatoria ({{ $umbral }} de 100).</p>
                 </div>
 
                 <div>
                     <label for="observaciones" class="block text-xs font-semibold text-slate-700 mb-1">
-                        Observaciones / Justificación de la evaluación:
+                        Observaciones / Justificación de la evaluación <span class="text-red-500">*</span>:
                     </label>
-                    <textarea id="observaciones" name="observaciones" rows="3" placeholder="Escribe tus observaciones sobre la entrevista..."
-                              class="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs text-slate-800 focus:border-[#064C3D] focus:ring-1 focus:ring-[#34D399]">{{ old('observaciones', $calificacion->observaciones ?? '') }}</textarea>
+                    <textarea id="observaciones" name="observaciones" rows="3" required placeholder="Escribe tus observaciones sobre la entrevista..."
+                              @class(['w-full rounded-xl border bg-white p-2.5 text-xs text-slate-800 focus:border-[#064C3D] focus:ring-1 focus:ring-[#34D399]', 'border-red-400' => $errors->has('observaciones'), 'border-slate-200' => !$errors->has('observaciones')])>{{ old('observaciones', $calificacion->observaciones ?? '') }}</textarea>
                 </div>
             </div>
 
@@ -127,13 +134,17 @@
 
     @push('scripts')
         <script>
+            // Puntaje en escala de 0 a 100 (RF-009) y concepto con el umbral de la convocatoria (RN-017)
             function sumarTotal() {
                 const inputs = document.querySelectorAll('.input-nota');
-                let total = 0;
+                let total = 0, maximo = 0;
                 inputs.forEach(input => {
                     total += parseFloat(input.value) || 0;
+                    maximo += parseFloat(input.dataset.maximo) || 0;
                 });
-                document.getElementById('total-calif').innerHTML = `${Math.round(total)} <span class="text-xs text-slate-400">/ 100</span>`;
+                const escala = maximo > 0 ? Math.round(total * 10000 / maximo) / 100 : 0;
+                document.getElementById('total-calif').innerHTML = `${escala} <span class="text-xs text-slate-400">/ 100</span>`;
+                document.getElementById('concepto').textContent = escala >= {{ $umbral }} ? 'Apto' : 'No apto';
             }
             document.addEventListener('DOMContentLoaded', sumarTotal);
         </script>

@@ -51,7 +51,12 @@
         </dl>
     @endif
 
-    {{-- Formulario para registrar o actualizar el concepto de hoja de vida (HU-024) --}}
+    {{-- Formulario para registrar o actualizar el concepto de hoja de vida (HU-024). Solo con la convocatoria cerrada (esc. 2) --}}
+    @if (!($analisisHabilitado ?? true))
+        <p class="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+            <i class="fas fa-lock mr-1" aria-hidden="true"></i> El análisis de hojas de vida se habilita al cerrar la convocatoria.
+        </p>
+    @else
     <form method="POST" action="{{ route('talentohumano.postulaciones.analisis', $postulacion->id) }}" class="mt-4 space-y-4">
         @csrf
         <div>
@@ -117,4 +122,5 @@
             </button>
         </div>
     </form>
+    @endif
 </section>

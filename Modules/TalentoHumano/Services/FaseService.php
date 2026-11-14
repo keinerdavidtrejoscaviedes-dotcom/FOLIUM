@@ -90,6 +90,8 @@ class FaseService
         $fichas = $this->fichasDeLaFase($faseId);
         $cargos = DB::table('th_cargos_activados')->where('fase_id', $faseId);
         $cronograma = $this->cronograma($faseId);
+        $convocatoria = $this->convocatoria($faseId);
+        $postulaciones = DB::table('th_postulaciones')->where('convocatoria_id', $convocatoria?->id)->whereNull('deleted_at');
 
         return [
             'fichas' => $fichas->count(),
@@ -97,8 +99,18 @@ class FaseService
             'cargos' => (clone $cargos)->count(),
             'cupos' => (int) (clone $cargos)->sum('numero_aprendices'),
             'cronograma' => $cronograma?->estado,
-            'convocatoria' => $this->convocatoria($faseId)?->estado,
+            'convocatoria' => $convocatoria?->estado,
             'convocatoria_publicada' => $this->convocatoriaPublicada($faseId),
+            // Proceso de selección después de publicar la convocatoria (HU-025 a HU-028)
+            'convocatoria_cerrada' => $convocatoria && $convocatoria->estado !== 'borrador' && today()->gt($convocatoria->fecha_cierre),
+            'postulantes' => (clone $postulaciones)->count(),
+            'pruebas_habilitadas' => DB::table('th_aplicaciones_prueba')->whereIn('postulacion_id', (clone $postulaciones)->select('id'))->count(),
+            'pruebas_presentadas' => DB::table('th_aplicaciones_prueba')->whereIn('postulacion_id', (clone $postulaciones)->select('id'))->where('estado', 'presentada')->count(),
+            'evaluadores' => DB::table('th_convocatoria_evaluadores')->where('convocatoria_id', $convocatoria?->id)->whereNull('retirado_en')->count(),
+            'entrevistas' => DB::table('th_entrevistas')->where('convocatoria_id', $convocatoria?->id)->whereNull('deleted_at')->count(),
+            'acta_publicada' => DB::table('th_actas')->where('fase_id', $faseId)->where('tipo', 'seleccionados')->where('estado', 'publicada')->exists(),
+            'empalmes' => DB::table('th_empalmes')->where('fase_id', $faseId)->count(),
+            'empalmes_cerrados' => DB::table('th_empalmes')->where('fase_id', $faseId)->where('estado', 'cerrado')->count(),
         ];
     }
 

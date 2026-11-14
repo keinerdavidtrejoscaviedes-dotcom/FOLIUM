@@ -1,25 +1,31 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\TalentoHumano\Http\Controllers\ActaSeleccionadosController;
 use Modules\TalentoHumano\Http\Controllers\ActivacionCargoController;
 use Modules\TalentoHumano\Http\Controllers\AlertasController;
 use Modules\TalentoHumano\Http\Controllers\AprendizController;
 use Modules\TalentoHumano\Http\Controllers\AprobacionesController;
 use Modules\TalentoHumano\Http\Controllers\AsignacionesController;
 use Modules\TalentoHumano\Http\Controllers\AuditoriaController;
+use Modules\TalentoHumano\Http\Controllers\CalculoSeleccionController;
 use Modules\TalentoHumano\Http\Controllers\CatalogoCargoController;
 use Modules\TalentoHumano\Http\Controllers\CatalogoCargosController;
 use Modules\TalentoHumano\Http\Controllers\ConvocatoriaController;
 use Modules\TalentoHumano\Http\Controllers\CronogramaController;
 use Modules\TalentoHumano\Http\Controllers\DesignacionesController;
 use Modules\TalentoHumano\Http\Controllers\EmpalmeController;
+use Modules\TalentoHumano\Http\Controllers\EmpalmesFaseController;
 use Modules\TalentoHumano\Http\Controllers\EntrevistaController;
+use Modules\TalentoHumano\Http\Controllers\EvaluadoresController;
 use Modules\TalentoHumano\Http\Controllers\FaseController;
 use Modules\TalentoHumano\Http\Controllers\FichaFaseController;
 use Modules\TalentoHumano\Http\Controllers\FormatoEntrevistaController;
+use Modules\TalentoHumano\Http\Controllers\HabilitacionPruebaController;
 use Modules\TalentoHumano\Http\Controllers\InstructorLiderController;
 use Modules\TalentoHumano\Http\Controllers\PlantillasActaController;
 use Modules\TalentoHumano\Http\Controllers\PostulacionController;
+use Modules\TalentoHumano\Http\Controllers\ProgramacionEntrevistasController;
 use Modules\TalentoHumano\Http\Controllers\PruebaPsicotecnicaController;
 use Modules\TalentoHumano\Http\Controllers\SeleccionActasController;
 use Modules\TalentoHumano\Http\Controllers\SupervisionController;
@@ -244,6 +250,44 @@ Route::prefix('talento-humano')
 
                 Route::get('cargos', [ActivacionCargoController::class, 'edit'])->name('cargos.edit');
                 Route::put('cargos', [ActivacionCargoController::class, 'update'])->name('cargos.update');
+            });
+
+            // Gestor de TH: proceso de selección después de publicar la convocatoria (HU-025, HU-027, HU-028)
+            Route::prefix('fases/{fase}')->whereNumber('fase')->name('fases.')->middleware(PermisoTH::class . ':programacion')->group(function () {
+                Route::get('prueba', [HabilitacionPruebaController::class, 'index'])->name('prueba.index');
+                Route::post('prueba', [HabilitacionPruebaController::class, 'habilitar'])->name('prueba.habilitar');
+
+                Route::get('entrevistas', [ProgramacionEntrevistasController::class, 'index'])->name('entrevistas.index');
+                Route::get('entrevistas/programar', [ProgramacionEntrevistasController::class, 'create'])->name('entrevistas.create');
+                Route::post('entrevistas', [ProgramacionEntrevistasController::class, 'store'])->name('entrevistas.store');
+                Route::delete('entrevistas/{entrevista}', [ProgramacionEntrevistasController::class, 'destroy'])->whereNumber('entrevista')->name('entrevistas.destroy');
+
+                Route::get('seleccion', [CalculoSeleccionController::class, 'show'])->name('seleccion.show');
+                Route::post('seleccion/calcular', [CalculoSeleccionController::class, 'calcular'])->name('seleccion.calcular');
+
+                Route::get('acta', [ActaSeleccionadosController::class, 'show'])->name('acta.show');
+                Route::post('acta/publicar', [ActaSeleccionadosController::class, 'publicar'])->name('acta.publicar');
+
+                // Empalmes de la fase: preparar, citar, inventario inicial, vinculación y cierre (HU-029A, HU-029B, HU-031, HU-033)
+                Route::prefix('empalmes')->name('empalmes.')->controller(EmpalmesFaseController::class)->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::post('preparar', 'preparar')->name('preparar');
+                    Route::post('citar', 'citar')->name('citar');
+                    Route::post('{empalme}/inventario/validar', 'validarInventario')->whereNumber('empalme')->name('inventario.validar');
+                    Route::post('{empalme}/inventario/devolver', 'devolverInventario')->whereNumber('empalme')->name('inventario.devolver');
+                    Route::post('cerrar-fase-saliente', 'cerrarFaseSaliente')->name('cerrar-saliente');
+                });
+            });
+
+            // Evaluadores de la convocatoria: el Gestor con el Instructor de TH (HU-026A, HU-026B)
+            Route::middleware(PermisoTH::class . ':evaluadores')->group(function () {
+                Route::get('evaluadores', [EvaluadoresController::class, 'actual'])->name('evaluadores.actual');
+                Route::prefix('fases/{fase}/evaluadores')->whereNumber('fase')->name('fases.evaluadores.')->controller(EvaluadoresController::class)->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::post('/', 'store')->name('store');
+                    Route::delete('{evaluador}', 'destroy')->whereNumber('evaluador')->name('destroy');
+                    Route::patch('{evaluador}/restaurar', 'restaurar')->whereNumber('evaluador')->name('restaurar');
+                });
             });
 
             // Portal del Aprendiz: cronograma, convocatoria, postulación, prueba, acta, empalme y cargo (HU-043 a HU-057)

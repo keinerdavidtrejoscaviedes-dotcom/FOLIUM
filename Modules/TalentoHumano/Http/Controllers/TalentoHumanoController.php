@@ -18,6 +18,7 @@ class TalentoHumanoController extends Controller
         ['icono' => 'fa-file-signature', 'titulo' => 'Postulaciones', 'texto' => 'Revisa a los aspirantes y analiza sus hojas de vida.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.postulaciones.index', 'seccion' => 'postulaciones'],
         ['icono' => 'fa-brain', 'titulo' => 'Prueba psicotécnica', 'texto' => 'Diseña las pruebas que presentan los postulantes, con sus preguntas y puntajes.', 'roles' => ['psicologo', 'gestor'], 'ruta' => 'talentohumano.pruebas.index', 'seccion' => 'pruebas'],
         ['icono' => 'fa-list-check', 'titulo' => 'Mi formato de entrevista psicológica', 'texto' => 'Tus preguntas de la entrevista psicológica con su puntaje, para calificar a los aspirantes.', 'roles' => ['psicologo'], 'ruta' => 'talentohumano.formato.edit', 'seccion' => 'formato'],
+        ['icono' => 'fa-user-tie', 'titulo' => 'Evaluadores de la convocatoria', 'texto' => 'Instructores y psicólogos que apoyarán las entrevistas de la fase.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.evaluadores.actual', 'seccion' => 'evaluadores'],
         ['icono' => 'fa-comments', 'titulo' => 'Entrevistas', 'texto' => 'Programa entrevistas, asigna evaluadores y registra calificaciones.', 'roles' => ['instructor', 'psicologo', 'gestor'], 'ruta' => 'talentohumano.entrevistas.index', 'seccion' => 'entrevistas'],
         ['icono' => 'fa-user-check', 'titulo' => 'Selección y actas', 'texto' => 'Valida a los seleccionados, haz reubicaciones y genera el acta.', 'roles' => ['instructor'], 'ruta' => 'talentohumano.seleccion.index', 'seccion' => 'seleccion'],
         ['icono' => 'fa-handshake', 'titulo' => 'Empalmes', 'texto' => 'Acta de recibimiento, inventario del cargo y firmas digitales.', 'roles' => ['instructor', 'gestor'], 'ruta' => 'talentohumano.empalmes.index', 'seccion' => 'empalmes'],
@@ -89,6 +90,7 @@ class TalentoHumanoController extends Controller
             'esInstructor' => $esInstructor,
             'faseActiva' => $faseActiva,
             'secciones' => $secciones,
+            'avisos' => in_array('gestor', $tipos) ? \Modules\TalentoHumano\Support\AvisosGestor::delPanel() : [],
         ]);
     }
 }

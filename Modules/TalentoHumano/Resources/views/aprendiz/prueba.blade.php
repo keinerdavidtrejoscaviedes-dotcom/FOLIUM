@@ -12,13 +12,13 @@
             @include('talentohumano::aprendiz._aviso', ['icono' => 'fa-circle-check', 'titulo' => 'Ya presentó la prueba psicotécnica', 'texto' => 'Tu resultado quedó registrado. El Gestor de Talento Humano te enviará la citación a tus entrevistas.', 'enlace' => [route('talentohumano.aprendiz.postulacion'), 'Ver mi postulación']])
             @break
         @case('vencida')
-            @include('talentohumano::aprendiz._aviso', ['icono' => 'fa-calendar-xmark', 'titulo' => 'El plazo para presentar la prueba venció', 'texto' => 'No presentaste la prueba dentro del plazo del cronograma, por lo que quedaste como «no evaluado» y no se te puede programar entrevista.'])
+            @include('talentohumano::aprendiz._aviso', ['icono' => 'fa-calendar-xmark', 'titulo' => 'El plazo para presentar la prueba venció', 'texto' => 'No presentaste la prueba dentro del plazo, por lo que quedaste como «no evaluado» y no se te puede programar entrevista.'])
             @break
         @case('por_abrir')
             @include('talentohumano::aprendiz._aviso', ['icono' => 'fa-hourglass-start', 'titulo' => $etapa?->inicio ? 'La prueba se habilita el ' . $etapa->inicio->format('d/m/Y') : 'La prueba aún no tiene fecha en el cronograma', 'texto' => $etapa?->fin ? 'Podrás presentarla hasta el ' . $etapa->fin->format('d/m/Y') . '.' : null])
             @break
-        @case('sin_prueba')
-            @include('talentohumano::aprendiz._aviso', ['icono' => 'fa-brain', 'titulo' => 'La prueba aún no está disponible', 'texto' => 'El Evaluador psicológico todavía no ha publicado la prueba. Vuelve más tarde.'])
+        @case('no_habilitada')
+            @include('talentohumano::aprendiz._aviso', ['icono' => 'fa-hourglass-half', 'titulo' => 'Tu prueba aún no está habilitada', 'texto' => 'El Gestor de Talento Humano la habilita cuando termina el análisis de tu hoja de vida. Te llegará un correo con el plazo para presentarla.'])
             @break
         @default
             @php $total = count($preguntas); $respondidas = collect($preguntas)->filter(fn ($pr) => filled($respuestas[$pr['id']] ?? null))->count(); @endphp

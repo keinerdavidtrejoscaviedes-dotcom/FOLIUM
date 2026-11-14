@@ -142,4 +142,19 @@
             </div>
         @endforelse
     </div>
+
+    {{-- HU-042B esc. 4: procesos terminados, solo mis calificaciones y sin datos de los aspirantes --}}
+    @if (($terminadas ?? collect())->isNotEmpty())
+        <section class="mt-8 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
+            <h2 class="font-bold text-base text-[#064C3D]">Mis calificaciones de procesos terminados</h2>
+            <ul class="mt-3 divide-y divide-slate-100 text-sm">
+                @foreach ($terminadas as $calificacion)
+                    <li class="flex flex-wrap justify-between gap-2 py-2">
+                        <span>Entrevista {{ $calificacion->entrevista?->tipo === 'psicologica' ? 'psicológica' : 'técnica' }} del {{ $calificacion->entrevista?->fecha_hora?->format('d/m/Y') }}</span>
+                        <span class="font-semibold text-[#064C3D]">{{ (float) $calificacion->puntaje }} / 100 · {{ $calificacion->concepto === 'apto' ? 'Apto' : 'No apto' }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
 </x-talentohumano::layouts.master>

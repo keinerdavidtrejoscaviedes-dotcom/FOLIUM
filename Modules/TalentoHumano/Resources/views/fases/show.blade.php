@@ -51,6 +51,75 @@
                 ? null
                 : 'Primero envíe el cronograma a aprobación del Instructor Líder.',
         ],
+        // Proceso de selección: se habilita con la convocatoria publicada y cerrada (RN-004)
+        [
+            'titulo' => 'Prueba psicotécnica',
+            'icono' => 'fa-brain',
+            'hu' => 'HU-025A · HU-025B',
+            'completo' => $resumen['pruebas_habilitadas'] > 0 && $resumen['pruebas_presentadas'] === $resumen['pruebas_habilitadas'],
+            'detalle' => $resumen['pruebas_habilitadas'] > 0
+                ? "{$resumen['pruebas_presentadas']} de {$resumen['pruebas_habilitadas']} postulantes la presentaron"
+                : 'Habilite la prueba a los postulantes con análisis de hoja de vida y defina el plazo.',
+            'ruta' => route('talentohumano.fases.prueba.index', $fase->id),
+            'bloqueo' => match (true) {
+                !$resumen['convocatoria_publicada'] => 'Primero publique la convocatoria.',
+                !$resumen['convocatoria_cerrada'] => 'Se habilita cuando cierre la convocatoria.',
+                default => null,
+            },
+        ],
+        [
+            'titulo' => 'Evaluadores de la convocatoria',
+            'icono' => 'fa-user-tie',
+            'hu' => 'HU-026A',
+            'completo' => $resumen['evaluadores'] > 0,
+            'detalle' => $resumen['evaluadores'] > 0
+                ? "{$resumen['evaluadores']} evaluadores"
+                : 'Instructores y psicólogos que apoyarán las entrevistas.',
+            'ruta' => route('talentohumano.fases.evaluadores.index', $fase->id),
+            'bloqueo' => $resumen['convocatoria_publicada'] ? null : 'Primero publique la convocatoria.',
+        ],
+        [
+            'titulo' => 'Entrevistas',
+            'icono' => 'fa-comments',
+            'hu' => 'HU-027A · HU-027B · HU-027C',
+            'completo' => false,
+            'detalle' => $resumen['entrevistas'] > 0
+                ? "{$resumen['entrevistas']} entrevistas programadas"
+                : 'Programe las entrevistas técnica y psicológica y haga seguimiento a las calificaciones.',
+            'ruta' => route('talentohumano.fases.entrevistas.index', $fase->id),
+            'bloqueo' => $resumen['pruebas_presentadas'] > 0 ? null : 'Primero algún postulante debe presentar la prueba psicotécnica.',
+        ],
+        [
+            'titulo' => 'Propuesta de selección',
+            'icono' => 'fa-calculator',
+            'hu' => 'HU-034',
+            'completo' => $resumen['acta_publicada'],
+            'detalle' => 'Calcule la propuesta cuando todas las entrevistas estén calificadas; se envía a validación del Instructor Líder.',
+            'ruta' => route('talentohumano.fases.seleccion.show', $fase->id),
+            'bloqueo' => $resumen['entrevistas'] > 0 ? null : 'Primero programe y califique las entrevistas.',
+        ],
+        [
+            'titulo' => 'Acta de seleccionados',
+            'icono' => 'fa-file-signature',
+            'hu' => 'HU-028A · HU-028B',
+            'completo' => $resumen['acta_publicada'],
+            'detalle' => $resumen['acta_publicada']
+                ? 'Publicada: las asignaciones de cargo quedaron creadas'
+                : 'Revise el acta generada con las selecciones validadas y publíquela.',
+            'ruta' => route('talentohumano.fases.acta.show', $fase->id),
+            'bloqueo' => $resumen['entrevistas'] > 0 ? null : 'Primero programe y califique las entrevistas.',
+        ],
+        [
+            'titulo' => 'Empalmes y vinculación',
+            'icono' => 'fa-people-arrows',
+            'hu' => 'HU-029A · HU-029B · HU-031 · HU-033',
+            'completo' => $resumen['empalmes'] > 0 && $resumen['empalmes_cerrados'] === $resumen['empalmes'],
+            'detalle' => $resumen['empalmes'] > 0
+                ? "{$resumen['empalmes_cerrados']} de {$resumen['empalmes']} empalmes cerrados con visto bueno"
+                : 'Prepare los empalmes: el sistema determina quién entrega y quién recibe cada cargo.',
+            'ruta' => route('talentohumano.fases.empalmes.index', $fase->id),
+            'bloqueo' => $resumen['acta_publicada'] ? null : 'Primero publique el acta de seleccionados.',
+        ],
     ];
 @endphp
 <x-talentohumano::layouts.master title="Fase {{ $fase->numero }}">

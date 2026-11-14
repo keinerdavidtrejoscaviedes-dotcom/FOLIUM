@@ -702,7 +702,7 @@ class AprendizController extends Controller
     }
 
     /**
-     * Situación de la prueba del Aprendiz: sin_postulacion, sin_prueba, por_abrir, disponible, presentada o vencida.
+     * Situación de la prueba del Aprendiz: sin_postulacion, por_abrir, no_habilitada, disponible, presentada o vencida.
      */
     private function situacionPrueba(PortalAprendiz $p): string
     {
@@ -728,7 +728,17 @@ class AprendizController extends Controller
             return 'vencida';
         }
 
-        return $aplicacion || $this->cuestionarioVigente() ? 'disponible' : 'sin_prueba';
+        // La habilita el Gestor de TH con su plazo, después del análisis de la hoja de vida (HU-025A, RN-012)
+        if (!$aplicacion) {
+            return 'no_habilitada';
+        }
+        if (now()->gt($aplicacion->fecha_limite)) {
+            $this->marcarNoEvaluado($p, $aplicacion);
+
+            return 'vencida';
+        }
+
+        return 'disponible';
     }
 
     private function aplicacion(Postulacion $postulacion): ?object
@@ -736,33 +746,18 @@ class AprendizController extends Controller
         return DB::table('th_aplicaciones_prueba')->where('postulacion_id', $postulacion->id)->latest('id')->first();
     }
 
-    private function cuestionarioVigente(): ?int
-    {
-        return DB::table('th_cuestionarios')->where('tipo', 'prueba_psicotecnica')->where('estado', 'vigente')
-            ->whereNull('deleted_at')->latest('id')->value('id');
-    }
-
     /**
-     * Aplicación de la prueba del Aprendiz; se crea al abrirla por primera vez dentro del plazo del cronograma.
+     * Aplicación de la prueba que habilitó el Gestor de TH (HU-025A); al abrirla por primera vez pasa a "en curso".
      */
     private function abrirAplicacion(PortalAprendiz $p): object
     {
         $aplicacion = $this->aplicacion($p->postulacion);
-        if ($aplicacion) {
-            return $aplicacion;
+        if ($aplicacion->estado === 'habilitada') {
+            DB::table('th_aplicaciones_prueba')->where('id', $aplicacion->id)->update(['estado' => 'en_curso', 'updated_at' => now()]);
+            $aplicacion->estado = 'en_curso';
         }
 
-        $etapa = $p->etapa('prueba_psicotecnica');
-        $id = DB::table('th_aplicaciones_prueba')->insertGetId([
-            'postulacion_id' => $p->postulacion->id,
-            'cuestionario_id' => $this->cuestionarioVigente(),
-            'estado' => 'en_curso',
-            'fecha_limite' => ($etapa->fin ?? $etapa->inicio)->copy()->endOfDay(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        return DB::table('th_aplicaciones_prueba')->find($id);
+        return $aplicacion;
     }
 
     private function guardarRespuesta(int $aplicacionId, int $preguntaId, ?string $respuesta): void
