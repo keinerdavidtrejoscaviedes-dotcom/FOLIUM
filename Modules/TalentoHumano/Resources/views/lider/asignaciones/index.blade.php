@@ -22,6 +22,9 @@
                 <button type="button" data-abrir="#modal-fase" class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-[#E8F3EF]">
                     <i class="fas fa-flag" aria-hidden="true"></i> Registrar fase
                 </button>
+                <a href="{{ route('talentohumano.fases.index') }}" class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-[#E8F3EF]">
+                    <i class="fas fa-pen" aria-hidden="true"></i> Editar o eliminar fases
+                </a>
             </div>
         @endif
         @if ($esAdministrador && $fase && !$cerrada)

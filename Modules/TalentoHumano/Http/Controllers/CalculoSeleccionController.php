@@ -12,6 +12,7 @@ use Modules\TalentoHumano\Support\Auditoria;
 use Modules\TalentoHumano\Support\AvisosGestor;
 use Modules\TalentoHumano\Support\Correo;
 use Modules\TalentoHumano\Support\ProcesoSeleccion;
+use Modules\TalentoHumano\Support\PruebaVencida;
 use Modules\TalentoHumano\Support\PropuestaSeleccion;
 
 /**
@@ -24,6 +25,7 @@ class CalculoSeleccionController extends Controller
     {
         $fase = Fase::findOrFail($fase);
         $convocatoria = ProcesoSeleccion::convocatoria($fase);
+        PruebaVencida::sincronizar($convocatoria);
 
         if (!$convocatoria) {
             return view('talentohumano::proceso.seleccion', ['fase' => $fase, 'convocatoria' => null]);

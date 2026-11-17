@@ -16,6 +16,8 @@ class AccesoTH
      * y designaciones vigentes que pueden entrar. El Administrador entra a todas, salvo las indicadas abajo.
      */
     public const PERMISOS = [
+        // Registrar, modificar y eliminar fases: el Gestor y el Administrador, que entra a todas (HU-011)
+        'fases' => ['gestor'],
         'activacion' => ['gestor'],
         // Fichas y cargos de la fase: el Gestor, o el Líder de la estrategia cuando no hay Gestor (HU-017C, HU-019D)
         'fichas_cargos' => ['gestor'],

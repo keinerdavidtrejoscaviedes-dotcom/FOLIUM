@@ -20,11 +20,16 @@ class Fase extends Model
     protected $casts = ['numero' => 'integer', 'fecha_inicio' => 'date', 'fecha_fin' => 'date'];
 
     /**
-     * Fase en curso: la más reciente que no está cerrada.
+     * Fase en curso: la más reciente que no está cerrada y ya tiene actividad (pasó de preparación o tiene fichas).
+     * Las fases registradas por adelantado y todavía vacías no la desplazan (HU-011: se pueden registrar varias fases
+     * futuras); si todas están vacías, es la próxima por número.
      */
     public static function actual(): ?self
     {
-        return self::where('estado', '!=', 'cerrada')->orderByDesc('numero')->first();
+        $abiertas = self::where('estado', '!=', 'cerrada')->orderByDesc('numero')->get();
+
+        return $abiertas->first(fn ($fase) => $fase->estado !== 'planeacion' || $fase->faseFichas()->exists())
+            ?? $abiertas->last();
     }
 
     public function nombre(): string

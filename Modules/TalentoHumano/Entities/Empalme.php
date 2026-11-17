@@ -18,6 +18,8 @@ class Empalme extends Model
         'visita_confirmada',
         'fecha_visita',
         'participantes_visita',
+        'instructor_area_id',
+        'jefe_inmediato_id',
         'visto_bueno_por',
         'fecha_visto_bueno',
     ];

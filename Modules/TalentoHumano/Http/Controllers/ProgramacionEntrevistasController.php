@@ -14,6 +14,7 @@ use Modules\TalentoHumano\Support\Auditoria;
 use Modules\TalentoHumano\Support\AvisosGestor;
 use Modules\TalentoHumano\Support\Correo;
 use Modules\TalentoHumano\Support\ProcesoSeleccion;
+use Modules\TalentoHumano\Support\PruebaVencida;
 
 /**
  * El Gestor de TH programa las entrevistas técnica y psicológica, envía el cronograma por correo y hace seguimiento
@@ -27,6 +28,7 @@ class ProgramacionEntrevistasController extends Controller
     {
         $fase = Fase::findOrFail($fase);
         $convocatoria = ProcesoSeleccion::convocatoria($fase);
+        PruebaVencida::sincronizar($convocatoria);
         $bloqueo = $this->bloqueo($convocatoria);
 
         if ($bloqueo) {
@@ -73,6 +75,7 @@ class ProgramacionEntrevistasController extends Controller
         $this->exigirPermiso($request);
         $fase = Fase::findOrFail($fase);
         $convocatoria = ProcesoSeleccion::convocatoria($fase);
+        PruebaVencida::sincronizar($convocatoria);
         if ($bloqueo = $this->bloqueo($convocatoria)) {
             AvisosGestor::prerrequisito($fase, 'Entrevistas', $bloqueo);
 

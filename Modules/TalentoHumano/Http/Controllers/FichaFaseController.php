@@ -28,6 +28,7 @@ class FichaFaseController extends Controller
 
         return view('talentohumano::fases.fichas', [
             'fase' => $fase,
+            'programas' => $this->fases->programasTecnologo(),
             'fichas' => $disponibles->concat($asociadas),
             'seleccionadas' => DB::table('th_fase_fichas')->where('fase_id', $fase->id)->pluck('course_id')->all(),
             'bloqueada' => $this->fases->convocatoriaPublicada($fase->id),
@@ -61,8 +62,17 @@ class FichaFaseController extends Controller
         }
 
         // Escenario 2: solo fichas tecnólogo presenciales, aunque se manipule el formulario
-        if ($nuevas->diff($this->fases->fichasDisponibles()->pluck('id'))->isNotEmpty()) {
+        $disponibles = $this->fases->fichasDisponibles()->keyBy('id');
+        if ($nuevas->diff($disponibles->keys())->isNotEmpty()) {
             return back()->withErrors(['fichas' => 'Solo se pueden seleccionar fichas de nivel tecnólogo y modalidad presencial.']);
+        }
+
+        // HU-018 esc. 2 y 3: una ficha sin trimestre o sin programa no se selecciona hasta registrar el dato
+        $incompletas = $nuevas->map(fn ($id) => $disponibles[$id])->filter(fn ($f) => $f->sin_programa || $f->sin_trimestre);
+        if ($incompletas->isNotEmpty()) {
+            return back()->withInput()->withErrors(['fichas' => $incompletas->map(fn ($f) => $f->sin_programa
+                ? "Ficha {$f->code}: registre el programa de formación antes de seleccionarla"
+                : "Ficha {$f->code}: registre el trimestre de la ficha antes de seleccionarla")->implode('. ') . '.']);
         }
 
         DB::transaction(function () use ($fase, $nuevas, $retiradas) {
@@ -86,6 +96,48 @@ class FichaFaseController extends Controller
 
         return redirect()->route('talentohumano.fases.fichas.index', $fase->id)
             ->with('success', "Fichas asociadas a la fase correctamente: {$fichas->count()} fichas y {$fichas->sum('aprendices')} aprendices.");
+    }
+
+    /**
+     * 'Guardar' el trimestre o el programa de una ficha que llegó sin ese dato (HU-018 esc. 1 y 3).
+     */
+    public function registrarDatos(Request $request, int $fase, int $ficha)
+    {
+        $fase = $this->fases->buscar($fase);
+        $datosFicha = $this->fases->fichasDisponibles()->firstWhere('id', $ficha);
+        abort_unless($datosFicha, 404);
+
+        $programas = $this->fases->programasTecnologo();
+        $maximo = (int) ($programas->firstWhere('id', (int) $request->input('program_id'))->quarter_number ?? $datosFicha->quarter_number ?? 8) ?: 8;
+        $datos = $request->validate([
+            'trimestre' => [$datosFicha->sin_trimestre ? 'required' : 'nullable', 'integer', 'min:1', "max:{$maximo}"],
+            'program_id' => [$datosFicha->sin_programa ? 'required' : 'nullable', 'integer', 'in:' . $programas->pluck('id')->implode(',')],
+        ], [
+            'trimestre.required' => 'Elija el trimestre en curso de la ficha.',
+            'trimestre.min' => 'El trimestre debe ser un número entre 1 y ' . $maximo . '.',
+            'trimestre.max' => 'El trimestre debe ser un número entre 1 y ' . $maximo . '.',
+            'trimestre.integer' => 'El trimestre debe ser un número entre 1 y ' . $maximo . '.',
+            'program_id.required' => 'Elija el programa de formación de la ficha.',
+            'program_id.in' => 'Elija un programa tecnólogo presencial del centro.',
+        ]);
+
+        // Solo se registra lo que falta; lo que trae SICEFA no se sobrescribe
+        $cambios = array_filter([
+            'trimestre' => $datosFicha->sin_trimestre ? (int) $datos['trimestre'] : null,
+            'program_id' => $datosFicha->sin_programa ? (int) $datos['program_id'] : null,
+        ]);
+        if (!$cambios) {
+            return back()->with('info', "La ficha {$datosFicha->code} ya tiene su programa y su trimestre.");
+        }
+
+        DB::table('th_fichas_datos')->updateOrInsert(['course_id' => $ficha], $cambios + [
+            'registrado_por' => auth()->user()->person_id,
+            'updated_at' => now(),
+            'created_at' => now(),
+        ]);
+        Auditoria::registrar('Registrar datos de la ficha', 'th_fase_fichas', $fase->id, ['ficha' => $datosFicha->code] + $cambios + ['origen' => 'manual']);
+
+        return back()->with('success', "Datos de la ficha {$datosFicha->code} registrados. Ya puede seleccionarla para la fase.");
     }
 
     /**

@@ -4,7 +4,7 @@
     <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
             <h1 class="text-2xl font-extrabold tracking-tight text-[#064C3D] sm:text-3xl">Convocatoria y cargos disponibles</h1>
-            <p class="mt-1 text-sm text-slate-600">Solo ves los cargos compatibles con tu programa de formación.</p>
+            <p class="mt-1 text-sm text-slate-600">Puedes postularte solo a los cargos compatibles con tu programa de formación.</p>
         </div>
         @if ($p->fichaHabilitada && $p->convocatoria && $estadoPostulacion === 'abierta' && !$p->postulacion)
             <a href="{{ route('talentohumano.aprendiz.postularme') }}" class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-[#043A2F]"><i class="fas fa-file-signature" aria-hidden="true"></i> Postularme</a>
@@ -75,6 +75,18 @@
                     </article>
                 @endforeach
             </div>
+        @endif
+        {{-- HU-044 esc. 6: cargos de la convocatoria que no son compatibles con su perfil, con la advertencia --}}
+        @if ($incompatibles->isNotEmpty())
+            <section class="mt-6 rounded-3xl bg-amber-50 p-6 ring-1 ring-amber-200" aria-labelledby="titulo-incompatibles">
+                <h2 id="titulo-incompatibles" class="font-bold text-amber-900"><i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i> Cargos a los que no puedes postularte</h2>
+                <p class="mt-1 text-sm text-amber-800">Tu perfil de formación no es compatible con estos cargos de la convocatoria, así que no puedes elegirlos en tu postulación.</p>
+                <ul class="mt-3 grid gap-1.5 text-sm text-amber-900 sm:grid-cols-2">
+                    @foreach ($incompatibles as $cargo)
+                        <li><i class="fas fa-ban mr-1.5 text-amber-600" aria-hidden="true"></i>{{ $cargo->nombre }} <span class="text-amber-700">· {{ $cargo->area ?? 'Sin área' }}</span></li>
+                    @endforeach
+                </ul>
+            </section>
         @endif
     @endif
 </x-talentohumano::layouts.aprendiz>

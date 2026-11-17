@@ -90,7 +90,13 @@ class TalentoHumanoController extends Controller
             'esInstructor' => $esInstructor,
             'faseActiva' => $faseActiva,
             'secciones' => $secciones,
-            'avisos' => in_array('gestor', $tipos) ? \Modules\TalentoHumano\Support\AvisosGestor::delPanel() : [],
+            'avisos' => array_merge(
+                in_array('gestor', $tipos) ? \Modules\TalentoHumano\Support\AvisosGestor::delPanel() : [],
+                // HU-057C: actas de recibimiento que esta persona firma como instructor del área o jefe inmediato
+                ($porFirmar = \Modules\TalentoHumano\Support\ActaRecibimiento::porFirmar($user->person_id)->count())
+                    ? [["Actas de recibimiento por firmar ({$porFirmar})", 'Firma como instructor del área o jefe inmediato del cargo.', route('talentohumano.actas-firma.index')]]
+                    : []
+            ),
         ]);
     }
 }

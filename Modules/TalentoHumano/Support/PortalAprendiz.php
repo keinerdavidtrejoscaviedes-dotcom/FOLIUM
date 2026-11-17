@@ -185,6 +185,27 @@ class PortalAprendiz
     }
 
     /**
+     * Cargos de la convocatoria que no son compatibles con el programa del Aprendiz: se le muestran con la advertencia
+     * de que no puede postularse a ellos (HU-044 esc. 6, RN-048: la regla para perfiles incompatibles es impedir).
+     */
+    public function cargosIncompatibles(): Collection
+    {
+        if (!$this->convocatoria) {
+            return collect();
+        }
+
+        return DB::table('th_convocatoria_cargos as cc')
+            ->join('th_cargos_activados as ca', 'ca.id', '=', 'cc.cargo_activado_id')
+            ->join('th_cargos as c', 'c.id', '=', 'ca.cargo_id')
+            ->leftJoin('th_areas as a', 'a.id', '=', 'c.area_id')
+            ->where('cc.convocatoria_id', $this->convocatoria->id)
+            ->whereNotIn('cc.id', $this->cargosCompatibles()->pluck('id'))
+            ->select('cc.id', 'c.nombre', 'c.nivel', 'a.nombre as area')
+            ->orderBy('a.nombre')->orderBy('c.nombre')
+            ->get();
+    }
+
+    /**
      * Papel del Aprendiz en su empalme: 'saliente' o 'receptor'.
      */
     public function papel(): ?string

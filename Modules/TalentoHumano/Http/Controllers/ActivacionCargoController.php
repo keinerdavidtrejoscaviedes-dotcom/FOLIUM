@@ -31,8 +31,18 @@ class ActivacionCargoController extends Controller
         $fichas = $this->fases->fichasDeLaFase($fase->id);
 
         // Escenario 11: sin fichas no hay propuesta
+        $consulta = [
+            'soloConsulta' => !AccesoTH::puedeModificar(auth()->user(), 'fichas_cargos'),
+            'avisoConsulta' => AccesoTH::esLiderEstrategia(auth()->user()) && AccesoTH::hayGestorDisponible()
+                ? 'La activación de cargos corresponde al Gestor de Talento Humano' : 'Consulta de los cargos activados, sin modificarlos.',
+        ];
         if ($fichas->isEmpty()) {
-            return view('talentohumano::fases.cargos', ['fase' => $fase, 'fichas' => $fichas]);
+            return view('talentohumano::fases.cargos', ['fase' => $fase, 'fichas' => $fichas] + $consulta);
+        }
+
+        // HU-018 esc. 4 y 5: con fichas sin programa o sin trimestre no se muestra la propuesta ni se permite activar
+        if (($incompletas = $this->fases->fichasIncompletas($fase->id))->isNotEmpty()) {
+            return view('talentohumano::fases.cargos', ['fase' => $fase, 'fichas' => $fichas, 'incompletas' => $incompletas] + $consulta);
         }
 
         $cargos = $this->cargosDelCatalogo();
@@ -90,6 +100,12 @@ class ActivacionCargoController extends Controller
 
         if ($this->fases->fichasDeLaFase($fase->id)->isEmpty()) {
             return redirect()->route('talentohumano.fases.cargos.edit', $fase->id);
+        }
+
+        // HU-018 esc. 4 y 5
+        if ($this->fases->fichasIncompletas($fase->id)->isNotEmpty()) {
+            return redirect()->route('talentohumano.fases.cargos.edit', $fase->id)
+                ->with('error', 'Hay fichas de la fase sin programa o sin trimestre: regístrelos antes de activar los cargos.');
         }
 
         $catalogo = $this->cargosDelCatalogo()->keyBy('id');

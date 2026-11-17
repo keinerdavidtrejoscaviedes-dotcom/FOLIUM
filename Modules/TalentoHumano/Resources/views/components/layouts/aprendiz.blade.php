@@ -23,7 +23,12 @@
             ['empalme', 'talentohumano.aprendiz.empalme', 'Mi empalme', 'fa-handshake'],
             ['satisfaccion', 'talentohumano.aprendiz.satisfaccion', 'Satisfacción del empalme', 'fa-face-smile'],
         ]],
-        ['Mi cargo', [['cargo', 'talentohumano.aprendiz.cargo', 'Mi cargo e historial', 'fa-id-card-clip']]],
+        ['Mi cargo', array_values(array_filter([
+            ['cargo', 'talentohumano.aprendiz.cargo', 'Mi cargo e historial', 'fa-id-card-clip'],
+            // HU-057C: el aprendiz que es jefe inmediato de un cargo firma su acta de recibimiento
+            \Modules\TalentoHumano\Support\ActaRecibimiento::porFirmar(auth()->user()->person_id)->isNotEmpty()
+                ? ['actas-firma', 'talentohumano.actas-firma.index', 'Actas por firmar', 'fa-file-signature'] : null,
+        ]))],
     ];
 @endphp
 <!DOCTYPE html>

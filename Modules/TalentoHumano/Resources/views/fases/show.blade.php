@@ -33,6 +33,7 @@
             'completo' => $resumen['cronograma'] === 'aprobado',
             'detalle' => $resumen['cronograma']
                 ? 'Estado: ' . CronogramaController::ESTADOS[$resumen['cronograma']]
+                    . ($resumen['cronograma_modificacion'] ? ' · modificación: ' . mb_strtolower(CronogramaController::ESTADOS[$resumen['cronograma_modificacion']]) : '')
                 : 'Defina las fechas de cada etapa y envíelo a aprobación del Instructor Líder.',
             'ruta' => route('talentohumano.fases.cronograma.edit', $fase->id),
             'bloqueo' => $resumen['cargos'] > 0 ? null : 'La activación de cargos es prerrequisito del cronograma.',

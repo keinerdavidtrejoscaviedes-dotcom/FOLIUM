@@ -5,6 +5,7 @@ namespace Modules\TalentoHumano\Support;
 use Illuminate\Support\Facades\DB;
 use Modules\TalentoHumano\Entities\Acta;
 use Modules\TalentoHumano\Entities\Empalme;
+use Modules\TalentoHumano\Entities\Firma;
 use Modules\TalentoHumano\Entities\InventarioEmpalme;
 use Modules\TalentoHumano\Entities\PlantillaActa;
 
@@ -17,6 +18,12 @@ class ActaRecibimiento
     /** Roles con los que firman los aprendices del empalme (th_firmas.rol_firmante). */
     public const ROL_SALIENTE = 'Aprendiz saliente';
     public const ROL_RECEPTOR = 'Receptor del cargo';
+
+    /** Firmantes que no son aprendices del empalme: cada uno firma desde su propia cuenta (HU-057C). */
+    public const ROLES_EXTERNOS = [
+        'instructor_area' => 'Instructor del área',
+        'jefe_inmediato' => 'Jefe inmediato',
+    ];
 
     /**
      * Plantilla vigente del área del cargo o, si el área no tiene, la plantilla general (RF-021).
@@ -106,6 +113,83 @@ class ActaRecibimiento
     }
 
     /**
+     * Instructor del área y jefe inmediato que exige la plantilla, con la persona que debe firmar y su firma:
+     * [clave => ['rol', 'person_id', 'nombre', 'sugerido', 'firma']]. La persona es la que eligió el Gestor de TH o,
+     * si no eligió, la que propone el sistema (responsable de la unidad productiva; quien ocupa el cargo superior).
+     */
+    public static function firmantesExternos(Empalme $empalme): array
+    {
+        $firmas = $empalme->acta ? $empalme->acta->firmas()->get() : collect();
+        $externos = [];
+
+        foreach (array_intersect(array_keys(self::ROLES_EXTERNOS), self::firmantes($empalme)) as $clave) {
+            $elegido = $clave === 'instructor_area' ? $empalme->instructor_area_id : $empalme->jefe_inmediato_id;
+            $personId = $elegido ?: ($clave === 'instructor_area' ? self::instructorAreaSugerido($empalme) : self::jefeSugerido($empalme));
+            $rol = self::ROLES_EXTERNOS[$clave];
+
+            $externos[$clave] = [
+                'rol' => $rol,
+                'person_id' => $personId,
+                'nombre' => $personId ? self::nombre($personId) : null,
+                'sugerido' => !$elegido && $personId,
+                'firma' => $personId ? $firmas->first(fn ($f) => $f->person_id == $personId && $f->rol_firmante === $rol) : null,
+            ];
+        }
+
+        return $externos;
+    }
+
+    /**
+     * Clave del firmante externo que le corresponde a la persona en el acta (instructor_area o jefe_inmediato), o null.
+     */
+    public static function rolExterno(Empalme $empalme, ?int $personId): ?string
+    {
+        if (!$personId) {
+            return null;
+        }
+
+        return collect(self::firmantesExternos($empalme))->search(fn ($f) => $f['person_id'] == $personId) ?: null;
+    }
+
+    /**
+     * Responsable de la unidad productiva de los aprendices del empalme (primero la del saliente).
+     */
+    public static function instructorAreaSugerido(Empalme $empalme): ?int
+    {
+        $empalme->loadMissing('participantes');
+        $asignaciones = $empalme->participantes->sortBy(fn ($p) => $p->papel === 'saliente' ? 0 : 1)->pluck('asignacion_id');
+        if ($asignaciones->isEmpty()) {
+            return null;
+        }
+
+        return DB::table('th_asignacion_unidades as au')
+            ->join('productive_units as pu', 'pu.id', '=', 'au.productive_unit_id')
+            ->whereIn('au.asignacion_id', $asignaciones)->whereNull('pu.deleted_at')
+            ->orderByRaw('FIELD(au.asignacion_id, ' . $asignaciones->map(fn ($id) => (int) $id)->implode(',') . ')')
+            ->value('pu.person_id');
+    }
+
+    /**
+     * Aprendiz que ocupa el cargo superior (jefe inmediato) del cargo en la fase del empalme.
+     */
+    public static function jefeSugerido(Empalme $empalme): ?int
+    {
+        $superior = $empalme->cargo?->cargo_superior_id;
+        if (!$superior) {
+            return null;
+        }
+
+        return DB::table('th_asignaciones')->where('fase_id', $empalme->fase_id)->where('cargo_id', $superior)
+            ->whereIn('estado', ['asignada', 'vigente'])->orderBy('id')->value('person_id');
+    }
+
+    private static function nombre(int $personId): ?string
+    {
+        return DB::table('people')->where('id', $personId)
+            ->selectRaw("TRIM(CONCAT_WS(' ', first_name, first_last_name, second_last_name)) as nombre")->value('nombre');
+    }
+
+    /**
      * Actualiza el estado del acta y del empalme después de una firma (HU-057, esc. 3 y 4).
      * Devuelve 'firmada', 'faltan_instructores' o 'pendiente'.
      */
@@ -115,11 +199,11 @@ class ActaRecibimiento
         $aprendices = self::aprendicesFirmantes($empalme);
         $faltanAprendices = array_diff(array_keys($aprendices), $firmas->pluck('person_id')->all());
 
-        // Instructor del área o jefe inmediato: los firma quien no es aprendiz del empalme
-        $exigeOtros = array_intersect(self::firmantes($empalme), ['instructor_area', 'jefe_inmediato']);
-        $firmaronOtros = $firmas->whereNotIn('person_id', array_keys($aprendices))->isNotEmpty();
+        // Instructor del área y jefe inmediato: cada uno firma con su propia cuenta; la firma de uno no cuenta por el otro
+        $empalme->setRelation('acta', $acta);
+        $faltanOtros = collect(self::firmantesExternos($empalme))->filter(fn ($f) => !$f['firma']);
 
-        if (!$faltanAprendices && (!$exigeOtros || $firmaronOtros)) {
+        if (!$faltanAprendices && $faltanOtros->isEmpty()) {
             $acta->update(['estado' => 'firmada', 'fecha_publicacion' => $acta->fecha_publicacion ?? now()]);
             $empalme->update(['estado' => 'firmado']);
 
@@ -131,6 +215,72 @@ class ActaRecibimiento
         }
 
         return $faltanAprendices ? 'pendiente' : 'faltan_instructores';
+    }
+
+    /**
+     * Firma del instructor del área o del jefe inmediato desde su propia cuenta (HU-057C). Devuelve [tipo, mensaje]
+     * con tipo 'success', 'info' o 'error'; null si la persona no es firmante externo de esta acta.
+     */
+    public static function firmarExterno(Empalme $empalme, int $personId): ?array
+    {
+        $clave = self::rolExterno($empalme, $personId);
+        if (!$clave) {
+            return null;
+        }
+
+        $acta = self::asegurar($empalme);
+        $rol = self::ROLES_EXTERNOS[$clave];
+        $firmas = $acta->firmas()->get();
+
+        if ($firmas->contains(fn ($f) => $f->person_id == $personId && $f->rol_firmante === $rol)) {
+            return ['info', "Ya firmó esta acta como {$rol}."];
+        }
+        if ($empalme->estado === 'cerrado') {
+            return ['error', 'El empalme ya tiene visto bueno: el acta no admite más firmas.'];
+        }
+        // HU-057C esc. 1: el instructor firma cuando los aprendices ya firmaron
+        if (array_diff(array_keys(self::aprendicesFirmantes($empalme)), $firmas->pluck('person_id')->all())) {
+            return ['error', 'Primero deben firmar los aprendices del empalme.'];
+        }
+
+        Firma::create(['acta_id' => $acta->id, 'person_id' => $personId, 'rol_firmante' => $rol, 'fecha_firma' => now()]);
+        Auditoria::registrar('acta_firmada', $acta, [], ['empalme' => $empalme->id, 'cargo' => $empalme->cargo?->nombre, 'rol_firmante' => $rol]);
+
+        return self::actualizarEstado($empalme, $acta) === 'firmada'
+            ? ['success', "Firma registrada como {$rol}. El acta quedó firmada por todas las partes."]
+            : ['success', "Firma registrada como {$rol}. El acta sigue «Pendiente de firmas» hasta que firmen las demás partes."];
+    }
+
+    /**
+     * Los aprendices ya firmaron: avisa por correo a cada firmante externo que aún no firma (HU-057B esc. 2).
+     */
+    public static function avisarFirmantesPendientes(Empalme $empalme): void
+    {
+        foreach (self::firmantesExternos($empalme) as $firmante) {
+            if ($firmante['firma'] || !$firmante['person_id'] || !($correo = Correo::de($firmante['person_id']))) {
+                continue;
+            }
+            Correo::enviar([$correo], "FOLIUM: acta de recibimiento pendiente de su firma ({$empalme->cargo?->nombre})",
+                "FOLIUM · Talento Humano\n\nLos aprendices ya firmaron el acta de recibimiento del cargo {$empalme->cargo?->nombre}. "
+                . "Falta su firma como {$firmante['rol']}.\n\nFírmela desde su cuenta en " . route('talentohumano.actas-firma.index'));
+        }
+    }
+
+    /**
+     * Actas de recibimiento que la persona debe firmar como instructor del área o jefe inmediato (empalmes abiertos).
+     */
+    public static function porFirmar(?int $personId)
+    {
+        if (!$personId) {
+            return collect();
+        }
+
+        return Empalme::with(['cargo', 'fase', 'acta', 'participantes.asignacion', 'inventarios'])
+            ->where('estado', '!=', 'cerrado')
+            ->whereHas('fase', fn ($q) => $q->where('estado', '!=', 'cerrada'))
+            ->get()
+            ->filter(fn ($e) => self::rolExterno($e, $personId))
+            ->values();
     }
 
     /**

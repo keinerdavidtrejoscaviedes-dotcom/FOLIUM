@@ -17,6 +17,7 @@ use Modules\TalentoHumano\Entities\Postulacion;
 use Modules\TalentoHumano\Entities\PostulacionDocumento;
 use Modules\TalentoHumano\Entities\PostulacionOpcion;
 use Modules\TalentoHumano\Services\CuestionarioService;
+use Modules\TalentoHumano\Support\PruebaVencida;
 use Modules\TalentoHumano\Support\ActaRecibimiento;
 use Modules\TalentoHumano\Support\ActaSeleccionados;
 use Modules\TalentoHumano\Support\Auditoria;
@@ -79,6 +80,7 @@ class AprendizController extends Controller
         return view('talentohumano::aprendiz.convocatoria', [
             'p' => $p,
             'cargos' => $p->fichaHabilitada ? $p->cargosCompatibles() : collect(),
+            'incompatibles' => $p->fichaHabilitada ? $p->cargosIncompatibles() : collect(),
             'estadoPostulacion' => $p->estadoPostulacion(),
             'fechas' => $p->fechasPostulacion(),
         ]);
@@ -99,6 +101,7 @@ class AprendizController extends Controller
         return view('talentohumano::aprendiz.postularme', [
             'p' => $p,
             'cargos' => $cargos,
+            'incompatibles' => $p->fichaHabilitada ? $p->cargosIncompatibles() : collect(),
             'estadoPostulacion' => $p->estadoPostulacion(),
             'fechas' => $p->fechasPostulacion(),
             'municipios' => DB::table('municipalities as m')->join('departments as d', 'd.id', '=', 'm.department_id')
@@ -150,6 +153,10 @@ class AprendizController extends Controller
             $errores['opciones'] = 'Debe seleccionar exactamente 3 cargos en orden de preferencia';
         } elseif ($elegidas->unique()->count() !== 3) {
             $errores['opciones'] = 'No puede seleccionar el mismo cargo en más de una opción';
+        } elseif (($incompatibles = $p->cargosIncompatibles()->keyBy('id'))->keys()->intersect($elegidas)->isNotEmpty()) {
+            // HU-044 esc. 6: un cargo incompatible con su perfil no se puede elegir
+            $errores['opciones'] = 'Su perfil de formación no es compatible con ' . $elegidas->filter(fn ($id) => $incompatibles->has($id))
+                ->map(fn ($id) => '«' . $incompatibles[$id]->nombre . '»')->implode(', ') . '; no puede postularse a ese cargo';
         } elseif ($elegidas->contains(fn ($id) => !$cargos->has($id))) {
             $errores['opciones'] = 'Seleccione cargos de la lista de cargos disponibles para su ficha';
         } else {
@@ -415,6 +422,7 @@ class AprendizController extends Controller
             'pasos' => $this->pasosEmpalme($empalme),
             'firmantes' => ActaRecibimiento::firmantes($empalme),
             'aprendices' => ActaRecibimiento::aprendicesFirmantes($empalme),
+            'externos' => ActaRecibimiento::firmantesExternos($empalme),
             'estados' => collect($plantilla?->columnas_inventario ?? [])->firstWhere('tipo', 'lista')['opciones'] ?? ['Bueno', 'Regular', 'Malo'],
             'yaFirme' => $empalme->acta?->firmas->contains('person_id', $p->user->person_id),
         ]);
@@ -590,14 +598,12 @@ class AprendizController extends Controller
         $estado = ActaRecibimiento::actualizarEstado($empalme, $acta);
         if ($estado === 'faltan_instructores') {
             // HU-057, esc. 3: el acta queda pendiente de la firma de los instructores que exige la plantilla
-            Correo::enviar($this->correosInstructoresTH(), "FOLIUM: acta de recibimiento pendiente de su firma ({$empalme->cargo?->nombre})",
-                "Los aprendices ya firmaron el acta de recibimiento del cargo {$empalme->cargo?->nombre}. Falta la firma del instructor.\n\n"
-                . route('talentohumano.empalmes.show', $empalme->id));
+            ActaRecibimiento::avisarFirmantesPendientes($empalme);
         }
 
         return back()->with('success', match ($estado) {
             'firmada' => 'Firma registrada. El acta quedó firmada por todas las partes: ya puedes diligenciar el Formulario de Satisfacción.',
-            'faltan_instructores' => 'Firma registrada. El acta queda «Pendiente de firmas» hasta que firme el instructor.',
+            'faltan_instructores' => 'Firma registrada. El acta queda «Pendiente de firmas» hasta que firmen el instructor del área o el jefe inmediato desde su cuenta.',
             default => 'Firma registrada con fecha y hora. Falta la firma de las demás partes del empalme.',
         });
     }
@@ -796,6 +802,13 @@ class AprendizController extends Controller
             return;
         }
 
+        // Proceso compartido con el panel del Gestor y la tarea programada (Support\PruebaVencida)
+        PruebaVencida::sincronizar($p->convocatoria);
+        $postulacion->refresh();
+        if ($postulacion->estado !== 'postulado') {
+            return;
+        }
+
         DB::transaction(function () use ($postulacion, $aplicacion) {
             $postulacion->update(['estado' => 'no_evaluado']);
             if ($aplicacion) {
@@ -913,11 +926,5 @@ class AprendizController extends Controller
             ->join('roles', 'roles.id', '=', 'role_user.role_id')
             ->where('roles.slug', 'talentohumano.gestor')->whereNull('users.deleted_at')
             ->pluck('users.email')->filter()->unique()->values()->all();
-    }
-
-    private function correosInstructoresTH(): array
-    {
-        return DB::table('th_designaciones')->where('tipo', 'instructor_th')->whereNull('fecha_retiro')->whereNull('deleted_at')
-            ->pluck('person_id')->map(fn ($id) => Correo::de($id))->filter()->unique()->values()->all();
     }
 }

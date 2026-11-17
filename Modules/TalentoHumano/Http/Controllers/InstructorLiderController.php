@@ -78,6 +78,8 @@ class InstructorLiderController extends Controller
             'aprobaciones' => $this->aprobaciones($fase),
             'alertas' => $this->alertas($fase),
             'resumen' => $this->resumen(),
+            // HU-057C: actas de recibimiento que firma como instructor del área
+            'actasPorFirmar' => \Modules\TalentoHumano\Support\ActaRecibimiento::porFirmar(auth()->user()->person_id)->count(),
         ]);
     }
 
@@ -86,7 +88,8 @@ class InstructorLiderController extends Controller
      */
     private function etapas(object $fase): array
     {
-        $cronograma = DB::table('th_cronogramas')->where('fase_id', $fase->id)->latest('id')->first();
+        $cronograma = DB::table('th_cronogramas')->where('fase_id', $fase->id)->where('estado', 'aprobado')->latest('fecha_aprobacion')->first()
+            ?? DB::table('th_cronogramas')->where('fase_id', $fase->id)->latest('id')->first();
         $convocatoria = DB::table('th_convocatorias')->whereNull('deleted_at')->where('fase_id', $fase->id)->first();
         $postulaciones = DB::table('th_postulaciones')->whereNull('deleted_at')->where('convocatoria_id', $convocatoria->id ?? 0);
         $pruebas = DB::table('th_aplicaciones_prueba')->whereIn('postulacion_id', (clone $postulaciones)->select('id'));

@@ -13,6 +13,7 @@ use Modules\TalentoHumano\Support\Auditoria;
 use Modules\TalentoHumano\Support\AvisosGestor;
 use Modules\TalentoHumano\Support\Correo;
 use Modules\TalentoHumano\Support\ProcesoSeleccion;
+use Modules\TalentoHumano\Support\PruebaVencida;
 
 /**
  * El Gestor de TH habilita la prueba psicotécnica a los postulantes con análisis de hoja de vida, define el plazo
@@ -24,6 +25,7 @@ class HabilitacionPruebaController extends Controller
     {
         $fase = Fase::findOrFail($fase);
         $convocatoria = ProcesoSeleccion::convocatoria($fase);
+        PruebaVencida::sincronizar($convocatoria);
         [$inicio, $fin] = ProcesoSeleccion::etapa($fase, 'prueba_psicotecnica');
         $postulantes = $convocatoria ? ProcesoSeleccion::postulantes($convocatoria) : collect();
 
@@ -135,8 +137,6 @@ class HabilitacionPruebaController extends Controller
         return match (true) {
             $postulante->prueba === 'presentada' => 'presentada',
             $postulante->prueba === 'no_evaluado', $postulante->estado === 'no_evaluado' => 'no_evaluado',
-            // Venció el plazo sin enviarla: el portal del Aprendiz lo marca como "no evaluado" (RN-013)
-            in_array($postulante->prueba, ['habilitada', 'en_curso']) && now()->gt($postulante->limite_prueba) => 'no_evaluado',
             in_array($postulante->prueba, ['habilitada', 'en_curso']) => 'pendiente',
             !$postulante->analizada => 'sin_analisis',
             default => 'sin_habilitar',

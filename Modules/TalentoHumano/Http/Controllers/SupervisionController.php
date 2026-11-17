@@ -178,7 +178,12 @@ class SupervisionController extends Controller
         $bloqueos = [];
         $ultimo = DB::table('th_cronogramas')->where('fase_id', $fase->id)->latest('id')->first();
 
-        if ($ultimo?->estado === 'enviado') {
+        $hayAprobado = DB::table('th_cronogramas')->where('fase_id', $fase->id)->where('estado', 'aprobado')->exists();
+
+        if ($hayAprobado && $ultimo && in_array($ultimo->estado, ['enviado', 'rechazado'])) {
+            $bloqueos[] = ['fa-calendar-days', 'amber', $ultimo->estado === 'enviado' ? 'Modificación del cronograma en aprobación' : 'Modificación del cronograma devuelta al Gestor',
+                'Mientras no se apruebe, siguen vigentes las fechas aprobadas.'];
+        } elseif ($ultimo?->estado === 'enviado') {
             $bloqueos[] = ['fa-hourglass-half', 'amber', 'Cronograma en aprobación', 'Mientras el Instructor Líder no lo apruebe, el Gestor de Talento Humano no puede publicar la convocatoria.'];
         } elseif ($ultimo?->estado === 'rechazado') {
             $bloqueos[] = ['fa-rotate-left', 'amber', 'Cronograma devuelto al Gestor de Talento Humano', "Motivo: «{$ultimo->motivo_rechazo}». La convocatoria no se puede publicar hasta que se apruebe."];

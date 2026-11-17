@@ -2,6 +2,17 @@
 @php
     $claseCampo = 'w-full rounded-xl border-0 px-3 py-2 text-sm ring-1 focus:ring-2 focus:ring-[#064C3D] disabled:bg-slate-50 disabled:text-slate-500';
     $fecha = fn ($etapa, $campo) => old("etapas.$etapa.$campo", $etapas[$etapa]->{$campo === 'inicio' ? 'fecha_inicio' : 'fecha_fin'} ?? '');
+    // Fechas aprobadas de una etapa, para mostrarlas junto a la propuesta de modificación
+    $vigenteTexto = function ($etapa) use ($etapasVigentes) {
+        $fila = $etapasVigentes[$etapa] ?? null;
+        if (!$fila) {
+            return 'sin fecha';
+        }
+        $inicio = \Illuminate\Support\Carbon::parse($fila->fecha_inicio)->format('d/m/Y');
+
+        return $fila->fecha_fin && $fila->fecha_fin !== $fila->fecha_inicio ? $inicio . ' – ' . \Illuminate\Support\Carbon::parse($fila->fecha_fin)->format('d/m/Y') : $inicio;
+    };
+    $propuestaPendiente = $esModificacion && $cronograma && $cronograma->id !== $vigente->id;
 @endphp
 <x-talentohumano::layouts.master title="Cronograma · Fase {{ $fase->numero }}">
     <x-talentohumano::encabezado titulo="Cronograma del proceso de selección · Fase {{ $fase->numero }}" :volver="route('talentohumano.fases.show', $fase->id)" hu="HU-020 · RF-003 · RN-006"
@@ -22,18 +33,28 @@
     @if ($cronograma?->estado === 'enviado')
         <div class="mb-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-200">
             <i class="fas fa-hourglass-half mr-1" aria-hidden="true"></i>
-            El cronograma está en aprobación del Instructor Líder. No se puede modificar mientras tanto.
+            @if ($propuestaPendiente)
+                La modificación del cronograma está en aprobación del Instructor Líder. Mientras tanto siguen vigentes las fechas aprobadas, que se muestran debajo de cada etapa.
+            @else
+                El cronograma está en aprobación del Instructor Líder. No se puede modificar mientras tanto.
+            @endif
         </div>
     @elseif ($cronograma?->estado === 'aprobado')
         <div class="mb-6 rounded-2xl bg-[#E8F3EF] p-4 text-sm text-[#064C3D]">
             <i class="fas fa-circle-check mr-1" aria-hidden="true"></i>
             Cronograma aprobado{{ $cronograma->fecha_aprobacion ? ' el ' . \Illuminate\Support\Carbon::parse($cronograma->fecha_aprobacion)->format('d/m/Y') : '' }}.
             Ya se puede preparar la convocatoria.
+            @if ($editable)
+                <p class="mt-1">Si necesita cambiar una fecha, modifíquela y presione «Enviar modificación a aprobación». Las fechas aprobadas siguen vigentes hasta que el Instructor Líder apruebe el cambio.</p>
+            @endif
         </div>
     @elseif ($cronograma?->estado === 'rechazado')
         <div class="mb-6 rounded-2xl bg-red-50 p-4 text-sm text-red-800 ring-1 ring-red-200">
-            <p class="font-semibold"><i class="fas fa-rotate-left mr-1" aria-hidden="true"></i> El Instructor Líder devolvió el cronograma para ajustes.</p>
+            <p class="font-semibold"><i class="fas fa-rotate-left mr-1" aria-hidden="true"></i> El Instructor Líder devolvió {{ $propuestaPendiente ? 'la modificación del cronograma' : 'el cronograma' }} para ajustes.</p>
             <p class="mt-1">Motivo: {{ $cronograma->motivo_rechazo }}</p>
+            @if ($propuestaPendiente)
+                <p class="mt-1">Siguen vigentes las fechas aprobadas, que se muestran debajo de cada etapa.</p>
+            @endif
         </div>
     @endif
 
@@ -53,6 +74,9 @@
                     <div @class(['grid gap-3 px-5 py-4 md:grid-cols-[1fr_11rem_11rem] md:items-center md:gap-4', 'bg-red-50' => $errorEtapa])>
                         <div>
                             <p class="font-semibold text-slate-900">{{ $loop->iteration }}. {{ $etapa['nombre'] }}</p>
+                            @if ($propuestaPendiente)
+                                <p class="text-xs text-slate-500">Vigente: {{ $vigenteTexto($clave) }}</p>
+                            @endif
                             @foreach ($errorEtapa as $mensaje)
                                 <p class="text-xs font-semibold text-red-700">{{ $mensaje }}</p>
                             @endforeach
@@ -76,7 +100,14 @@
             </div>
         </div>
 
-        @if ($editable)
+        @if ($editable && $esModificacion)
+            <div class="mt-6 flex flex-wrap justify-end gap-3">
+                <button type="submit" name="accion" value="enviar"
+                        class="inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]">
+                    <i class="fas fa-paper-plane" aria-hidden="true"></i> Enviar modificación a aprobación
+                </button>
+            </div>
+        @elseif ($editable)
             <div class="mt-6 flex flex-wrap justify-end gap-3">
                 <button type="submit" name="accion" value="borrador" formnovalidate
                         class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">

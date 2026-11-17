@@ -17,6 +17,7 @@ use Modules\TalentoHumano\Support\Aprendices;
 use Modules\TalentoHumano\Support\Auditoria;
 use Modules\TalentoHumano\Support\CargaMasiva;
 use Modules\TalentoHumano\Support\GestionAsignaciones;
+use Modules\TalentoHumano\Support\GestionFases;
 use Modules\TalentoHumano\Support\HojaExcel;
 use RuntimeException;
 
@@ -99,41 +100,16 @@ class AsignacionesController extends Controller
      */
     public function registrarFase(Request $request)
     {
-        $validador = Validator::make($request->all(), [
-            'numero' => ['required', 'integer', 'min:1', 'max:65535', Rule::unique('th_fases', 'numero')->whereNull('deleted_at')],
-            'fecha_inicio' => ['required', 'date'],
-            'fecha_fin' => ['required', 'date', 'after:fecha_inicio'],
-        ], [
-            'required' => 'Este campo es obligatorio',
-            'numero.unique' => 'Ya existe una fase con ese número',
-            'fecha_fin.after' => 'La fecha de fin debe ser posterior a la de inicio',
-        ]);
+        try {
+            $datos = GestionFases::validar($request->only('numero', 'fecha_inicio', 'fecha_fin'), null, 'fase');
+        } catch (ValidationException $e) {
+            $faltan = collect($e->errors())->flatten()->contains('Este campo es obligatorio');
 
-        // Las fechas no pueden cruzarse con otra fase; una fase sin fecha de fin ocupa solo su día de inicio
-        $validador->after(function ($v) use ($request) {
-            if ($v->errors()->isNotEmpty()) {
-                return;
-            }
-            $inicio = $request->input('fecha_inicio');
-            $fin = $request->input('fecha_fin');
-            $cruce = Fase::where('fecha_inicio', '<=', $fin)
-                ->where(fn ($q) => $q->where('fecha_fin', '>=', $inicio)->orWhere(fn ($s) => $s->whereNull('fecha_fin')->where('fecha_inicio', '>=', $inicio)))
-                ->exists();
-            if ($cruce) {
-                $v->errors()->add('fecha_inicio', 'Las fechas se cruzan con otra fase');
-            }
-        });
-
-        if ($validador->fails()) {
-            $faltan = collect($validador->errors()->all())->contains('Este campo es obligatorio');
-
-            return back()->withErrors($validador, 'fase')->withInput()
-                ->with('error', $faltan ? 'Debe completar los campos obligatorios' : $validador->errors()->first());
+            return back()->withErrors($e->validator, 'fase')->withInput()
+                ->with('error', $faltan ? 'Debe completar los campos obligatorios' : collect($e->errors())->flatten()->first());
         }
 
-        $datos = $validador->validated();
-        $fase = Fase::create($datos + ['estado' => 'planeacion']);
-        Auditoria::registrar('fase_registrada', $fase, [], ['numero' => $fase->numero, 'fecha_inicio' => $datos['fecha_inicio'], 'fecha_fin' => $datos['fecha_fin']]);
+        $fase = GestionFases::registrar($datos);
 
         return redirect()->route('talentohumano.lider.asignaciones.index', ['fase' => $fase->id])->with('success', 'Fase registrada correctamente');
     }

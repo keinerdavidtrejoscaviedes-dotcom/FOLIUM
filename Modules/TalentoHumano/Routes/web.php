@@ -20,6 +20,7 @@ use Modules\TalentoHumano\Http\Controllers\EntrevistaController;
 use Modules\TalentoHumano\Http\Controllers\EvaluadoresController;
 use Modules\TalentoHumano\Http\Controllers\FaseController;
 use Modules\TalentoHumano\Http\Controllers\FichaFaseController;
+use Modules\TalentoHumano\Http\Controllers\FirmasActaController;
 use Modules\TalentoHumano\Http\Controllers\FormatoEntrevistaController;
 use Modules\TalentoHumano\Http\Controllers\HabilitacionPruebaController;
 use Modules\TalentoHumano\Http\Controllers\InstructorLiderController;
@@ -227,9 +228,15 @@ Route::prefix('talento-humano')
             });
 
             // Gestor de TH: preparación de la fase (HU-017, HU-019, HU-020)
+            // Registro, modificación y eliminación de fases: el Gestor de TH y el Administrador (HU-011)
+            Route::prefix('fases')->name('fases.')->middleware(PermisoTH::class . ':fases')->group(function () {
+                Route::post('/', [FaseController::class, 'store'])->name('store');
+                Route::put('{fase}', [FaseController::class, 'update'])->whereNumber('fase')->name('update');
+                Route::delete('{fase}', [FaseController::class, 'destroy'])->whereNumber('fase')->name('destroy');
+            });
+
             Route::prefix('fases')->name('fases.')->middleware(PermisoTH::class . ':activacion')->group(function () {
                 Route::get('/', [FaseController::class, 'index'])->name('index');
-                Route::post('/', [FaseController::class, 'store'])->name('store');
 
                 Route::prefix('{fase}')->whereNumber('fase')->group(function () {
                     Route::get('/', [FaseController::class, 'show'])->name('show');
@@ -247,6 +254,8 @@ Route::prefix('talento-humano')
                 Route::get('fichas', [FichaFaseController::class, 'index'])->name('fichas.index');
                 Route::put('fichas', [FichaFaseController::class, 'update'])->name('fichas.update');
                 Route::get('fichas/{ficha}/aprendices', [FichaFaseController::class, 'aprendices'])->whereNumber('ficha')->name('fichas.aprendices');
+                // HU-018: trimestre o programa de una ficha que llegó sin ese dato
+                Route::post('fichas/{ficha}/datos', [FichaFaseController::class, 'registrarDatos'])->whereNumber('ficha')->name('fichas.datos');
 
                 Route::get('cargos', [ActivacionCargoController::class, 'edit'])->name('cargos.edit');
                 Route::put('cargos', [ActivacionCargoController::class, 'update'])->name('cargos.update');
@@ -275,6 +284,7 @@ Route::prefix('talento-humano')
                     Route::post('citar', 'citar')->name('citar');
                     Route::post('{empalme}/inventario/validar', 'validarInventario')->whereNumber('empalme')->name('inventario.validar');
                     Route::post('{empalme}/inventario/devolver', 'devolverInventario')->whereNumber('empalme')->name('inventario.devolver');
+                    Route::post('{empalme}/firmantes', 'firmantes')->whereNumber('empalme')->name('firmantes');
                     Route::post('cerrar-fase-saliente', 'cerrarFaseSaliente')->name('cerrar-saliente');
                 });
             });
@@ -288,6 +298,13 @@ Route::prefix('talento-humano')
                     Route::delete('{evaluador}', 'destroy')->whereNumber('evaluador')->name('destroy');
                     Route::patch('{evaluador}/restaurar', 'restaurar')->whereNumber('evaluador')->name('restaurar');
                 });
+            });
+
+            // Actas de recibimiento por firmar como instructor del área o jefe inmediato (HU-057C). Cada uno firma desde su
+            // cuenta; el controlador verifica que la persona sea el firmante designado del empalme
+            Route::prefix('actas-por-firmar')->name('actas-firma.')->controller(FirmasActaController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('{empalme}/firmar', 'firmar')->whereNumber('empalme')->name('firmar');
             });
 
             // Portal del Aprendiz: cronograma, convocatoria, postulación, prueba, acta, empalme y cargo (HU-043 a HU-057)

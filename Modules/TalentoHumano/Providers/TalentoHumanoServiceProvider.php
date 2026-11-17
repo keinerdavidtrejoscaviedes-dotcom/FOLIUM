@@ -22,7 +22,9 @@ class TalentoHumanoServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        \Modules\TalentoHumano\Console\VencerPruebas::class,
+    ];
 
     /**
      * Provider classes to register.
@@ -39,8 +41,9 @@ class TalentoHumanoServiceProvider extends ModuleServiceProvider
      * 
      * @param $schedule
      */
-    // protected function configureSchedules(Schedule $schedule): void
-    // {
-    //     $schedule->command('inspire')->hourly();
-    // }
+    protected function configureSchedules(Schedule $schedule): void
+    {
+        // HU-047 esc. 3: «No evaluado» automático al vencer el plazo de la prueba psicotécnica
+        $schedule->command('talentohumano:vencer-pruebas')->hourly();
+    }
 }

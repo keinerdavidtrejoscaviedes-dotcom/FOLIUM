@@ -44,7 +44,8 @@ class CronogramaController extends Controller
     public function edit(int $fase)
     {
         $fase = $this->fases->buscar($fase);
-        $cronograma = $this->fases->cronograma($fase->id);
+        $cronograma = $this->fases->ultimoCronograma($fase->id);
+        $vigente = $this->fases->cronogramaAprobado($fase->id);
 
         $etapas = $cronograma
             ? DB::table('th_cronograma_etapas')->where('cronograma_id', $cronograma->id)->get()->keyBy('etapa')
@@ -54,7 +55,11 @@ class CronogramaController extends Controller
             'fase' => $fase,
             'cronograma' => $cronograma,
             'etapas' => $etapas,
-            'editable' => $this->editable($cronograma),
+            'editable' => $this->editable($cronograma, $fase) && AccesoTH::puedeModificar(auth()->user(), 'activacion'),
+            // Modificación de un cronograma aprobado: se envía como nueva propuesta y las fechas aprobadas siguen vigentes
+            'vigente' => $vigente,
+            'etapasVigentes' => $vigente ? DB::table('th_cronograma_etapas')->where('cronograma_id', $vigente->id)->get()->keyBy('etapa') : collect(),
+            'esModificacion' => (bool) $vigente,
             'resumen' => $this->fases->resumen($fase->id),
         ]);
     }
@@ -62,17 +67,30 @@ class CronogramaController extends Controller
     public function update(Request $request, int $fase)
     {
         $fase = $this->fases->buscar($fase);
-        $cronograma = $this->fases->cronograma($fase->id);
+        $cronograma = $this->fases->ultimoCronograma($fase->id);
+        $vigente = $this->fases->cronogramaAprobado($fase->id);
         $enviar = $request->input('accion') === 'enviar';
 
-        if (!$this->editable($cronograma)) {
-            return back()->with('error', 'El cronograma ya fue enviado a aprobación; no se puede modificar.');
+        if (!$this->editable($cronograma, $fase)) {
+            return back()->with('error', $fase->estado === 'cerrada'
+                ? 'La fase está cerrada; su cronograma ya no se puede modificar.'
+                : 'El cronograma ya fue enviado a aprobación; no se puede modificar.');
+        }
+
+        // HU-020B esc. 8: la modificación de un cronograma aprobado es una nueva propuesta que se envía a aprobación
+        if ($vigente && !$enviar) {
+            return back()->withInput()->with('error', 'La modificación de un cronograma aprobado se envía directamente a aprobación del Instructor Líder.');
         }
 
         [$fechas, $errores] = $this->leerFechas($request);
+        $fechasVigentes = $vigente ? $this->fechasDe($vigente->id) : [];
+
+        if ($vigente && $errores->isEmpty() && $fechas == $fechasVigentes) {
+            return back()->withInput()->with('error', 'No modificó ninguna fecha del cronograma aprobado.');
+        }
 
         if ($enviar && $errores->isEmpty()) {
-            $errores = $this->validarEnvio($fase, $fechas);
+            $errores = $this->validarEnvio($fase, $fechas, $fechasVigentes);
             if ($errores->has('cronograma')) {
                 $this->avisarCondicionesMinimas($fase, $errores->get('cronograma'));
             }
@@ -82,14 +100,18 @@ class CronogramaController extends Controller
             return back()->withErrors($errores)->withInput();
         }
 
-        DB::transaction(function () use ($fase, $cronograma, $fechas, $enviar) {
+        // Sobre un cronograma aprobado no se escribe: la modificación queda en un cronograma nuevo
+        $nuevaPropuesta = $cronograma && $cronograma->estado === 'aprobado';
+
+        DB::transaction(function () use ($fase, $cronograma, $fechas, $enviar, $nuevaPropuesta) {
             $datos = [
                 'estado' => $enviar ? 'enviado' : 'borrador',
                 'enviado_por' => $enviar ? auth()->user()->person_id : null,
+                'motivo_rechazo' => null,
                 'updated_at' => now(),
             ];
 
-            if ($cronograma) {
+            if ($cronograma && !$nuevaPropuesta) {
                 DB::table('th_cronogramas')->where('id', $cronograma->id)->update($datos);
                 $id = $cronograma->id;
             } else {
@@ -110,17 +132,41 @@ class CronogramaController extends Controller
                 ])->values()->all());
         });
 
-        Auditoria::registrar($enviar ? 'Enviar cronograma a aprobación' : 'Guardar cronograma como borrador', 'th_cronogramas', $fase->id, $fechas);
+        Auditoria::registrar(match (true) {
+            $vigente !== null => 'Enviar modificación del cronograma a aprobación',
+            $enviar => 'Enviar cronograma a aprobación',
+            default => 'Guardar cronograma como borrador',
+        }, 'th_cronogramas', $fase->id, $vigente ? ['anteriores' => $fechasVigentes, 'nuevas' => $fechas] : $fechas);
 
         // Pendiente: aviso por correo al Instructor Líder (IE-007), cuando se defina el envío de notificaciones
         return redirect()->route('talentohumano.fases.cronograma.edit', $fase->id)
-            ->with('success', $enviar ? 'Cronograma enviado a aprobación.' : 'Cronograma guardado como borrador.');
+            ->with('success', match (true) {
+                $vigente !== null => 'Modificación del cronograma enviada a aprobación. Mientras el Instructor Líder no la apruebe, siguen vigentes las fechas aprobadas.',
+                $enviar => 'Cronograma enviado a aprobación.',
+                default => 'Cronograma guardado como borrador.',
+            });
     }
 
-    /** Se puede editar mientras no exista, esté en borrador o haya sido rechazado (RF-003). */
-    private function editable(?object $cronograma): bool
+    /**
+     * Se puede editar mientras no exista, esté en borrador o haya sido rechazado (RF-003). Uno aprobado lo puede
+     * modificar el Gestor como nueva propuesta (HU-020B esc. 8) mientras la fase no esté cerrada; uno en aprobación, no.
+     */
+    private function editable(?object $cronograma, object $fase): bool
     {
-        return !$cronograma || in_array($cronograma->estado, ['borrador', 'rechazado']);
+        return $fase->estado !== 'cerrada' && (!$cronograma || in_array($cronograma->estado, ['borrador', 'rechazado', 'aprobado']));
+    }
+
+    /**
+     * Fechas guardadas de un cronograma, con la misma forma que las que llegan del formulario.
+     */
+    private function fechasDe(int $cronogramaId): array
+    {
+        $guardadas = DB::table('th_cronograma_etapas')->where('cronograma_id', $cronogramaId)->get()->keyBy('etapa');
+
+        return collect(self::ETAPAS)->map(fn ($etapa, $clave) => [
+            'inicio' => isset($guardadas[$clave]) ? Carbon::parse($guardadas[$clave]->fecha_inicio)->format('Y-m-d') : null,
+            'fin' => $etapa['rango'] && isset($guardadas[$clave]) && $guardadas[$clave]->fecha_fin ? Carbon::parse($guardadas[$clave]->fecha_fin)->format('Y-m-d') : null,
+        ])->all();
     }
 
     /**
@@ -185,7 +231,7 @@ class CronogramaController extends Controller
     /**
      * Reglas para 'Enviar a aprobación' (HU-020 escenarios 3 a 8).
      */
-    private function validarEnvio(object $fase, array $fechas): MessageBag
+    private function validarEnvio(object $fase, array $fechas, array $fechasVigentes = []): MessageBag
     {
         $errores = new MessageBag();
         $hoy = today()->format('Y-m-d');
@@ -207,9 +253,9 @@ class CronogramaController extends Controller
             return $errores;
         }
 
-        // Escenario 5: fechas en el pasado
+        // Escenario 5: fechas en el pasado. En una modificación, una etapa que ya empezó puede conservar su fecha aprobada
         foreach (self::ETAPAS as $clave => $etapa) {
-            if ($fechas[$clave]['inicio'] < $hoy) {
+            if ($fechas[$clave]['inicio'] < $hoy && $fechas[$clave]['inicio'] !== ($fechasVigentes[$clave]['inicio'] ?? null)) {
                 $errores->add("etapas.$clave", "{$etapa['nombre']}: las fechas del cronograma no pueden ser anteriores a hoy.");
             }
         }

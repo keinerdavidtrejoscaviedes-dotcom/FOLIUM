@@ -139,6 +139,49 @@
                             @endif
                         </div>
                     @endif
+
+                    {{-- HU-057C: instructor del área y jefe inmediato que firman el acta, cada uno desde su cuenta --}}
+                    @if ($empalme->externos)
+                        <div class="mt-4 rounded-xl bg-slate-50 p-4 text-sm">
+                            <p class="font-semibold text-slate-700"><i class="fas fa-file-signature mr-1" aria-hidden="true"></i> Firmantes del acta que no son aprendices</p>
+                            <ul class="mt-1 space-y-0.5 text-slate-600">
+                                @foreach ($empalme->externos as $externo)
+                                    <li>
+                                        {{ $externo['rol'] }}:
+                                        <strong>{{ $externo['nombre'] ?? 'sin designar' }}</strong>
+                                        @if ($externo['sugerido'])<span class="text-xs text-slate-400">(propuesto por el sistema)</span>@endif
+                                        · <span @class(['text-emerald-700' => $externo['firma'], 'text-amber-700' => !$externo['firma']])>{{ $externo['firma'] ? 'firmó' : 'por firmar' }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            @if (!$soloConsulta && $empalme->estado !== 'cerrado')
+                                <form method="POST" action="{{ route('talentohumano.fases.empalmes.firmantes', [$fase->id, $empalme->id]) }}" class="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                                    @csrf
+                                    @if (isset($empalme->externos['instructor_area']))
+                                        <label class="block text-xs font-semibold text-slate-600">Instructor del área
+                                            <select name="instructor_area_id" class="mt-1 w-full rounded-xl border-0 px-3 py-2 text-sm ring-1 ring-slate-300 focus:ring-2 focus:ring-[#064C3D]">
+                                                <option value="">Propuesto por el sistema</option>
+                                                @foreach ($instructores as $instructor)
+                                                    <option value="{{ $instructor->id }}" @selected($empalme->instructor_area_id == $instructor->id)>{{ $instructor->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                    @endif
+                                    @if (isset($empalme->externos['jefe_inmediato']))
+                                        <label class="block text-xs font-semibold text-slate-600">Jefe inmediato
+                                            <select name="jefe_inmediato_id" class="mt-1 w-full rounded-xl border-0 px-3 py-2 text-sm ring-1 ring-slate-300 focus:ring-2 focus:ring-[#064C3D]">
+                                                <option value="">Propuesto por el sistema</option>
+                                                @foreach ($aprendicesFase as $aprendiz)
+                                                    <option value="{{ $aprendiz->id }}" @selected($empalme->jefe_inmediato_id == $aprendiz->id)>{{ $aprendiz->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                    @endif
+                                    <button type="submit" class="rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#064C3D] ring-1 ring-[#064C3D]/30 hover:bg-[#E8F3EF]">Guardar firmantes</button>
+                                </form>
+                            @endif
+                        </div>
+                    @endif
                 </article>
             @empty
                 <div class="rounded-2xl bg-white p-10 text-center text-slate-500 shadow-sm ring-1 ring-slate-200">

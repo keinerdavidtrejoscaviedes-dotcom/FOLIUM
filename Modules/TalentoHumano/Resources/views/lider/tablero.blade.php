@@ -12,6 +12,12 @@
 @endphp
 
 <x-talentohumano::layouts.lider title="Tablero de la fase" activo="tablero">
+    @if ($actasPorFirmar ?? 0)
+        <a href="{{ route('talentohumano.actas-firma.index') }}" class="mb-4 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900 shadow-sm ring-1 ring-amber-200 hover:bg-amber-100" role="alert">
+            <i class="fas fa-file-signature mt-0.5" aria-hidden="true"></i>
+            <span><strong>Actas de recibimiento por firmar ({{ $actasPorFirmar }})</strong><span class="block">Firma como instructor del área o jefe inmediato del cargo.</span></span>
+        </a>
+    @endif
     {{-- Encabezado --}}
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>

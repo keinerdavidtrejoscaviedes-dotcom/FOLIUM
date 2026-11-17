@@ -61,22 +61,34 @@ class AprobacionesController extends Controller
             return back()->with('error', 'Ese cronograma ya no está en aprobación.');
         }
 
+        $esModificacion = Cronograma::where('fase_id', $cronograma->fase_id)->where('estado', 'aprobado')->exists();
         $cronograma->update(['estado' => 'aprobado', 'aprobado_por' => auth()->user()->person_id, 'fecha_aprobacion' => now(), 'motivo_rechazo' => null]);
         $fase = $cronograma->fase->nombre_completo;
-        Auditoria::registrar('cronograma_aprobado', $cronograma, ['estado' => 'enviado'], ['estado' => 'aprobado', 'fase' => $fase]);
+        Auditoria::registrar($esModificacion ? 'cronograma_modificacion_aprobada' : 'cronograma_aprobado', $cronograma, ['estado' => 'enviado'], ['estado' => 'aprobado', 'fase' => $fase]);
+
+        // HU-020B esc. 8: con la modificación aprobada, la convocatoria toma las nuevas fechas de apertura y cierre
+        $etapaConvocatoria = $cronograma->etapas()->where('etapa', 'convocatoria')->first();
+        if ($esModificacion && $etapaConvocatoria) {
+            DB::table('th_convocatorias')->where('fase_id', $cronograma->fase_id)->whereNull('deleted_at')->update([
+                'cronograma_id' => $cronograma->id,
+                'fecha_apertura' => $etapaConvocatoria->fecha_inicio,
+                'fecha_cierre' => $etapaConvocatoria->fecha_fin ?? $etapaConvocatoria->fecha_inicio,
+                'updated_at' => now(),
+            ]);
+        }
 
         $etapas = collect($this->etapas($cronograma->load('etapas')))->map(fn ($e) => "- {$e['nombre']}: {$e['fechas']}")->implode("\n");
         $correos = $this->correosAprendices($cronograma->fase_id);
         $aviso = match (true) {
             $correos === [] => ' Las fichas de la fase no tienen aprendices con correo registrado, así que no se envió ningún aviso.',
-            Correo::enviar($correos, "FOLIUM: cronograma del proceso de selección de la {$fase}",
-                "FOLIUM · Talento Humano\n\nSe aprobó el cronograma del proceso de selección de SENA Empresa ({$fase}).\n\n{$etapas}\n\n"
+            Correo::enviar($correos, $esModificacion ? "FOLIUM: cambio en el cronograma del proceso de selección de la {$fase}" : "FOLIUM: cronograma del proceso de selección de la {$fase}",
+                "FOLIUM · Talento Humano\n\n" . ($esModificacion ? 'Cambiaron las fechas del' : 'Se aprobó el') . " cronograma del proceso de selección de SENA Empresa ({$fase}).\n\n{$etapas}\n\n"
                 . 'Las fechas también se pueden consultar en FOLIUM.') => ' Se avisó por correo a ' . count($correos) . ' aprendices de las fichas de la fase.',
             default => ' El correo a los aprendices no se pudo entregar; quedó en «Notificaciones no entregadas».',
         };
 
         return redirect()->route('talentohumano.lider.aprobaciones.cronograma', $cronograma)
-            ->with('success', 'Cronograma aprobado. El Gestor de Talento Humano ya puede publicar la convocatoria.' . $aviso);
+            ->with('success', ($esModificacion ? 'Modificación del cronograma aprobada: las nuevas fechas quedan vigentes.' : 'Cronograma aprobado. El Gestor de Talento Humano ya puede publicar la convocatoria.') . $aviso);
     }
 
     /**

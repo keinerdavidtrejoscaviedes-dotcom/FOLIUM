@@ -69,6 +69,12 @@
             <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
                 <h2 class="font-bold text-[#064C3D]">2. Tus 3 cargos en orden de preferencia</h2>
                 <p class="text-xs text-slate-500">Debes elegir exactamente 3 cargos distintos y cargar una propuesta de trabajo para cada uno.</p>
+                @if ($incompatibles->isNotEmpty())
+                    <p class="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800 ring-1 ring-amber-200">
+                        <i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i>
+                        Su perfil de formación no es compatible con {{ $incompatibles->count() }} {{ $incompatibles->count() === 1 ? 'cargo' : 'cargos' }} de la convocatoria; aparecen al final de la lista, bloqueados, y no puede postularse a ellos.
+                    </p>
+                @endif
                 @error('opciones')<p class="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{{ $message }}</p>@enderror
                 @error('propuestas')<p class="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{{ $message }}</p>@enderror
                 <div class="mt-4 space-y-4">
@@ -81,6 +87,13 @@
                                     @foreach ($cargos as $cargo)
                                         <option value="{{ $cargo->id }}" @selected(old("opciones.$i") == $cargo->id)>{{ $cargo->nombre }} · {{ $cargo->area ?? 'Sin área' }}{{ $cargo->alterno ? ' (programa alterno)' : '' }}</option>
                                     @endforeach
+                                    @if ($incompatibles->isNotEmpty())
+                                        <optgroup label="No compatibles con tu perfil (no puedes postularte)">
+                                            @foreach ($incompatibles as $cargo)
+                                                <option value="{{ $cargo->id }}" disabled>{{ $cargo->nombre }} · {{ $cargo->area ?? 'Sin área' }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
                                 </select>
                             </div>
                             <div>

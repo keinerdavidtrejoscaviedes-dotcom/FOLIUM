@@ -16,6 +16,7 @@ use Modules\TalentoHumano\Support\Auditoria;
 use Modules\TalentoHumano\Support\AvisosGestor;
 use Modules\TalentoHumano\Support\Correo;
 use Modules\TalentoHumano\Support\GestionAsignaciones;
+use Modules\TalentoHumano\Support\Instructores;
 use Modules\TalentoHumano\Support\PreparacionEmpalmes;
 use Modules\TalentoHumano\Support\ProcesoSeleccion;
 
@@ -42,7 +43,11 @@ class EmpalmesFaseController extends Controller
             'saliente' => PreparacionEmpalmes::faseSaliente($fase),
             'empalmes' => $empalmes->each(function ($empalme) {
                 $empalme->pasos = $this->pasos($empalme);
+                // HU-057C: instructor del área y jefe inmediato que firman el acta, si la plantilla los exige
+                $empalme->externos = $empalme->acta ? ActaRecibimiento::firmantesExternos($empalme) : [];
             }),
+            'instructores' => Instructores::designables(),
+            'aprendicesFase' => $this->aprendicesDeLaFase($fase),
             'sinEmpalme' => PreparacionEmpalmes::salientesSinEmpalme($fase),
             'vinculacion' => $this->vinculacion($fase, $empalmes),
             'soloConsulta' => !AccesoTH::puedeModificar(auth()->user(), 'programacion'),
@@ -277,6 +282,66 @@ class EmpalmesFaseController extends Controller
         abort_unless($empalme->participantes->where('papel', 'saliente')->isEmpty(), 422, 'Este empalme tiene aprendiz saliente: el inventario lo verifica quien recibe.');
 
         return $empalme;
+    }
+
+    /**
+     * 'Guardar firmantes': el Gestor indica quién firma el acta como instructor del área y como jefe inmediato (HU-057C).
+     * Si deja un campo vacío, firma quien propone el sistema.
+     */
+    public function firmantes(Request $request, int $fase, int $empalme)
+    {
+        $this->exigirPermiso($request);
+        $empalme = Empalme::with(['acta', 'cargo', 'participantes.asignacion'])->where('fase_id', $fase)->findOrFail($empalme);
+        if ($empalme->estado === 'cerrado') {
+            return back()->with('error', 'El empalme ya tiene visto bueno: sus firmantes no se pueden cambiar.');
+        }
+
+        $datos = $request->validate([
+            'instructor_area_id' => ['nullable', 'integer'],
+            'jefe_inmediato_id' => ['nullable', 'integer'],
+        ]);
+        $errores = [];
+        if (!empty($datos['instructor_area_id']) && !Instructores::esDesignable((int) $datos['instructor_area_id'])) {
+            $errores['instructor_area_id'] = 'El instructor del área debe ser un instructor activo del centro.';
+        }
+        if (!empty($datos['jefe_inmediato_id']) && !$this->aprendicesDeLaFase(Fase::find($fase))->contains('id', (int) $datos['jefe_inmediato_id'])) {
+            $errores['jefe_inmediato_id'] = 'El jefe inmediato debe ser un aprendiz con cargo asignado en la fase.';
+        }
+        // Quien ya firmó con su rol no se puede reemplazar
+        foreach (ActaRecibimiento::firmantesExternos($empalme) as $clave => $externo) {
+            $campo = $clave === 'instructor_area' ? 'instructor_area_id' : 'jefe_inmediato_id';
+            if ($externo['firma'] && (int) ($datos[$campo] ?? 0) !== (int) $externo['person_id']) {
+                $errores[$campo] = "{$externo['rol']}: ya firmó {$externo['nombre']}; no se puede cambiar.";
+            }
+        }
+        if ($errores) {
+            return back()->withErrors($errores)->with('error', implode(' ', $errores));
+        }
+
+        $antes = $empalme->only(['instructor_area_id', 'jefe_inmediato_id']);
+        $empalme->update([
+            'instructor_area_id' => $datos['instructor_area_id'] ?? null,
+            'jefe_inmediato_id' => $datos['jefe_inmediato_id'] ?? null,
+        ]);
+        Auditoria::registrar('empalme_firmantes', $empalme, $antes, $empalme->only(['instructor_area_id', 'jefe_inmediato_id']));
+
+        // Si los aprendices ya firmaron, se avisa a los firmantes que faltan
+        if ($empalme->acta && ActaRecibimiento::actualizarEstado($empalme, $empalme->acta) === 'faltan_instructores') {
+            ActaRecibimiento::avisarFirmantesPendientes($empalme);
+        }
+
+        return back()->with('success', "Firmantes del acta de {$empalme->cargo?->nombre} guardados.");
+    }
+
+    /**
+     * Aprendices con cargo en la fase (posibles jefes inmediatos), por nombre.
+     */
+    private function aprendicesDeLaFase(Fase $fase)
+    {
+        return DB::table('th_asignaciones as a')->join('people as p', 'p.id', '=', 'a.person_id')->join('th_cargos as c', 'c.id', '=', 'a.cargo_id')
+            ->where('a.fase_id', $fase->id)->whereIn('a.estado', ['asignada', 'vigente'])
+            ->selectRaw("p.id, CONCAT(TRIM(CONCAT_WS(' ', p.first_name, p.first_last_name, p.second_last_name)), ' · ', c.nombre) as nombre")
+            ->orderBy('p.first_name')->get()->unique('id')->values();
     }
 
     private function exigirPermiso(Request $request): void

@@ -9,7 +9,20 @@
     @endif
 
 
-    @if ($fichas->isEmpty())
+    @if (!empty($incompletas) && $incompletas->isNotEmpty())
+        {{-- HU-018 escenarios 4 y 5 --}}
+        <div class="rounded-2xl bg-amber-50 p-6 text-sm text-amber-900 ring-1 ring-amber-200" role="alert">
+            <p class="font-semibold"><i class="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i> No se puede mostrar la propuesta de cargos ni activar: hay fichas de la fase con datos incompletos.</p>
+            <ul class="mt-2 list-disc pl-5">
+                @foreach ($incompletas as $ficha)
+                    <li>Ficha {{ $ficha->code }}: {{ $ficha->sin_programa ? 'sin programa de formación' : 'sin trimestre registrado' }}</li>
+                @endforeach
+            </ul>
+            <a href="{{ route('talentohumano.fases.fichas.index', $fase->id) }}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]">
+                <i class="fas fa-users-rectangle" aria-hidden="true"></i> Registrar los datos en Fichas de la fase
+            </a>
+        </div>
+    @elseif ($fichas->isEmpty())
         {{-- HU-019 escenario 11 --}}
         <div class="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-slate-200">
             <p class="text-slate-600">Primero debe seleccionar las fichas de la fase.</p>

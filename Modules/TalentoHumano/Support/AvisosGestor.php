@@ -45,6 +45,18 @@ class AvisosGestor
         }
 
         $avisos = [];
+
+        // HU-047 esc. 3 y HU-025B: postulantes que dejaron vencer la prueba quedan «No evaluado» sin esperar a que entren
+        if ($convocatoria = ProcesoSeleccion::convocatoria($fase)) {
+            PruebaVencida::sincronizar($convocatoria);
+            $noEvaluados = PruebaVencida::noEvaluados($convocatoria);
+            if ($noEvaluados->isNotEmpty()) {
+                $avisos[] = ["Postulantes «No evaluado» ({$noEvaluados->count()})",
+                    'No presentaron la prueba psicotécnica dentro del plazo y su entrevista queda bloqueada: ' . $noEvaluados->take(8)->implode(', ') . ($noEvaluados->count() > 8 ? '…' : ''),
+                    route('talentohumano.fases.prueba.index', $fase->id)];
+            }
+        }
+
         foreach (self::plazosPorVencer($fase) as [$etapa, $fin, $pendientes]) {
             $titulo = "Plazo de «{$etapa}»: vence el " . $fin->format('d/m/Y');
             $texto = count($pendientes) . ' pendientes: ' . implode(', ', array_slice($pendientes, 0, 8)) . (count($pendientes) > 8 ? '…' : '');

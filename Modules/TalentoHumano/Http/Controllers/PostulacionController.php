@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Modules\TalentoHumano\Entities\PostulacionDocumento;
 use Modules\TalentoHumano\Entities\PostulacionOpcion;
 use Modules\TalentoHumano\Support\AccesoTH;
+use Modules\TalentoHumano\Support\PruebaVencida;
 use Modules\TalentoHumano\Support\Auditoria;
 
 class PostulacionController extends Controller
@@ -27,6 +28,10 @@ class PostulacionController extends Controller
         // Bloque 1: Convocatoria activa o más reciente
         $convocatoria = $this->obtenerConvocatoriaActiva();
         $convocatoriaId = $convocatoria ? $convocatoria->id : null;
+        // HU-047 esc. 3: los que dejaron vencer el plazo de la prueba aparecen ya como «No evaluado»
+        if ($convocatoria instanceof Convocatoria && $convocatoria->estado !== 'borrador') {
+            PruebaVencida::sincronizar($convocatoria);
+        }
 
         // Bloque 2: Filtrar postulaciones por criterios (nombre, ficha, cargo, estado)
         // El Gestor no ve puntajes ni el orden por puntaje: revelaría el resultado de la evaluación (HU-032, SRS 2.6)

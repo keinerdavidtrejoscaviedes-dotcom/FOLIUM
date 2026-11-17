@@ -182,11 +182,11 @@
                         @if ($firma)<span class="text-xs text-emerald-700"><i class="fas fa-signature mr-1" aria-hidden="true"></i>Firmó el {{ $firma->fecha_firma->format('d/m/Y h:i a') }}</span>@else<span class="text-xs text-amber-700">Por firmar</span>@endif
                     </li>
                 @endforeach
-                @foreach ($otros as $firmante)
-                    @php $firma = $firmas->whereNotIn('person_id', array_keys($aprendices))->first(); @endphp
+                {{-- HU-057C: el instructor del área y el jefe inmediato firman cada uno desde su propia cuenta --}}
+                @foreach ($externos as $externo)
                     <li class="flex flex-wrap items-center justify-between gap-2 py-2">
-                        <span class="font-semibold text-slate-800">{{ PlantillaActa::FIRMANTES[$firmante][0] }}</span>
-                        @if ($firma)<span class="text-xs text-emerald-700"><i class="fas fa-signature mr-1" aria-hidden="true"></i>Firmó {{ $nombre($firma->person) }}</span>@else<span class="text-xs text-amber-700">Por firmar</span>@endif
+                        <span class="font-semibold text-slate-800">{{ $externo['rol'] }}<span class="block text-xs font-normal text-slate-500">{{ $externo['nombre'] ?? 'Por designar' }}</span></span>
+                        @if ($externo['firma'])<span class="text-xs text-emerald-700"><i class="fas fa-signature mr-1" aria-hidden="true"></i>Firmó</span>@else<span class="text-xs text-amber-700">Por firmar</span>@endif
                     </li>
                 @endforeach
             </ul>

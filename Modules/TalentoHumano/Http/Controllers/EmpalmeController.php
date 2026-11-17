@@ -62,7 +62,10 @@ class EmpalmeController extends Controller
         $user = auth()->user();
         $personId = $user->person_id ?? 1;
 
-        $yaFirmoInstructor = $firmas->contains(fn ($f) => $f->rol_firmante === 'Instructor de Talento Humano' || $f->person_id == $personId);
+        // HU-057C: instructor del área y jefe inmediato que exige la plantilla; firma aquí solo quien está designado
+        $externos = $acta ? ActaRecibimiento::firmantesExternos($empalme) : [];
+        $miRolExterno = $acta ? ActaRecibimiento::rolExterno($empalme, $personId) : null;
+        $aprendicesFirmantes = ActaRecibimiento::aprendicesFirmantes($empalme);
 
         return view('talentohumano::empalmes.show', compact(
             'empalme',
@@ -70,7 +73,9 @@ class EmpalmeController extends Controller
             'receptor',
             'acta',
             'firmas',
-            'yaFirmoInstructor'
+            'externos',
+            'miRolExterno',
+            'aprendicesFirmantes'
         ));
     }
 
@@ -125,23 +130,16 @@ class EmpalmeController extends Controller
      */
     public function firmarActa(Request $request, $empalmeId)
     {
-        $empalme = Empalme::with(['acta', 'cargo'])->findOrFail($empalmeId);
-        $personId = auth()->user()->person_id ?? 1;
+        $empalme = Empalme::with(['acta', 'cargo', 'participantes.asignacion'])->findOrFail($empalmeId);
 
-        // La firma queda como Instructor de Talento Humano: solo la registra quien tiene esa designación
-        if (!in_array('instructor_th', AccesoTH::designaciones(auth()->user()))) {
+        // HU-057C: firman el instructor del área y el jefe inmediato, cada uno desde su propia cuenta
+        $resultado = ActaRecibimiento::firmarExterno($empalme, (int) auth()->user()->person_id);
+        if (!$resultado) {
             Auditoria::registrarIntentoDenegado($request);
-            abort(403, 'No tiene permisos para realizar esta acción');
+            abort(403, 'Esta acta la firman el instructor del área y el jefe inmediato del cargo desde su propia cuenta.');
         }
 
-        // Bloque 1: Asegurar que el acta de recibimiento exista
-        $acta = $this->asegurarActaRecibimiento($empalme);
-
-        // Bloque 2: Registrar firma digital y actualizar estados correspondientes
-        $this->procesarFirmaDigital($empalme, $acta, $personId);
-        Auditoria::registrar('acta_firmada', $acta, [], ['empalme' => $empalme->id, 'cargo' => optional($empalme->cargo)->nombre, 'rol_firmante' => 'Instructor de Talento Humano']);
-
-        return back()->with('success', '¡Has firmado digitalmente el acta de recibimiento con tu designación de Instructor de Talento Humano!');
+        return back()->with(...$resultado);
     }
 
     /**
@@ -272,22 +270,5 @@ class EmpalmeController extends Controller
     private function asegurarActaRecibimiento(Empalme $empalme): Acta
     {
         return ActaRecibimiento::asegurar($empalme);
-    }
-
-    /**
-     * Procesa la firma digital del instructor y actualiza estados de cierre.
-     */
-    private function procesarFirmaDigital(Empalme $empalme, Acta $acta, int $personId): void
-    {
-        Firma::updateOrCreate(
-            ['acta_id' => $acta->id, 'person_id' => $personId],
-            [
-                'rol_firmante' => 'Instructor de Talento Humano',
-                'fecha_firma' => now(),
-            ]
-        );
-
-        // El acta queda firmada cuando firman los aprendices y los firmantes que exige la plantilla del área (HU-057)
-        ActaRecibimiento::actualizarEstado($empalme, $acta);
     }
 }

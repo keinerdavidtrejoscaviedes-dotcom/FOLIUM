@@ -43,9 +43,9 @@ class FaseService
      */
     public function fichasDisponibles(): Collection
     {
+        // Una ficha sin programa también se lista, para que el Gestor lo registre antes de seleccionarla (HU-018 esc. 3)
         return $this->consultaFichas()
-            ->where('p.program_type', 'Tecnólogo')
-            ->where('p.modality', 'Presencial')
+            ->where(fn ($q) => $q->whereNull('p.id')->orWhere(fn ($t) => $t->where('p.program_type', 'Tecnólogo')->where('p.modality', 'Presencial')))
             ->where('c.status', 'Activo')
             ->orderBy('p.name')
             ->orderBy('c.code')
@@ -65,6 +65,23 @@ class FaseService
             ->orderBy('p.name')
             ->get()
             ->map(fn ($ficha) => $this->conTrimestre($ficha));
+    }
+
+    /**
+     * Fichas de la fase a las que les falta el programa o el trimestre: impiden la activación de cargos (HU-018 esc. 4 y 5).
+     */
+    public function fichasIncompletas(int $faseId): Collection
+    {
+        return $this->fichasDeLaFase($faseId)->filter(fn ($f) => $f->sin_programa || $f->sin_trimestre)->values();
+    }
+
+    /**
+     * Programas tecnólogo presenciales del centro, para registrar el de una ficha que llegó sin él (HU-018 esc. 3).
+     */
+    public function programasTecnologo(): Collection
+    {
+        return DB::table('programs')->where('program_type', 'Tecnólogo')->where('modality', 'Presencial')
+            ->whereNull('deleted_at')->orderBy('name')->get(['id', 'name', 'quarter_number']);
     }
 
     /**
@@ -99,6 +116,8 @@ class FaseService
             'cargos' => (clone $cargos)->count(),
             'cupos' => (int) (clone $cargos)->sum('numero_aprendices'),
             'cronograma' => $cronograma?->estado,
+            // Propuesta de modificación de un cronograma aprobado (enviado, borrador o rechazado)
+            'cronograma_modificacion' => ($ultimo = $this->ultimoCronograma($faseId)) && $cronograma && $ultimo->id !== $cronograma->id ? $ultimo->estado : null,
             'convocatoria' => $convocatoria?->estado,
             'convocatoria_publicada' => $this->convocatoriaPublicada($faseId),
             // Proceso de selección después de publicar la convocatoria (HU-025 a HU-028)
@@ -126,9 +145,28 @@ class FaseService
     }
 
     /**
-     * Último cronograma de la fase (puede haber varios si uno fue rechazado y se rehízo).
+     * Cronograma vigente de la fase: el último aprobado; si aún no hay uno aprobado, el último registrado.
+     * Mientras una modificación está en aprobación siguen vigentes las fechas aprobadas (HU-020B esc. 8).
      */
     public function cronograma(int $faseId): ?object
+    {
+        return $this->cronogramaAprobado($faseId) ?? $this->ultimoCronograma($faseId);
+    }
+
+    public function cronogramaAprobado(int $faseId): ?object
+    {
+        return DB::table('th_cronogramas')
+            ->where('fase_id', $faseId)
+            ->where('estado', 'aprobado')
+            ->orderByDesc('fecha_aprobacion')
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    /**
+     * Último cronograma registrado (puede ser un borrador, una propuesta de modificación o uno rechazado).
+     */
+    public function ultimoCronograma(int $faseId): ?object
     {
         return DB::table('th_cronogramas')
             ->where('fase_id', $faseId)
@@ -138,11 +176,13 @@ class FaseService
 
     private function consultaFichas()
     {
+        // El programa y el trimestre registrados a mano por el Gestor completan los que faltan en SICEFA (HU-018)
         return DB::table('courses as c')
-            ->join('programs as p', 'p.id', '=', 'c.program_id')
+            ->leftJoin('th_fichas_datos as fd', 'fd.course_id', '=', 'c.id')
+            ->leftJoin('programs as p', 'p.id', '=', DB::raw('COALESCE(c.program_id, fd.program_id)'))
             ->whereNull('c.deleted_at')
             ->select(
-                'c.id', 'c.code', 'c.start_date', 'c.end_date', 'c.status',
+                'c.id', 'c.code', 'c.start_date', 'c.end_date', 'c.status', 'fd.trimestre as trimestre_manual',
                 'p.id as program_id', 'p.name as programa', 'p.sofia_code', 'p.quarter_number',
                 'p.program_type', 'p.modality'
             )
@@ -155,7 +195,10 @@ class FaseService
 
     private function conTrimestre(object $ficha): object
     {
-        $ficha->trimestre = $this->trimestre($ficha->start_date, $ficha->quarter_number);
+        // Sin fecha de inicio no se puede calcular: vale el trimestre que registró el Gestor (HU-018 esc. 1)
+        $ficha->trimestre = $ficha->start_date ? $this->trimestre($ficha->start_date, $ficha->quarter_number) : (int) $ficha->trimestre_manual;
+        $ficha->sin_trimestre = !$ficha->start_date && !$ficha->trimestre_manual;
+        $ficha->sin_programa = !$ficha->program_id;
 
         return $ficha;
     }

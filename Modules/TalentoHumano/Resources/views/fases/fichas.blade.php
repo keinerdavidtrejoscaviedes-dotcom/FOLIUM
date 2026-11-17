@@ -64,10 +64,40 @@
                                 </td>
                                 <td class="px-4 py-3 font-bold text-slate-900"><label for="ficha-{{ $ficha->id }}">{{ $ficha->code }}</label></td>
                                 <td class="px-4 py-3">
-                                    {{ $ficha->programa }}
-                                    <span class="block text-xs text-slate-400">Código SOFIA {{ $ficha->sofia_code }}</span>
+                                    @if ($ficha->sin_programa)
+                                        {{-- HU-018 esc. 3 --}}
+                                        <span class="font-semibold text-amber-700">Sin programa de formación</span>
+                                        @unless ($bloqueada || $soloConsulta)
+                                            <span class="mt-1 flex gap-1">
+                                                <select form="datos-ficha-{{ $ficha->id }}" name="program_id" aria-label="Programa de formación de la ficha {{ $ficha->code }}" class="max-w-56 rounded-lg border-0 px-2 py-1 text-xs ring-1 ring-amber-300">
+                                                    <option value="">Programa de formación…</option>
+                                                    @foreach ($programas as $programa)
+                                                        <option value="{{ $programa->id }}">{{ $programa->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="submit" form="datos-ficha-{{ $ficha->id }}" class="rounded-lg bg-[#064C3D] px-2 py-1 text-xs font-semibold text-white">Guardar</button>
+                                            </span>
+                                        @endunless
+                                    @else
+                                        {{ $ficha->programa }}
+                                        <span class="block text-xs text-slate-400">Código SOFIA {{ $ficha->sofia_code }}</span>
+                                    @endif
                                 </td>
-                                <td class="px-4 py-3">{{ $ficha->trimestre ? $ficha->trimestre . '.º' : 'Sin iniciar' }}</td>
+                                <td class="px-4 py-3">
+                                    @if ($ficha->sin_trimestre)
+                                        {{-- HU-018 esc. 1 y 2 --}}
+                                        <span class="font-semibold text-amber-700">Sin trimestre</span>
+                                        @unless ($bloqueada || $soloConsulta || $ficha->sin_programa)
+                                            <span class="mt-1 flex gap-1">
+                                                <input form="datos-ficha-{{ $ficha->id }}" type="number" name="trimestre" min="1" max="{{ $ficha->quarter_number ?: 8 }}" placeholder="N.º" aria-label="Trimestre de la ficha {{ $ficha->code }}" class="w-16 rounded-lg border-0 px-2 py-1 text-xs ring-1 ring-amber-300">
+                                                <button type="submit" form="datos-ficha-{{ $ficha->id }}" class="rounded-lg bg-[#064C3D] px-2 py-1 text-xs font-semibold text-white">Guardar</button>
+                                            </span>
+                                        @endunless
+                                    @else
+                                        {{ $ficha->trimestre ? $ficha->trimestre . '.º' : 'Sin iniciar' }}
+                                        @if ($ficha->trimestre_manual && !$ficha->start_date)<span class="block text-xs text-slate-400">Registrado a mano</span>@endif
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3">{{ $ficha->start_date ? \Illuminate\Support\Carbon::parse($ficha->start_date)->format('d/m/Y') : '—' }}</td>
                                 <td class="px-4 py-3">{{ $ficha->aprendices }}</td>
                                 <td class="px-4 py-3 text-right">
@@ -93,6 +123,11 @@
                 </div>
             @endunless
         </form>
+
+        {{-- Formularios de HU-018 (fuera del formulario de selección, enlazados con el atributo form) --}}
+        @foreach ($fichas->filter(fn ($f) => $f->sin_programa || $f->sin_trimestre) as $ficha)
+            <form id="datos-ficha-{{ $ficha->id }}" method="POST" action="{{ route('talentohumano.fases.fichas.datos', [$fase->id, $ficha->id]) }}" class="hidden">@csrf</form>
+        @endforeach
     @endif
 
     @push('scripts')
