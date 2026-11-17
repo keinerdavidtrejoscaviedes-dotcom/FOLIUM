@@ -57,10 +57,11 @@
     {{-- Lista de Entrevistas Asignadas (Mockup INS-07) --}}
     <div class="space-y-4">
         @forelse ($entrevistas as $entr)
+            {{-- Una tarjeta por aspirante: en la entrevista grupal cada uno se califica por separado (HU-041A esc. 7) --}}
+            @foreach ($entr->postulaciones as $aspirante)
             @php
-                $aspirante = $entr->postulaciones->first();
-                $persona = $aspirante?->person;
-                $calificacion = $entr->calificaciones->first();
+                $persona = $aspirante->person;
+                $calificacion = $entr->calificaciones->firstWhere('postulacion_id', $aspirante->id);
                 $esCalificada = (bool)$calificacion;
 
                 // Otros evaluadores presentes en la misma entrevista
@@ -132,6 +133,7 @@
                     @endif
                 </div>
             </article>
+            @endforeach
         @empty
             <div class="rounded-3xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-slate-200/70">
                 <i class="fas fa-calendar-xmark mb-2 block text-3xl text-slate-300"></i>

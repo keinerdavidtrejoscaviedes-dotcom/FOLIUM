@@ -222,7 +222,7 @@ class ProgramacionEntrevistasController extends Controller
             ProcesoSeleccion::correos($entrevista->postulaciones->pluck('person_id')->merge($entrevista->evaluadores->pluck('person_id'))),
             'FOLIUM: se canceló una entrevista',
             "FOLIUM · Talento Humano\n\nSe canceló la entrevista " . mb_strtolower(self::TIPOS[$entrevista->tipo]) . ' del '
-            . $entrevista->fecha_hora->translatedFormat('l j \d\e F \a \l\a\s g:i a') . " en {$entrevista->lugar}.\n\nEl Gestor de Talento Humano enviará la nueva citación."
+            . $entrevista->fecha_hora->locale('es')->translatedFormat('l j \d\e F \a \l\a\s g:i a') . " en {$entrevista->lugar}.\n\nEl Gestor de Talento Humano enviará la nueva citación."
         );
 
         return back()->with('success', 'Entrevista cancelada. Se avisó por correo a los aspirantes y a los evaluadores.');
@@ -233,7 +233,7 @@ class ProgramacionEntrevistasController extends Controller
      */
     private function enviarCitaciones(Entrevista $entrevista, $postulantes, $evaluadores): void
     {
-        $cuando = $entrevista->fecha_hora->translatedFormat('l j \d\e F \d\e Y \a \l\a\s g:i a');
+        $cuando = $entrevista->fecha_hora->locale('es')->translatedFormat('l j \d\e F \d\e Y \a \l\a\s g:i a');
         $tipo = mb_strtolower(self::TIPOS[$entrevista->tipo]);
         $detalle = "Fecha y hora: {$cuando}\nLugar: {$entrevista->lugar}\nModalidad: " . ($entrevista->modalidad === 'grupal' ? 'grupal' : 'individual');
 

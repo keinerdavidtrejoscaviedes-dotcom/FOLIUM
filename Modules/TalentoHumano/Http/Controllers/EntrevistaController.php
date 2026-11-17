@@ -81,6 +81,13 @@ class EntrevistaController extends Controller
             'preguntas.*' => 'required|array',
             'preguntas.*.enunciado' => 'required|string',
             'preguntas.*.puntaje' => 'required|numeric|min:1',
+        ], [
+            // HU-040A esc. 3 y 4
+            'preguntas.required' => 'Agregue al menos una pregunta.',
+            'preguntas.*.enunciado.required' => 'Escriba el enunciado de cada pregunta.',
+            'preguntas.*.puntaje.required' => 'Asigne un puntaje numérico a la pregunta.',
+            'preguntas.*.puntaje.numeric' => 'El puntaje debe ser un número.',
+            'preguntas.*.puntaje.min' => 'El puntaje debe ser mayor que cero.',
         ]);
 
         $personId = auth()->user()->person_id ?? 1;
@@ -250,8 +257,9 @@ class EntrevistaController extends Controller
      */
     private function calcularMetricasEntrevistas($entrevistas): array
     {
-        $totalAsignadas = $entrevistas->count();
-        $totalCalificadas = $entrevistas->filter(fn ($e) => $e->calificaciones->isNotEmpty())->count();
+        // Se cuenta por aspirante: una entrevista grupal tiene una calificación por cada aprendiz del grupo
+        $totalAsignadas = $entrevistas->sum(fn ($e) => $e->postulaciones->count());
+        $totalCalificadas = $entrevistas->sum(fn ($e) => $e->postulaciones->filter(fn ($p) => $e->calificaciones->contains('postulacion_id', $p->id))->count());
         $totalPorCalificar = $totalAsignadas - $totalCalificadas;
 
         return [

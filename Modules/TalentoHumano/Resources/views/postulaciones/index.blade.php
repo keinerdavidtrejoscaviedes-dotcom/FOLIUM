@@ -61,6 +61,7 @@
             <p class="folium-kpi-meta">Requieren concepto de instructor</p>
         </div>
 
+        @if ($verResultados)
         <div class="folium-kpi-card">
             <div class="folium-kpi-top">
                 <span class="folium-kpi-label">Puntaje promedio</span>
@@ -69,6 +70,7 @@
             <p class="folium-kpi-value">{{ round($promedioPuntaje, 1) }} <span class="text-xs font-normal text-slate-400">/ 200</span></p>
             <p class="folium-kpi-meta">Prueba + Entrevistas</p>
         </div>
+        @endif
     </div>
 
     {{-- Filtros y Buscador --}}
@@ -175,7 +177,7 @@
 
                     {{-- Puntaje y Acciones --}}
                     <div class="flex items-center gap-4 shrink-0 self-end md:self-center">
-                        @if ($post->puntaje_total)
+                        @if ($verResultados && $post->puntaje_total)
                             <div class="text-right">
                                 <p class="text-[11px] font-semibold text-slate-400 uppercase">Puntaje</p>
                                 <p class="text-xl font-extrabold text-[#064C3D]">

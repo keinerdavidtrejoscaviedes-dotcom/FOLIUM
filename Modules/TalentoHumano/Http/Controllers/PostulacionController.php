@@ -29,7 +29,9 @@ class PostulacionController extends Controller
         $convocatoriaId = $convocatoria ? $convocatoria->id : null;
 
         // Bloque 2: Filtrar postulaciones por criterios (nombre, ficha, cargo, estado)
-        $postulaciones = $this->filtrarPostulaciones($request, $convocatoriaId);
+        // El Gestor no ve puntajes ni el orden por puntaje: revelaría el resultado de la evaluación (HU-032, SRS 2.6)
+        $verResultados = $this->puedeVerResultados(auth()->user());
+        $postulaciones = $this->filtrarPostulaciones($request, $convocatoriaId, $verResultados);
 
         // Bloque 3: Calcular métricas generales de postulación
         $metricas = $this->calcularMetricasConvocatoria($convocatoriaId);
@@ -40,6 +42,7 @@ class PostulacionController extends Controller
         return view('talentohumano::postulaciones.index', array_merge([
             'convocatoria' => $convocatoria,
             'postulaciones' => $postulaciones,
+            'verResultados' => $verResultados,
         ], $metricas, $opcionesFiltro));
     }
 
@@ -63,7 +66,7 @@ class PostulacionController extends Controller
 
         // Resultados de la prueba y de las entrevistas: Líder, Instructor de TH y Administrador; el Gestor no los ve (SRS 2.6)
         $designaciones = AccesoTH::designaciones($user);
-        $verResultados = AccesoTH::esAdministrador($user) || array_intersect(['lider_estrategia', 'instructor_th'], $designaciones);
+        $verResultados = $this->puedeVerResultados($user);
         $designacion = match (true) {
             in_array('lider_estrategia', $designaciones) => 'Líder de la estrategia',
             in_array('instructor_th', $designaciones) => 'Instructor de Talento Humano',
@@ -122,6 +125,11 @@ class PostulacionController extends Controller
             'habilidades' => 'required|string|min:5',
             'afinidades' => 'nullable|array',
             'observaciones' => 'nullable|string',
+        ], [
+            'formacion.required' => 'Describa la formación del postulante.',
+            'formacion.min' => 'La formación debe tener al menos 5 caracteres.',
+            'habilidades.required' => 'Describa las habilidades del postulante.',
+            'habilidades.min' => 'Las habilidades deben tener al menos 5 caracteres.',
         ]);
 
         $postulacion = Postulacion::with(['opciones.convocatoriaCargo.cargoActivado.cargo', 'convocatoria'])->findOrFail($id);
@@ -174,7 +182,7 @@ class PostulacionController extends Controller
     /**
      * Filtra las postulaciones según los parámetros de búsqueda del usuario.
      */
-    private function filtrarPostulaciones(Request $request, ?int $convocatoriaId)
+    private function filtrarPostulaciones(Request $request, ?int $convocatoriaId, bool $porPuntaje)
     {
         $query = Postulacion::with([
             'person',
@@ -217,7 +225,15 @@ class PostulacionController extends Controller
             });
         }
 
-        return $query->orderByDesc('puntaje_total')->get();
+        return $porPuntaje ? $query->orderByDesc('puntaje_total')->get() : $query->orderBy('id')->get();
+    }
+
+    /**
+     * Resultados de la prueba y de las entrevistas: Líder, Instructor de TH y Administrador; el Gestor no los ve (SRS 2.6).
+     */
+    private function puedeVerResultados($user): bool
+    {
+        return AccesoTH::esAdministrador($user) || (bool) array_intersect(['lider_estrategia', 'instructor_th'], AccesoTH::designaciones($user));
     }
 
     /**
