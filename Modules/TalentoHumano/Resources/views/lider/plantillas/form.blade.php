@@ -9,7 +9,7 @@
         'columnas' => old('columnas_inventario', $plantilla->columnas_inventario),
         'items' => old('items_base', $plantilla->items_base ?? []),
     ];
-    $firmantes = old('firmantes', $plantilla->firmantes);
+    $firmantes = (array) old('firmantes', $plantilla->firmantes);
     $area = (string) old('area_id', $areaInicial);
     $mensajes = collect($errors->all())->unique();
     $sinColumnas = $mensajes->contains(PlantillaActaRequest::MENSAJE_SIN_COLUMNAS);
@@ -71,7 +71,7 @@
                 </div>
                 <div>
                     <label for="nombre" class="mb-1 block text-sm font-semibold text-slate-700">Nombre <span class="text-red-500">*</span></label>
-                    <input id="nombre" name="nombre" maxlength="150" data-obligatorio value="{{ old('nombre', $plantilla->nombre) }}" placeholder="Por ejemplo: Plantilla Agrícola"
+                    <input id="nombre" name="nombre" data-validar="sin_numeros" maxlength="150" data-obligatorio value="{{ old('nombre', $plantilla->nombre) }}" placeholder="Por ejemplo: Plantilla Agrícola"
                            class="{{ $campo }} @error('nombre') border-red-400 @enderror">
                     @error('nombre') <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p> @enderror
                 </div>

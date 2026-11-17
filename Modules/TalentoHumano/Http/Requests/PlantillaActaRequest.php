@@ -41,7 +41,7 @@ class PlantillaActaRequest extends FormRequest
                     $falla('Seleccione un área de la lista');
                 }
             }],
-            'nombre' => ['required', 'string', 'max:150'],
+            'nombre' => ['required', 'string', 'max:150', 'not_regex:/\d/', 'regex:/\pL/u'],
             'indicaciones' => ['nullable', 'string', 'max:2000'],
             'secciones' => ['required', 'array', 'min:1'],
             'secciones.*.titulo' => ['required', 'string', 'max:120'],
@@ -67,6 +67,8 @@ class PlantillaActaRequest extends FormRequest
     {
         return [
             'required' => 'Este campo es obligatorio',
+            'nombre.not_regex' => 'El nombre de la plantilla no puede contener números',
+            'nombre.regex' => 'El nombre de la plantilla debe contener letras',
             'columnas_inventario.required' => self::MENSAJE_SIN_COLUMNAS,
             'columnas_inventario.min' => self::MENSAJE_SIN_COLUMNAS,
             'firmantes.required' => self::MENSAJE_SIN_FIRMANTES,
