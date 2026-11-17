@@ -161,7 +161,7 @@
                             <div class="mt-3 space-y-2 sm:pl-9">
                                 ${s.campos.map((c, j) => `
                                     <div class="flex flex-wrap items-center gap-2 sm:flex-nowrap">
-                                        <input value="${esc(c.etiqueta)}" data-s="${i}" data-c="${j}" data-k="etiqueta" aria-label="Nombre del campo" placeholder="Nombre del campo" class="${campo} min-w-0 flex-1">
+                                        <input value="${esc(c.etiqueta)}" data-s="${i}" data-c="${j}" data-k="etiqueta" data-validar="sin_numeros" maxlength="120" aria-label="Nombre del campo" placeholder="Nombre del campo" class="${campo} min-w-0 flex-1">
                                         <select data-s="${i}" data-c="${j}" data-k="tipo" aria-label="Tipo de campo" class="${campo} w-40">${opciones(TIPOS_CAMPO, c.tipo)}</select>
                                         ${quitar('quitar-campo', `data-s="${i}" data-c="${j}"`, 'Quitar campo')}
                                     </div>`).join('')}
