@@ -155,7 +155,7 @@
                         <div class="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200/70">
                             <div class="flex items-center gap-2">
                                 <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#064C3D] text-xs font-bold text-white">${i + 1}</span>
-                                <input value="${esc(s.titulo)}" data-s="${i}" data-k="titulo" aria-label="Título de la sección" placeholder="Título de la sección" class="${campo} min-w-0 flex-1 font-semibold" ${s.fija ? 'readonly' : ''}>
+                                <input value="${esc(s.titulo)}" data-s="${i}" data-k="titulo" data-validar="sin_numeros" maxlength="120" aria-label="Título de la sección" placeholder="Título de la sección" class="${campo} min-w-0 flex-1 font-semibold" ${s.fija ? 'readonly' : ''}>
                                 ${s.fija ? '<span class="shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200">Fija</span>' : quitar('quitar-seccion', `data-s="${i}"`, 'Quitar sección')}
                             </div>
                             <div class="mt-3 space-y-2 sm:pl-9">
