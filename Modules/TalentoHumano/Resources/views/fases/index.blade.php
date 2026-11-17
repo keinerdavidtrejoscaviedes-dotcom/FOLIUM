@@ -83,11 +83,11 @@
                                         </label>
                                         <label class="block">
                                             <span class="text-xs font-semibold text-slate-700">Fecha de inicio</span>
-                                            <input type="date" name="fecha_inicio" required value="{{ $bolsa->any() ? old('fecha_inicio') : $fase->fecha_inicio }}" class="{{ $claseCampo }} {{ $bolsa->has('fecha_inicio') ? 'ring-red-400' : '' }}">
+                                            <input type="date" name="fecha_inicio" required value="{{ $bolsa->any() ? old('fecha_inicio') : $fase->fecha_inicio }}" min="{{ min(today(), \Illuminate\Support\Carbon::parse($fase->fecha_inicio)->startOfDay())->format('Y-m-d') }}" class="{{ $claseCampo }} {{ $bolsa->has('fecha_inicio') ? 'ring-red-400' : '' }}">
                                         </label>
                                         <label class="block">
                                             <span class="text-xs font-semibold text-slate-700">Fecha de fin</span>
-                                            <input type="date" name="fecha_fin" required value="{{ $bolsa->any() ? old('fecha_fin') : $fase->fecha_fin }}" class="{{ $claseCampo }} {{ $bolsa->has('fecha_fin') ? 'ring-red-400' : '' }}">
+                                            <input type="date" name="fecha_fin" required value="{{ $bolsa->any() ? old('fecha_fin') : $fase->fecha_fin }}" min="{{ ($fase->fecha_fin ? min(today(), \Illuminate\Support\Carbon::parse($fase->fecha_fin)->startOfDay()) : today())->format('Y-m-d') }}" class="{{ $claseCampo }} {{ $bolsa->has('fecha_fin') ? 'ring-red-400' : '' }}">
                                         </label>
                                         <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full bg-[#064C3D] px-4 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">
                                             <i class="fas fa-floppy-disk" aria-hidden="true"></i> Guardar cambios
@@ -124,11 +124,11 @@
             </label>
             <label class="mt-3 block">
                 <span class="text-sm font-semibold text-slate-700">Fecha de inicio</span>
-                <input type="date" name="fecha_inicio" value="{{ old('fecha_inicio') }}" required class="{{ $claseCampo }}">
+                <input type="date" name="fecha_inicio" value="{{ old('fecha_inicio') }}" min="{{ today()->format('Y-m-d') }}" required class="{{ $claseCampo }}">
             </label>
             <label class="mt-3 block">
                 <span class="text-sm font-semibold text-slate-700">Fecha de fin</span>
-                <input type="date" name="fecha_fin" value="{{ old('fecha_fin') }}" required class="{{ $claseCampo }}">
+                <input type="date" name="fecha_fin" value="{{ old('fecha_fin') }}" min="{{ today()->format('Y-m-d') }}" required class="{{ $claseCampo }}">
             </label>
 
             <button type="submit" class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#064C3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#043A2F]">

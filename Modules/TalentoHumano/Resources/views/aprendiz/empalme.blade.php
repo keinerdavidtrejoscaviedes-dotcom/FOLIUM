@@ -146,7 +146,8 @@
                     @csrf
                     <div class="max-w-xs">
                         <label for="fecha_visita" class="text-sm font-semibold text-slate-700">Fecha de la visita *</label>
-                        <input id="fecha_visita" name="fecha_visita" type="date" max="{{ today()->toDateString() }}" value="{{ old('fecha_visita', today()->toDateString()) }}" class="mt-1 {{ $campo }}">
+                        <input id="fecha_visita" name="fecha_visita" type="date" min="{{ today()->toDateString() }}" max="{{ today()->toDateString() }}" value="{{ old('fecha_visita', today()->toDateString()) }}" class="mt-1 {{ $campo }}">
+                        <p class="mt-1 text-xs text-slate-500">La visita se confirma el mismo día en que se realiza.</p>
                         @error('fecha_visita')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <fieldset>

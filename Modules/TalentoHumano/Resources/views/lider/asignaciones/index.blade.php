@@ -199,12 +199,12 @@
                     </div>
                     <div>
                         <label for="fase-inicio" class="mb-1 block text-sm font-semibold text-slate-700">Inicio <span class="text-red-500">*</span></label>
-                        <input id="fase-inicio" name="fecha_inicio" type="date" value="{{ old('fecha_inicio') }}" class="{{ $campo }} w-full {{ $errorFase('fecha_inicio') }}">
+                        <input id="fase-inicio" name="fecha_inicio" type="date" value="{{ old('fecha_inicio') }}" min="{{ today()->format('Y-m-d') }}" class="{{ $campo }} w-full {{ $errorFase('fecha_inicio') }}">
                         @if ($errors->fase->has('fecha_inicio')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $errors->fase->first('fecha_inicio') }}</p> @endif
                     </div>
                     <div>
                         <label for="fase-fin" class="mb-1 block text-sm font-semibold text-slate-700">Fin <span class="text-red-500">*</span></label>
-                        <input id="fase-fin" name="fecha_fin" type="date" value="{{ old('fecha_fin') }}" class="{{ $campo }} w-full {{ $errorFase('fecha_fin') }}">
+                        <input id="fase-fin" name="fecha_fin" type="date" value="{{ old('fecha_fin') }}" min="{{ today()->format('Y-m-d') }}" class="{{ $campo }} w-full {{ $errorFase('fecha_fin') }}">
                         @if ($errors->fase->has('fecha_fin')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $errors->fase->first('fecha_fin') }}</p> @endif
                     </div>
                 </div>

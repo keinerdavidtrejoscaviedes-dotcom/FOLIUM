@@ -2,6 +2,12 @@
 @php
     $claseCampo = 'w-full rounded-xl border-0 px-3 py-2 text-sm ring-1 focus:ring-2 focus:ring-[#064C3D] disabled:bg-slate-50 disabled:text-slate-500';
     $fecha = fn ($etapa, $campo) => old("etapas.$etapa.$campo", $etapas[$etapa]->{$campo === 'inicio' ? 'fecha_inicio' : 'fecha_fin'} ?? '');
+    // Fecha mínima: hoy. Una etapa ya aprobada que empezó antes de hoy puede conservar su fecha.
+    $minimo = function ($etapa, $campo) use ($etapas) {
+        $guardada = $etapas[$etapa]->{$campo === 'inicio' ? 'fecha_inicio' : 'fecha_fin'} ?? null;
+
+        return ($guardada ? min(today(), \Illuminate\Support\Carbon::parse($guardada)->startOfDay()) : today())->format('Y-m-d');
+    };
     // Fechas aprobadas de una etapa, para mostrarlas junto a la propuesta de modificación
     $vigenteTexto = function ($etapa) use ($etapasVigentes) {
         $fila = $etapasVigentes[$etapa] ?? null;
@@ -83,13 +89,13 @@
                         </div>
                         <label class="block">
                             <span class="text-xs font-semibold text-slate-500 md:sr-only">{{ $etapa['rango'] ? 'Desde' : 'Fecha' }}</span>
-                            <input type="date" name="etapas[{{ $clave }}][inicio]" value="{{ $fecha($clave, 'inicio') }}"
+                            <input type="date" name="etapas[{{ $clave }}][inicio]" value="{{ $fecha($clave, 'inicio') }}" min="{{ $minimo($clave, 'inicio') }}"
                                    @class([$claseCampo, 'ring-red-400' => $errorEtapa, 'ring-slate-300' => !$errorEtapa]) @disabled(!$editable)>
                         </label>
                         @if ($etapa['rango'])
                             <label class="block">
                                 <span class="text-xs font-semibold text-slate-500 md:sr-only">Hasta</span>
-                                <input type="date" name="etapas[{{ $clave }}][fin]" value="{{ $fecha($clave, 'fin') }}"
+                                <input type="date" name="etapas[{{ $clave }}][fin]" value="{{ $fecha($clave, 'fin') }}" min="{{ $minimo($clave, 'fin') }}"
                                        @class([$claseCampo, 'ring-red-400' => $errorEtapa, 'ring-slate-300' => !$errorEtapa]) @disabled(!$editable)>
                             </label>
                         @else

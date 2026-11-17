@@ -40,7 +40,7 @@
                 <div class="mt-3 overflow-x-auto rounded-2xl ring-1 ring-slate-200">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-[#064C3D] text-white"><tr>@foreach (CargaMasiva::COLUMNAS as $columna)<th class="px-3 py-2 font-semibold">{{ $columna }}</th>@endforeach</tr></thead>
-                        <tbody class="text-slate-500"><tr><td class="px-3 py-2">1075276540</td><td class="px-3 py-2">Gestor de Talento Humano</td><td class="px-3 py-2">04/08/2026</td><td class="px-3 py-2">Punto de venta</td></tr></tbody>
+                        <tbody class="text-slate-500"><tr><td class="px-3 py-2">1075276540</td><td class="px-3 py-2">Gestor de Talento Humano</td><td class="px-3 py-2">{{ today()->format('d/m/Y') }}</td><td class="px-3 py-2">Punto de venta</td></tr></tbody>
                     </table>
                 </div>
                 <p class="mt-3 text-xs text-slate-500">La plantilla incluye hojas con los nombres exactos de los cargos activos del catálogo y de las unidades productivas. La unidad productiva es opcional.</p>

@@ -32,11 +32,11 @@
             </label>
             <label class="block">
                 <span class="text-sm font-semibold text-slate-700">Fecha</span>
-                <input type="date" name="fecha" value="{{ old('fecha') }}" min="{{ $inicio?->format('Y-m-d') }}" max="{{ $fin?->format('Y-m-d') }}" class="{{ $claseCampo }} {{ $anillo('fecha') }}">
+                <input type="date" name="fecha" id="entrevista-fecha" value="{{ old('fecha') }}" min="{{ max(today(), $inicio ? $inicio->copy()->startOfDay() : today())->format('Y-m-d') }}" max="{{ $fin?->format('Y-m-d') }}" class="{{ $claseCampo }} {{ $anillo('fecha') }}">
             </label>
             <label class="block">
                 <span class="text-sm font-semibold text-slate-700">Hora</span>
-                <input type="time" name="hora" value="{{ old('hora') }}" class="{{ $claseCampo }} {{ $anillo('hora') }}">
+                <input type="time" name="hora" value="{{ old('hora') }}" data-fecha-de="#entrevista-fecha" class="{{ $claseCampo }} {{ $anillo('hora') }}">
             </label>
             <label class="block">
                 <span class="text-sm font-semibold text-slate-700">Lugar</span>

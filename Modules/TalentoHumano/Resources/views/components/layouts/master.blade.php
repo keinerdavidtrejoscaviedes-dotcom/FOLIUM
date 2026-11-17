@@ -71,5 +71,6 @@
     </main>
 
     @stack('scripts')
+    <x-talentohumano::validacion-formularios />
 </body>
 </html>

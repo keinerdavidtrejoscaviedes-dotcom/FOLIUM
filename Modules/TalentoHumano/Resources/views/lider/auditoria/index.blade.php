@@ -32,13 +32,16 @@
             <option value="">Cualquier origen</option>
             @foreach (AuditoriaController::ORIGENES as $clave => $texto) <option value="{{ $clave }}" @selected(request('origen') === $clave)>{{ $texto }}</option> @endforeach
         </select>
-        <label><span class="sr-only">Desde</span><input type="date" name="desde" value="{{ request('desde') }}" title="Desde" class="{{ $campo }}"></label>
-        <label><span class="sr-only">Hasta</span><input type="date" name="hasta" value="{{ request('hasta') }}" title="Hasta" class="{{ $campo }}"></label>
+        <label><span class="sr-only">Desde</span><input type="date" name="desde" id="auditoria-desde" value="{{ request('desde', old('desde')) }}" max="{{ today()->format('Y-m-d') }}" title="Desde" class="{{ $campo }} {{ $errors->has('desde') ? 'ring-2 ring-red-400' : '' }}"></label>
+        <label><span class="sr-only">Hasta</span><input type="date" name="hasta" id="auditoria-hasta" value="{{ request('hasta', old('hasta')) }}" max="{{ today()->format('Y-m-d') }}" data-desde="#auditoria-desde" title="Hasta" class="{{ $campo }} {{ $errors->has('hasta') ? 'ring-2 ring-red-400' : '' }}"></label>
         <div class="flex gap-2">
             <button class="rounded-xl bg-[#064C3D] px-4 py-2 text-sm font-semibold text-white hover:bg-[#043A2F]">Filtrar</button>
             @if ($filtrando) <a href="{{ route('talentohumano.lider.auditoria.index') }}" class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100">Limpiar</a> @endif
         </div>
     </form>
+    @if ($errors->has('desde') || $errors->has('hasta'))
+        <p class="mt-2 rounded-2xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-700" role="alert"><i class="fas fa-circle-exclamation mr-1" aria-hidden="true"></i>{{ $errors->first('desde') ?: $errors->first('hasta') }}</p>
+    @endif
 
     {{-- Registro --}}
     <div class="mt-4 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">

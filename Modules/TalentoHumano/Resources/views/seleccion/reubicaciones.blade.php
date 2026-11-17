@@ -211,9 +211,9 @@
 
                             <div>
                                 <label for="fecha_reunion" class="mb-1.5 block text-sm font-semibold text-slate-700">Fecha de la reunión <span class="text-red-500">*</span></label>
-                                <input id="fecha_reunion" type="date" name="fecha_reunion" value="{{ old('fecha_reunion', date('Y-m-d')) }}" max="{{ date('Y-m-d') }}" class="{{ $campo }} {{ $borde('fecha_reunion') }}">
+                                <input id="fecha_reunion" type="date" name="fecha_reunion" value="{{ old('fecha_reunion', date('Y-m-d')) }}" min="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" class="{{ $campo }} {{ $borde('fecha_reunion') }}">
                                 @error('fecha_reunion') <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
-                                @else <p class="text-xs text-slate-400 mt-2">Fecha en la que el comité sesionó para acordar la reubicación.</p> @enderror
+                                @else <p class="text-xs text-slate-400 mt-2">Fecha en la que el comité sesionó para acordar la reubicación. Se registra el mismo día de la reunión.</p> @enderror
                             </div>
                         </div>
 

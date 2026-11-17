@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Modules\TalentoHumano\Support\Auditoria;
 use Modules\TalentoHumano\Support\DescripcionAuditoria;
 use Modules\TalentoHumano\Support\HojaExcel;
@@ -19,6 +20,10 @@ class AuditoriaController extends Controller
 
     public function index(Request $request)
     {
+        if ($error = $this->errorFechas($request)) {
+            return $error;
+        }
+
         $registros = $this->consulta($request)->paginate(25)->withQueryString();
 
         return view('talentohumano::lider.auditoria.index', [
@@ -32,6 +37,10 @@ class AuditoriaController extends Controller
      */
     public function exportar(Request $request)
     {
+        if ($error = $this->errorFechas($request)) {
+            return $error;
+        }
+
         $registros = $this->consulta($request)->limit(10000)->get();
         $descripcion = new DescripcionAuditoria($registros);
         $filas = $registros->map(function ($r) use ($descripcion) {
@@ -57,6 +66,30 @@ class AuditoriaController extends Controller
     {
         Auditoria::registrarIntentoDenegado($request);
         abort(403, 'El registro de auditoría no se puede modificar ni borrar');
+    }
+
+    /**
+     * Los filtros de fecha solo aceptan días hasta hoy (no hay registros del futuro) y un rango en orden.
+     * Si no son válidos se vuelve al registro sin esas fechas y con el mensaje del error.
+     */
+    private function errorFechas(Request $request)
+    {
+        $validador = Validator::make($request->only('desde', 'hasta'), [
+            'desde' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'hasta' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today', 'after_or_equal:desde'],
+        ], [
+            'date_format' => 'Escriba una fecha válida',
+            'desde.before_or_equal' => 'La fecha "Desde" no puede ser posterior a hoy',
+            'hasta.before_or_equal' => 'La fecha "Hasta" no puede ser posterior a hoy',
+            'hasta.after_or_equal' => 'La fecha "Hasta" no puede ser anterior a "Desde"',
+        ]);
+
+        if ($validador->fails()) {
+            return redirect()->route('talentohumano.lider.auditoria.index', $request->except('desde', 'hasta', 'page'))
+                ->withErrors($validador)->withInput($request->only('desde', 'hasta'));
+        }
+
+        return null;
     }
 
     private function consulta(Request $request)

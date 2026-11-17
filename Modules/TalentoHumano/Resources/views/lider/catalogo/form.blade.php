@@ -42,7 +42,7 @@
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
                     <label for="nombre" class="{{ $etiqueta }}">Nombre del cargo {!! $obligatorio !!}</label>
-                    <input id="nombre" name="nombre" value="{{ old('nombre', $cargo->nombre) }}" maxlength="150" data-obligatorio class="{{ $campo }} {{ $borde('nombre') }}">
+                    <input id="nombre" name="nombre" data-validar="sin_numeros" value="{{ old('nombre', $cargo->nombre) }}" maxlength="150" data-obligatorio class="{{ $campo }} {{ $borde('nombre') }}">
                     @error('nombre') <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -105,7 +105,7 @@
                     <input type="radio" name="jefe_tipo" value="alta_direccion" @checked($jefeTipo === 'alta_direccion') class="mt-1 accent-[#064C3D]">
                     <span class="flex-1">
                         <span class="text-sm font-semibold text-slate-700">Jefe de la alta dirección</span>
-                        <input name="jefe_inmediato_texto" id="jefe_inmediato_texto" aria-label="Rol de la alta dirección" maxlength="150" data-obligatorio
+                        <input name="jefe_inmediato_texto" id="jefe_inmediato_texto" data-validar="letras" aria-label="Rol de la alta dirección" maxlength="150" data-obligatorio
                                value="{{ old('jefe_inmediato_texto', $cargo->cargo_superior_id ? '' : $cargo->jefe_inmediato_texto) }}" placeholder="Por ejemplo: Instructor Líder"
                                class="mt-2 {{ $campo }} {{ $borde('jefe_inmediato_texto') }}">
                         @error('jefe_inmediato_texto') <span class="mt-1 block text-xs font-semibold text-red-600">{{ $message }}</span> @enderror

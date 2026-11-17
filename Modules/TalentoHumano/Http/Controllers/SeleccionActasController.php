@@ -168,7 +168,7 @@ class SeleccionActasController extends Controller
             'cargo_activado_id' => ['required', 'regex:/^(sin_cargo|\d+)$/'],
             'participantes' => ['required', 'array', 'min:1'],
             'participantes.*' => ['integer'],
-            'fecha_reunion' => ['required', 'date', 'before_or_equal:today'],
+            'fecha_reunion' => ['required', 'date', 'date_equals:today'],
             'justificacion' => ['nullable', 'string', 'max:2000'],
         ], [
             'cargo_activado_id.required' => 'Seleccione el cargo en el que se reubica al aprendiz',
@@ -176,7 +176,7 @@ class SeleccionActasController extends Controller
             'participantes.required' => 'Registre los participantes de la reunión de reubicación',
             'participantes.min' => 'Registre los participantes de la reunión de reubicación',
             'fecha_reunion.required' => 'Indique la fecha de la reunión del comité',
-            'fecha_reunion.before_or_equal' => 'La fecha de la reunión no puede ser posterior a hoy',
+            'fecha_reunion.date_equals' => 'La reunión solo puede registrarse con la fecha de hoy',
         ]);
 
         $caso = ComiteReubicacion::pendientes($convocatoria)->firstWhere('id', (int) $datos['postulacion_id']);

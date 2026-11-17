@@ -61,11 +61,12 @@ class HabilitacionPruebaController extends Controller
         [$inicio, $fin] = ProcesoSeleccion::etapa($fase, 'prueba_psicotecnica');
         $datos = $request->validate([
             'cuestionario_id' => 'required|integer',
-            'plazo' => 'required|date',
+            'plazo' => 'required|date|after_or_equal:today',
         ], [
             'cuestionario_id.required' => 'Elija la prueba psicotécnica que presentarán los postulantes.',
             'plazo.required' => 'Defina el plazo para presentar la prueba.',
             'plazo.date' => 'Defina el plazo para presentar la prueba.',
+            'plazo.after_or_equal' => 'El plazo no puede ser anterior a hoy.',
         ]);
 
         $prueba = Cuestionario::where('tipo', 'prueba_psicotecnica')->where('estado', 'vigente')->find($datos['cuestionario_id']);

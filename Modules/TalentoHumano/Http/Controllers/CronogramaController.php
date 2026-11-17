@@ -257,6 +257,8 @@ class CronogramaController extends Controller
         foreach (self::ETAPAS as $clave => $etapa) {
             if ($fechas[$clave]['inicio'] < $hoy && $fechas[$clave]['inicio'] !== ($fechasVigentes[$clave]['inicio'] ?? null)) {
                 $errores->add("etapas.$clave", "{$etapa['nombre']}: las fechas del cronograma no pueden ser anteriores a hoy.");
+            } elseif (!empty($fechas[$clave]['fin']) && $fechas[$clave]['fin'] < $hoy && $fechas[$clave]['fin'] !== ($fechasVigentes[$clave]['fin'] ?? null)) {
+                $errores->add("etapas.$clave", "{$etapa['nombre']}: la fecha final no puede ser anterior a hoy.");
             }
         }
 

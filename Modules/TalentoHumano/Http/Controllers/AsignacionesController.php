@@ -141,13 +141,13 @@ class AsignacionesController extends Controller
         abort_unless($fase, 409, 'No hay una fase en curso');
 
         $datos = $request->validate([
-            'documento' => ['required', 'string'],
+            'documento' => ['required', 'regex:/^\d{5,15}$/'],
             'cargo_id' => ['required', Rule::exists('th_cargos', 'id')->where('estado', 'activo')->whereNull('deleted_at')],
-            'fecha_inicio' => ['required', 'date'],
+            'fecha_inicio' => ['required', 'date', 'after_or_equal:today'],
             'unidades' => ['array'],
             'unidades.*' => [Rule::exists('productive_units', 'id')->whereNull('deleted_at')],
             'justificacion' => ['required', 'string', 'max:2000'],
-        ], ['required' => 'Este campo es obligatorio', 'justificacion.required' => self::MENSAJE_JUSTIFICACION, 'cargo_id.exists' => 'Seleccione un cargo activo del catálogo']);
+        ], ['required' => 'Este campo es obligatorio', 'documento.regex' => 'El documento solo admite números (entre 5 y 15 dígitos)', 'fecha_inicio.after_or_equal' => 'La fecha de inicio no puede ser anterior a hoy', 'justificacion.required' => self::MENSAJE_JUSTIFICACION, 'cargo_id.exists' => 'Seleccione un cargo activo del catálogo']);
 
         $aprendiz = Aprendices::porDocumento($datos['documento']);
         if (!$aprendiz || !$aprendiz->aprendiz_id) {

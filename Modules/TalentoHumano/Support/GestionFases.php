@@ -51,6 +51,22 @@ class GestionFases
             if ($v->errors()->isNotEmpty()) {
                 return;
             }
+            // No se aceptan fechas de inicio pasadas; al editar se puede conservar la fecha que ya tenía la fase.
+            $inicio = \Illuminate\Support\Carbon::parse($entrada['fecha_inicio'])->startOfDay();
+            $original = $actual?->fecha_inicio ? \Illuminate\Support\Carbon::parse($actual->fecha_inicio)->startOfDay() : null;
+            if ($inicio->lt(today()) && !($original && $inicio->equalTo($original))) {
+                $v->errors()->add('fecha_inicio', 'La fecha de inicio no puede ser anterior a hoy');
+
+                return;
+            }
+            // Igual con la fecha de fin: no puede ser pasada, salvo que se conserve la que ya tenía la fase.
+            $fin = \Illuminate\Support\Carbon::parse($entrada['fecha_fin'])->startOfDay();
+            $finOriginal = $actual?->fecha_fin ? \Illuminate\Support\Carbon::parse($actual->fecha_fin)->startOfDay() : null;
+            if ($fin->lt(today()) && !($finOriginal && $fin->equalTo($finOriginal))) {
+                $v->errors()->add('fecha_fin', 'La fecha de fin no puede ser anterior a hoy');
+
+                return;
+            }
             if ($otra = self::faseQueSeCruza($entrada['fecha_inicio'], $entrada['fecha_fin'], $actual?->id)) {
                 $v->errors()->add('fecha_inicio', "Las fechas se cruzan con otra fase (Fase {$otra->numero})");
             }

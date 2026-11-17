@@ -32,13 +32,13 @@ class CargoRequest extends FormRequest
         $esGerente = $this->input('nivel') === 'Gerente';
 
         return [
-            'nombre' => ['required', 'string', 'max:150', Rule::unique('th_cargos', 'nombre')->ignore($cargo?->id)],
+            'nombre' => ['required', 'string', 'max:150', 'not_regex:/\d/', 'regex:/\pL/u', Rule::unique('th_cargos', 'nombre')->ignore($cargo?->id)],
             'nivel' => ['required', Rule::in(array_keys(Cargo::NIVELES))],
             'area_id' => ['required', Rule::exists('th_areas', 'id')->whereNull('deleted_at')],
             'jefe_tipo' => [Rule::requiredIf(!$esGerente), 'nullable', Rule::in(['cargo', 'alta_direccion'])],
             'cargo_superior_id' => [Rule::requiredIf(!$esGerente && $this->input('jefe_tipo') === 'cargo'), 'nullable',
                 Rule::exists('th_cargos', 'id')->whereNull('deleted_at'), Rule::notIn([$cargo?->id])],
-            'jefe_inmediato_texto' => [Rule::requiredIf(!$esGerente && $this->input('jefe_tipo') === 'alta_direccion'), 'nullable', 'string', 'max:150'],
+            'jefe_inmediato_texto' => [Rule::requiredIf(!$esGerente && $this->input('jefe_tipo') === 'alta_direccion'), 'nullable', 'string', 'max:150', "regex:/^[\pL\s'.-]+$/u"],
             'numero_aprendices' => ['required', 'integer', 'min:1', 'max:50'],
             'macroproceso' => ['nullable', 'string', 'max:100'],
             'proceso' => ['nullable', 'string', 'max:150'],
@@ -80,10 +80,13 @@ class CargoRequest extends FormRequest
         return [
             'required' => 'Este campo es obligatorio',
             'nombre.unique' => 'Ya existe un cargo con ese nombre en el catálogo',
+            'nombre.not_regex' => 'El nombre del cargo no puede contener números',
+            'nombre.regex' => 'El nombre del cargo debe contener letras',
             'cargo_superior_id.not_in' => 'Un cargo no puede ser su propio jefe inmediato',
             'programas.*.program_id.distinct' => 'Este tecnólogo ya está en la lista',
             'numero_aprendices.min' => 'Debe ser al menos 1',
             'numero_aprendices.max' => 'No puede ser mayor que 50',
+            'jefe_inmediato_texto.regex' => 'El rol de la alta dirección solo puede contener letras',
         ];
     }
 

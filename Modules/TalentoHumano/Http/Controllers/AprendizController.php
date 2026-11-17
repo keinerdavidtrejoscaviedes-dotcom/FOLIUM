@@ -549,13 +549,13 @@ class AprendizController extends Controller
         }
 
         $datos = $request->validate([
-            'fecha_visita' => ['required', 'date', 'before_or_equal:today'],
+            'fecha_visita' => ['required', 'date', 'date_equals:today'],
             'participantes' => ['array'],
             'participantes.*' => ['string', 'max:120'],
             'otros' => ['nullable', 'string', 'max:500'],
         ], [
             'fecha_visita.required' => 'Este campo es obligatorio',
-            'fecha_visita.before_or_equal' => 'La fecha de la visita no puede ser futura',
+            'fecha_visita.date_equals' => 'La visita solo puede confirmarse con la fecha de hoy',
         ]);
 
         $participantes = collect($datos['participantes'] ?? [])
