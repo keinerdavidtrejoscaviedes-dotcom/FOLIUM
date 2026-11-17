@@ -132,6 +132,9 @@
                                             <button type="submit" class="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">Devolver</button>
                                         </form>
                                     </div>
+                                    @if ($empalme->visita_confirmada)
+                                        <p class="mt-2 text-xs text-amber-700">Si lo devuelve, el aprendiz deberá confirmar de nuevo la visita, firmar el acta y diligenciar el Formulario de Satisfacción.</p>
+                                    @endif
                                 @endunless
                             @endif
                         </div>

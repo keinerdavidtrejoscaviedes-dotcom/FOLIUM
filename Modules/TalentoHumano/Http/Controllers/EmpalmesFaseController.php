@@ -133,21 +133,50 @@ class EmpalmesFaseController extends Controller
             return back()->withErrors(["observaciones.{$empalme->id}" => 'Escriba las observaciones para el aprendiz.']);
         }
 
+        if ($empalme->estado === 'cerrado') {
+            return back()->with('error', 'El empalme ya tiene visto bueno: su inventario no se puede devolver.');
+        }
+
         $acta = ActaRecibimiento::asegurar($empalme);
-        $acta->update(['contenido' => array_merge($acta->contenido ?? [], [
-            // Vuelve a quedar sin registrar: el aprendiz corrige y lo guarda de nuevo
-            'inventario_registrado' => null,
-            'inventario_validado' => null,
-            'inventario_devuelto' => ['fecha' => now()->toDateTimeString(), 'por' => auth()->user()->person_id, 'observaciones' => mb_substr($observaciones, 0, 1000)],
-        ])]);
-        Auditoria::registrar('inventario_inicial_devuelto', $empalme, [], ['cargo' => $empalme->cargo?->nombre, 'observaciones' => $observaciones]);
+        // Si el aprendiz ya había avanzado (visita, firmas o Formulario de Satisfacción), esos pasos se hicieron sobre el
+        // inventario devuelto: se reabren para que pueda corregirlo (el registro se bloquea con la visita confirmada)
+        $reabiertos = array_keys(array_filter([
+            'visita' => (bool) $empalme->visita_confirmada,
+            'firmas' => $acta->firmas()->exists(),
+            'satisfaccion' => DB::table('th_satisfaccion_empalme')->where('empalme_id', $empalme->id)->exists(),
+        ]));
+
+        DB::transaction(function () use ($empalme, $acta, $observaciones) {
+            $acta->update([
+                'estado' => 'borrador',
+                'contenido' => array_merge($acta->contenido ?? [], [
+                    // Vuelve a quedar sin registrar: el aprendiz corrige y lo guarda de nuevo
+                    'inventario_registrado' => null,
+                    'inventario_verificado' => null,
+                    'inventario_validado' => null,
+                    'inventario_devuelto' => ['fecha' => now()->toDateTimeString(), 'por' => auth()->user()->person_id, 'observaciones' => mb_substr($observaciones, 0, 1000)],
+                ]),
+            ]);
+            $acta->firmas()->delete();
+            DB::table('th_satisfaccion_empalme')->where('empalme_id', $empalme->id)->delete();
+            $empalme->inventarios()->update(['verificado' => false]);
+            $empalme->update([
+                'visita_confirmada' => false,
+                'fecha_visita' => null,
+                'participantes_visita' => null,
+                'estado' => $empalme->estado === 'pendiente' ? 'pendiente' : 'en_curso',
+            ]);
+        });
+        Auditoria::registrar('inventario_inicial_devuelto', $empalme, ['pasos_reabiertos' => $reabiertos], ['cargo' => $empalme->cargo?->nombre, 'observaciones' => $observaciones]);
 
         Correo::enviar(ProcesoSeleccion::correos($empalme->participantes->pluck('asignacion.person_id')->filter()),
             "FOLIUM: corrija el inventario inicial del cargo {$empalme->cargo?->nombre}",
             "FOLIUM · Talento Humano\n\nEl Gestor de Talento Humano devolvió el inventario inicial del cargo {$empalme->cargo?->nombre} con estas observaciones:\n\n"
-            . "{$observaciones}\n\nCorríjalo y guárdelo de nuevo en " . route('talentohumano.aprendiz.empalme'));
+            . "{$observaciones}\n\nCorríjalo y guárdelo de nuevo en " . route('talentohumano.aprendiz.empalme')
+            . ($reabiertos ? "\n\nComo el inventario cambia, después de corregirlo debe confirmar de nuevo la visita, firmar el acta y diligenciar el Formulario de Satisfacción." : ''));
 
-        return back()->with('success', 'Inventario devuelto: quedó pendiente de corrección y se avisó al aprendiz entrante.');
+        return back()->with('success', 'Inventario devuelto: quedó pendiente de corrección y se avisó al aprendiz entrante.'
+            . ($reabiertos ? ' La visita, las firmas y el Formulario de Satisfacción se deben hacer de nuevo.' : ''));
     }
 
     /**

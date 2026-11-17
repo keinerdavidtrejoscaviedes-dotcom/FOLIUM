@@ -152,6 +152,11 @@ class EmpalmeController extends Controller
         $empalme = Empalme::with(['acta', 'participantes.asignacion'])->findOrFail($empalmeId);
         $personId = auth()->user()->person_id ?? 1;
 
+        // El visto bueno se da una sola vez: no se sobrescriben quién lo dio ni la fecha
+        if ($empalme->estado === 'cerrado') {
+            return back()->with('info', 'Este empalme ya tiene visto bueno' . ($empalme->fecha_visto_bueno ? ' desde el ' . $empalme->fecha_visto_bueno->format('d/m/Y') : '') . '.');
+        }
+
         // RN-024 y RN-027: el empalme cierra con el acta firmada y el Formulario de Satisfacción de ambos aprendices
         if ($empalme->acta?->estado !== 'firmada') {
             return back()->with('error', 'El acta de recibimiento aún no tiene todas las firmas.');
