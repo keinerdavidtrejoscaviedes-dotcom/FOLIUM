@@ -198,8 +198,8 @@ class ProgramacionEntrevistasController extends Controller
         $this->enviarCitaciones($entrevista, $postulantes, $evaluadores);
 
         return redirect()->route('talentohumano.fases.entrevistas.index', $fase->id)
-            ->with('success', 'Entrevista ' . mb_strtolower(self::TIPOS[$tipo]) . ' programada. Se envió la citación por correo a '
-                . ($postulantes->count() === 1 ? 'el aspirante' : 'los aspirantes') . ' y a los evaluadores.');
+            ->with('success', 'Entrevista ' . mb_strtolower(self::TIPOS[$tipo]) . ' programada. Se envió la citación por correo '
+                . ($postulantes->count() === 1 ? 'al aspirante' : 'a los aspirantes') . ' y a los evaluadores.');
     }
 
     /**
