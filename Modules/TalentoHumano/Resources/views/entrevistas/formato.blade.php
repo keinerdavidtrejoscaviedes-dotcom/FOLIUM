@@ -28,6 +28,11 @@
         </div>
     </div>
 
+    {{-- Mensajes de validación del formato (HU-040A esc. 3 y 4) --}}
+    <div class="mt-4">
+        <x-talentohumano::errores />
+    </div>
+
     {{-- Aviso de formato usado con calificaciones si aplica --}}
     @if ($totalCalificaciones > 0)
         <div class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">

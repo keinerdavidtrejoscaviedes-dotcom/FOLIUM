@@ -34,18 +34,16 @@
                                 </td>
                                 <td class="px-4 py-3">{{ $entrevistas[$evaluador->person_id] ?? 0 }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    @unless ($soloConsulta)
+                                    @if ($evaluador->incluidoPorSistema())
+                                        {{-- HU-026A esc. 2: el Instructor Líder y los instructores de las fichas no se retiran --}}
+                                        <span class="text-xs font-semibold text-slate-400">Incluido siempre</span>
+                                    @elseif (!$soloConsulta)
                                         <form method="POST" action="{{ route('talentohumano.fases.evaluadores.destroy', [$fase->id, $evaluador->id]) }}" class="flex items-center justify-end gap-2">
                                             @csrf
                                             @method('DELETE')
-                                            @if ($evaluador->incluidoPorSistema())
-                                                {{-- Lo incluyó el sistema: se retira con motivo y queda en la lista de retirados --}}
-                                                <input type="text" name="motivo_retiro" maxlength="255" placeholder="Motivo del retiro" aria-label="Motivo del retiro"
-                                                       @class(['w-44 rounded-xl border-0 px-3 py-1.5 text-xs ring-1 focus:ring-2 focus:ring-[#064C3D]', 'ring-red-400' => $errors->has("motivo_retiro.{$evaluador->id}"), 'ring-slate-300' => !$errors->has("motivo_retiro.{$evaluador->id}")])>
-                                            @endif
                                             <button type="submit" class="rounded-full px-3 py-1.5 text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600">Quitar</button>
                                         </form>
-                                    @endunless
+                                    @endif
                                 </td>
                             </tr>
                         @empty

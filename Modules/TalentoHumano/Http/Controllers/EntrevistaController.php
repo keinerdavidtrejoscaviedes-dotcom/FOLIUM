@@ -91,7 +91,14 @@ class EntrevistaController extends Controller
         ]);
 
         $personId = auth()->user()->person_id ?? 1;
-        $cuestionarioActual = Cuestionario::findOrFail($request->cuestionario_id);
+
+        // Solo el formato técnico vigente del propio evaluador: no el de otro evaluador ni la prueba psicotécnica (HU-040A)
+        $cuestionarioActual = Cuestionario::where('autor_id', $personId)->where('tipo', 'entrevista_tecnica')
+            ->whereIn('estado', ['vigente', 'borrador'])->find($request->cuestionario_id);
+        if (!$cuestionarioActual) {
+            Auditoria::registrarIntentoDenegado($request);
+            abort(403, 'No tiene permisos para realizar esta acción');
+        }
 
         // Bloque: Control de versiones histórico si ya cuenta con calificaciones
         [$cuestionarioTarget, $mensaje] = $this->versionarOReutilizarCuestionario($cuestionarioActual, $personId);

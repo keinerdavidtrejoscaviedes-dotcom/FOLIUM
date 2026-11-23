@@ -103,9 +103,8 @@ class EvaluadoresController extends Controller
     }
 
     /**
-     * 'Quitar' un evaluador. Ajuste del equipo a HU-026A esc. 2: el Instructor Líder y los instructores de las fichas
-     * también se pueden retirar (por ejemplo, si no están en el centro), pero con un motivo; quedan marcados como
-     * retirados para que el sistema no los vuelva a incluir. Los agregados se quitan de la lista.
+     * 'Quitar' un evaluador agregado (HU-026A esc. 2 y HU-026B esc. 2): el Instructor Líder y los instructores de las
+     * fichas se incluyen siempre y no se pueden retirar.
      */
     public function destroy(Request $request, int $fase, int $evaluador)
     {
@@ -115,26 +114,18 @@ class EvaluadoresController extends Controller
         $evaluador = $convocatoria->evaluadores()->activos()->with('persona')->findOrFail($evaluador);
         $nombre = trim("{$evaluador->persona?->first_name} {$evaluador->persona?->first_last_name}");
 
+        if ($evaluador->incluidoPorSistema()) {
+            return back()->with('error', 'El Instructor Líder y los instructores de las fichas se incluyen siempre');
+        }
+
         if ($this->entrevistasPorEvaluador($convocatoria)->get($evaluador->person_id)) {
             return back()->with('error', "No se puede quitar a {$nombre}: tiene entrevistas programadas. Cancélelas o reprográmelas con otro evaluador.");
         }
 
-        if (!$evaluador->incluidoPorSistema()) {
-            $evaluador->delete();
-            Auditoria::registrar('evaluador_retirado', $evaluador, ['evaluador' => $nombre], []);
+        $evaluador->delete();
+        Auditoria::registrar('evaluador_retirado', $evaluador, ['evaluador' => $nombre], []);
 
-            return back()->with('success', "{$nombre} ya no es evaluador de la convocatoria.");
-        }
-
-        $motivo = trim((string) $request->input('motivo_retiro'));
-        if ($motivo === '') {
-            return back()->withErrors(["motivo_retiro.{$evaluador->id}" => "Escriba el motivo para retirar a {$nombre} (por ejemplo, que no está en el centro)."]);
-        }
-
-        $evaluador->update(['retirado_en' => now(), 'motivo_retiro' => mb_substr($motivo, 0, 255), 'retirado_por' => auth()->user()->person_id]);
-        Auditoria::registrar('evaluador_retirado', $evaluador, ['evaluador' => $nombre, 'motivo' => ConvocatoriaEvaluador::MOTIVOS[$evaluador->motivo]], ['motivo_retiro' => $motivo]);
-
-        return back()->with('success', "{$nombre} fue retirado de la convocatoria. Puede volver a incluirlo si se necesita.");
+        return back()->with('success', "{$nombre} ya no es evaluador de la convocatoria.");
     }
 
     /**

@@ -111,6 +111,7 @@ class DesignacionesController extends Controller
         ], [
             'required' => 'Este campo es obligatorio',
             'program_id.required' => 'Indique el programa de formación del instructor técnico',
+            'program_id.in' => 'Seleccione un programa de formación de la lista',
             'vigencia.in' => 'No hay una fase en curso: la vigencia debe ser indefinida',
         ]);
 
@@ -173,6 +174,9 @@ class DesignacionesController extends Controller
         ], [
             'required' => 'Este campo es obligatorio',
             'program_id.required_if' => 'Indique el programa de formación del instructor técnico',
+            'program_id.in' => 'Seleccione un programa de formación de la lista',
+            'tipo.in' => 'Seleccione una designación de la lista',
+            'person_id.integer' => 'Seleccione un instructor de la lista',
             'vigencia.in' => 'No hay una fase en curso: la vigencia debe ser indefinida',
         ]);
     }

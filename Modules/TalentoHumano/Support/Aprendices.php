@@ -34,6 +34,8 @@ class Aprendices
             ->leftJoin('programs as pr', 'pr.id', '=', 'c.program_id')
             ->whereNull('a.deleted_at')
             ->whereColumn('a.person_id', 'p.id')
+            // El registro activo más reciente; un traslado o una ficha anterior no lo reemplazan
+            ->orderByRaw("a.apprentice_status in ('" . implode("','", \Modules\TalentoHumano\Services\FaseService::ESTADOS_APRENDIZ_ACTIVO) . "') desc")
             ->orderByDesc('a.id')
             ->limit(1);
 

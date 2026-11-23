@@ -73,7 +73,8 @@
                 Formación académica y técnica <span class="text-red-500">*</span>
             </label>
             <textarea id="formacion" name="formacion" rows="2" required placeholder="Ej: Tecnóloga en Gestión Agroempresarial, diplomados, cursos complementarios..."
-                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">{{ old('formacion', $postulacion->analisisHv->formacion ?? '') }}</textarea>
+                      class="w-full rounded-xl border {{ $errors->has('formacion') ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200' }} bg-white px-3 py-2 text-xs focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">{{ old('formacion', $postulacion->analisisHv->formacion ?? '') }}</textarea>
+            @error('formacion') <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p> @enderror
         </div>
 
         <div>
@@ -81,7 +82,8 @@
                 Habilidades y competencias clave <span class="text-red-500">*</span>
             </label>
             <textarea id="habilidades" name="habilidades" rows="2" required placeholder="Ej: Liderazgo, manejo de Excel, trabajo en equipo, registros..."
-                      class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">{{ old('habilidades', $postulacion->analisisHv->habilidades ?? '') }}</textarea>
+                      class="w-full rounded-xl border {{ $errors->has('habilidades') ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200' }} bg-white px-3 py-2 text-xs focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40">{{ old('habilidades', $postulacion->analisisHv->habilidades ?? '') }}</textarea>
+            @error('habilidades') <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p> @enderror
         </div>
 
         {{-- Nivel de afinidad por cada una de sus 3 opciones --}}

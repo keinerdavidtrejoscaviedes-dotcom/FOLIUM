@@ -72,9 +72,14 @@ class PortalAprendiz
             return null;
         }
 
+        // Con varios registros en SICEFA (traslados, fichas anteriores) manda el registro activo más reciente,
+        // no el último creado: un registro «TRASLADADO» no debe ocultar la ficha en la que está en formación
+        $activos = "'" . implode("','", FaseService::ESTADOS_APRENDIZ_ACTIVO) . "'";
+
         return DB::table('people as p')
             ->leftJoin('apprentices as a', fn ($j) => $j->on('a.person_id', '=', 'p.id')->whereNull('a.deleted_at')
-                ->whereRaw('a.id = (select max(a2.id) from apprentices a2 where a2.person_id = p.id and a2.deleted_at is null)'))
+                ->whereRaw("a.id = (select a2.id from apprentices a2 where a2.person_id = p.id and a2.deleted_at is null
+                    order by a2.apprentice_status in ({$activos}) desc, a2.id desc limit 1)"))
             ->leftJoin('courses as c', 'c.id', '=', 'a.course_id')
             ->leftJoin('programs as pr', 'pr.id', '=', 'c.program_id')
             ->where('p.id', $personId)->whereNull('p.deleted_at')
@@ -165,6 +170,12 @@ class PortalAprendiz
 
         $programa = (int) $this->persona->program_id;
 
+        // Programas de las fichas de la fase: activan las restricciones «exclusivo si hay ficha en la fase» (HU-004 esc. 3)
+        $programasFase = DB::table('th_fase_fichas as ff')->join('courses as co', 'co.id', '=', 'ff.course_id')
+            ->leftJoin('th_fichas_datos as fd', 'fd.course_id', '=', 'co.id')
+            ->where('ff.fase_id', $this->convocatoria->fase_id)
+            ->selectRaw('COALESCE(co.program_id, fd.program_id) as program_id')->pluck('program_id')->filter()->unique()->all();
+
         return DB::table('th_convocatoria_cargos as cc')
             ->join('th_cargos_activados as ca', 'ca.id', '=', 'cc.cargo_activado_id')
             ->join('th_cargos as c', 'c.id', '=', 'ca.cargo_id')
@@ -172,6 +183,10 @@ class PortalAprendiz
             ->leftJoin('th_cargo_programas as cp', fn ($j) => $j->on('cp.cargo_id', '=', 'c.id')->where('cp.program_id', $programa))
             ->where('cc.convocatoria_id', $this->convocatoria->id)
             ->where(fn ($q) => $q->whereNotNull('cp.id')->orWhereJsonContains('cc.programas_extra', $programa))
+            // HU-044 esc. 2 y 3: si la fase tiene una ficha de un programa exclusivo del cargo, solo esos aprendices se postulan
+            ->where(fn ($q) => $q->where('cp.tipo', 'exclusivo_si_presente')
+                ->orWhereNotExists(fn ($ex) => $ex->from('th_cargo_programas as ex')->whereColumn('ex.cargo_id', 'c.id')
+                    ->where('ex.tipo', 'exclusivo_si_presente')->whereIn('ex.program_id', $programasFase)))
             ->select('cc.id', 'cc.cupos', 'cc.requisitos', 'cc.documentos', 'c.id as cargo_id', 'c.nombre', 'c.nivel', 'c.rol_principal', 'a.nombre as area', 'cp.tipo as tipo_programa')
             ->orderBy('a.nombre')->orderBy('c.nombre')
             ->get()
