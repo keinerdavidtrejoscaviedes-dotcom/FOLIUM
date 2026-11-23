@@ -83,6 +83,13 @@ class DesignacionesController extends Controller
             'motivo' => ['required', 'string', 'max:200'],
         ], ['required' => 'Este campo es obligatorio', 'person_id.not_in' => 'Seleccione un instructor distinto al actual']);
 
+        // HU-007D esc. 2: con pendientes en un proceso en curso no se reasigna, igual que al retirar (HU-007C esc. 2)
+        if ($pendientes = $designacion->pendientes()) {
+            return back()
+                ->with('error', 'No se puede retirar: el instructor tiene pendientes en un proceso en curso')
+                ->with('pendientes', ['designacion' => $designacion->id, 'nombre' => $this->nombre($designacion), 'lista' => $pendientes]);
+        }
+
         $nueva = DB::transaction(function () use ($designacion, $datos) {
             $nueva = Designacion::create($designacion->only(['tipo', 'program_id', 'fase_id']) + [
                 'person_id' => $datos['person_id'],

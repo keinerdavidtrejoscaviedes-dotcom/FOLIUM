@@ -343,8 +343,8 @@
             <dialog id="modal-bloqueado" aria-labelledby="titulo-bloqueado" class="m-auto w-[min(94vw,30rem)] rounded-3xl p-0 shadow-2xl backdrop:bg-slate-900/50" data-abrir-al-cargar>
                 <div class="p-6">
                     <span class="grid h-12 w-12 place-items-center rounded-2xl bg-amber-100 text-xl text-amber-600"><i class="fas fa-lock" aria-hidden="true"></i></span>
-                    <h2 id="titulo-bloqueado" class="mt-4 text-lg font-bold text-slate-900">No se puede retirar todavía</h2>
-                    <p class="mt-1 text-sm text-slate-600">{{ $bloqueo['nombre'] }} tiene pendientes en un proceso de selección en curso. Reasigna la designación o espera a que los complete.</p>
+                    <h2 id="titulo-bloqueado" class="mt-4 text-lg font-bold text-slate-900">No se puede retirar ni reasignar todavía</h2>
+                    <p class="mt-1 text-sm text-slate-600">{{ $bloqueo['nombre'] }} tiene pendientes en un proceso de selección en curso. Espera a que los complete para retirar o reasignar la designación.</p>
                     <ul class="mt-4 space-y-2">
                         @foreach ($bloqueo['lista'] as $pendiente)
                             <li class="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm">

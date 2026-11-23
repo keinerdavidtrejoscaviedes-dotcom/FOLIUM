@@ -4,6 +4,7 @@ namespace Modules\TalentoHumano\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Modules\TalentoHumano\Entities\Entrevista;
 use Modules\TalentoHumano\Entities\EntrevistaAspirante;
 use Modules\TalentoHumano\Entities\EntrevistaEvaluador;
@@ -145,13 +146,22 @@ class EntrevistaController extends Controller
             : collect();
         $umbral = (float) ($entrevista->convocatoria?->umbral ?? 0);
 
+        // HU-041A esc. 7: la entrevista grupal se califica en un solo formulario, un bloque por cada aprendiz del grupo
+        $grupo = $entrevista->modalidad === 'grupal'
+            ? $entrevista->postulaciones()->with(['person', 'course'])->orderBy('th_postulaciones.id')->get()
+            : collect([$postulacion]);
+        $calificacionesGrupo = Calificacion::where('entrevista_id', $entrevista->id)->where('evaluador_id', $personId)
+            ->whereIn('postulacion_id', $grupo->pluck('id'))->get()->keyBy('postulacion_id');
+
         return view('talentohumano::entrevistas.calificar', compact(
             'entrevista',
             'postulacion',
             'cuestionario',
             'calificacion',
             'otras',
-            'umbral'
+            'umbral',
+            'grupo',
+            'calificacionesGrupo'
         ));
     }
 
@@ -160,12 +170,7 @@ class EntrevistaController extends Controller
      */
     public function guardarCalificacion(Request $request, $entrevistaId, $postulacionId)
     {
-        // HU-041A esc. 3: las observaciones son obligatorias; el concepto lo calcula el sistema (esc. 1)
-        $request->validate([
-            'cuestionario_id' => 'required|integer',
-            'observaciones' => 'required|string',
-            'puntajes' => 'required|array',
-        ], ['observaciones.required' => 'Escriba sus observaciones de la entrevista.']);
+        $request->validate(['cuestionario_id' => 'required|integer']);
 
         $personId = auth()->user()->person_id ?? 1;
         $this->verificarEvaluador((int) $entrevistaId, (int) $postulacionId, $personId);
@@ -179,29 +184,54 @@ class EntrevistaController extends Controller
         $cuestionario = $this->resolverCuestionarioVigente($personId, $entrevista);
         abort_unless($cuestionario && (int) $request->cuestionario_id === $cuestionario->id, 422, 'El formato de la entrevista cambió; vuelva a abrir la calificación.');
 
-        // HU-041A esc. 2: cada pregunta con un puntaje entre 0 y su máximo
-        $sinCalificar = [];
-        foreach ($cuestionario->preguntas as $pregunta) {
-            $valor = $request->input("puntajes.{$pregunta->id}");
-            if (!is_numeric($valor) || $valor < 0 || $valor > $pregunta->puntaje_maximo) {
-                $sinCalificar["puntajes.{$pregunta->id}"] = "Califique la pregunta «{$pregunta->enunciado}» con un puntaje entre 0 y " . (float) $pregunta->puntaje_maximo . '.';
+        // HU-041A esc. 7: la entrevista grupal se califica completa, cada aprendiz con sus puntajes y observaciones;
+        // la individual, solo el aspirante. Los datos llegan como puntajes[postulación][pregunta] y observaciones[postulación]
+        $grupal = $entrevista->modalidad === 'grupal';
+        $ids = $grupal ? $entrevista->aspirantes()->pluck('postulacion_id')->map(fn ($id) => (int) $id)->all() : [(int) $postulacionId];
+        $nombres = $grupal ? Postulacion::with('person')->whereIn('id', $ids)->get()->mapWithKeys(fn ($p) => [$p->id => $p->nombre_completo])->all() : [];
+        $puntajes = fn ($id) => $grupal ? (array) $request->input("puntajes.{$id}", []) : (array) $request->input('puntajes', []);
+        $observaciones = fn ($id) => trim((string) ($grupal ? $request->input("observaciones.{$id}") : $request->input('observaciones')));
+        $campo = fn ($id, $resto) => $grupal ? "{$resto[0]}.{$id}" . (isset($resto[1]) ? ".{$resto[1]}" : '') : $resto[0] . (isset($resto[1]) ? ".{$resto[1]}" : '');
+
+        // HU-041A esc. 2 y 3: cada pregunta con un puntaje entre 0 y su máximo, y observaciones escritas
+        $errores = [];
+        foreach ($ids as $id) {
+            $quien = $grupal ? ' de ' . ($nombres[$id] ?? 'un aprendiz del grupo') : '';
+            foreach ($cuestionario->preguntas as $pregunta) {
+                $valor = $puntajes($id)[$pregunta->id] ?? null;
+                if (!is_numeric($valor) || $valor < 0 || $valor > $pregunta->puntaje_maximo) {
+                    $errores[$campo($id, ['puntajes', $pregunta->id])] = "Califique la pregunta «{$pregunta->enunciado}»{$quien} con un puntaje entre 0 y " . (float) $pregunta->puntaje_maximo . '.';
+                }
+            }
+            if ($observaciones($id) === '') {
+                $errores[$campo($id, ['observaciones'])] = 'Escriba sus observaciones de la entrevista' . $quien . '.';
             }
         }
-        if ($sinCalificar) {
-            return back()->withErrors($sinCalificar)->withInput();
+        if ($errores) {
+            return back()->withErrors($errores)->withInput();
         }
 
-        // Bloque: Persistir evaluación y cálculo de puntaje total
-        $totalPuntaje = $this->registrarCalificacionAspirante($request, $cuestionario, $entrevista, $postulacionId, $personId);
-        $calificacion = Calificacion::where('entrevista_id', $entrevistaId)->where('postulacion_id', $postulacionId)->where('evaluador_id', $personId)->first();
+        // Bloque: Persistir evaluación y cálculo de puntaje total (todo el grupo o nada)
+        $resultados = DB::transaction(fn () => collect($ids)->mapWithKeys(fn ($id) => [
+            $id => $this->registrarCalificacionAspirante($puntajes($id), $observaciones($id), $cuestionario, $entrevista, $id, $personId),
+        ]));
         // El puntaje total y la propuesta de selección se actualizan con cada calificación (RF-010)
         PropuestaSeleccion::sincronizar($entrevista->convocatoria);
-        Auditoria::registrar('calificacion_registrada', $calificacion, [], [
-            'entrevista' => (int) $entrevistaId, 'postulacion' => (int) $postulacionId, 'puntaje' => $totalPuntaje, 'concepto' => $calificacion->concepto,
-        ]);
+        foreach ($resultados as $id => $total) {
+            $calificacion = Calificacion::where('entrevista_id', $entrevista->id)->where('postulacion_id', $id)->where('evaluador_id', $personId)->first();
+            Auditoria::registrar('calificacion_registrada', $calificacion, [], [
+                'entrevista' => (int) $entrevistaId, 'postulacion' => $id, 'puntaje' => $total, 'concepto' => $calificacion->concepto,
+            ]);
+        }
+
+        if ($grupal) {
+            return redirect()->route('talentohumano.entrevistas.index')
+                ->with('success', 'Calificaciones del grupo guardadas (' . count($ids) . ' aprendices).');
+        }
+        $total = $resultados[(int) $postulacionId];
 
         return redirect()->route('talentohumano.entrevistas.index')
-            ->with('success', "Calificación guardada exitosamente ({$totalPuntaje} de 100 · " . ($calificacion->concepto === 'apto' ? 'Apto' : 'No apto') . ').');
+            ->with('success', "Calificación guardada exitosamente ({$total} de 100 · " . ($total >= (float) ($entrevista->convocatoria?->umbral ?? 0) ? 'Apto' : 'No apto') . ').');
     }
 
     // =========================================================================
@@ -388,10 +418,10 @@ class EntrevistaController extends Controller
     /**
      * Registra o actualiza la calificación del aspirante.
      */
-    private function registrarCalificacionAspirante(Request $request, Cuestionario $cuestionario, Entrevista $entrevista, int $postulacionId, int $personId): float
+    private function registrarCalificacionAspirante(array $puntajes, string $observaciones, Cuestionario $cuestionario, Entrevista $entrevista, int $postulacionId, int $personId): float
     {
         // RF-009: el puntaje de cada evaluador se lleva a una escala común de 0 a 100
-        $detalle = $cuestionario->preguntas->mapWithKeys(fn ($p) => [$p->id => (float) $request->input("puntajes.{$p->id}")])->all();
+        $detalle = $cuestionario->preguntas->mapWithKeys(fn ($p) => [$p->id => (float) ($puntajes[$p->id] ?? 0)])->all();
         $maximo = (float) $cuestionario->preguntas->sum('puntaje_maximo');
         $totalPuntaje = $maximo > 0 ? round(array_sum($detalle) * 100 / $maximo, 2) : 0.0;
 
@@ -406,7 +436,7 @@ class EntrevistaController extends Controller
                 'puntaje' => $totalPuntaje,
                 // RN-017: apto si alcanza el umbral de la convocatoria
                 'concepto' => $totalPuntaje >= (float) ($entrevista->convocatoria?->umbral ?? 0) ? 'apto' : 'no_apto',
-                'observaciones' => $request->observaciones,
+                'observaciones' => $observaciones,
                 'detalle' => $detalle,
             ]
         );
