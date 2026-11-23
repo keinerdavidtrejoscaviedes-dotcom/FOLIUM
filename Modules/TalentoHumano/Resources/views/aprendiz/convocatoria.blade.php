@@ -61,12 +61,23 @@
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Requisitos y competencias</p>
                                 <p class="mt-1 whitespace-pre-line text-slate-700">{{ $cargo->requisitos ?: 'Sin requisitos adicionales.' }}</p>
+                                {{-- HU-004 esc. 4: requisitos que el sistema no puede verificar; los que exigen soporte se adjuntan al postularse --}}
+                                @if ($cargo->requisitos_adicionales->isNotEmpty())
+                                    <ul class="mt-2 space-y-0.5 text-slate-700">
+                                        @foreach ($cargo->requisitos_adicionales as $requisito)
+                                            <li><i class="fas fa-circle-check mr-1.5 text-emerald-600" aria-hidden="true"></i>{{ $requisito->descripcion }}@if ($requisito->exige_soporte) <span class="text-xs font-semibold text-amber-700">(adjunta el soporte)</span>@endif</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
                             </div>
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Documentos obligatorios</p>
                                 <ul class="mt-1 space-y-0.5 text-slate-700">
                                     @foreach ($cargo->documentos as $doc)
                                         <li><i class="fas fa-file-lines mr-1.5 text-emerald-600" aria-hidden="true"></i>{{ $doc['descripcion'] ?? $doc['tipo'] }}</li>
+                                    @endforeach
+                                    @foreach ($cargo->requisitos_adicionales->where('exige_soporte', 1) as $requisito)
+                                        <li><i class="fas fa-file-circle-check mr-1.5 text-emerald-600" aria-hidden="true"></i>Soporte: {{ $requisito->descripcion }}</li>
                                     @endforeach
                                     <li><i class="fas fa-file-pen mr-1.5 text-emerald-600" aria-hidden="true"></i>Propuesta de trabajo para este cargo</li>
                                 </ul>

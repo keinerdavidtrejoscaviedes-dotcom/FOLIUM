@@ -50,6 +50,9 @@
 
                 {{-- Bloque 2: Evaluaciones de Entrevista --}}
                 @include('talentohumano::postulaciones.partials.entrevistas')
+            @elseif ($seguimiento)
+                {{-- Sin resultados (Gestor de TH): si presentó la prueba y sus entrevistas programadas (HU-032, HU-025B) --}}
+                @include('talentohumano::postulaciones.partials.seguimiento')
             @endif
 
             {{-- Bloque 3: Análisis y Concepto de Hoja de Vida --}}

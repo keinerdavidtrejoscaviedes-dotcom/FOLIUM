@@ -136,9 +136,25 @@ class ConvocatoriaController extends Controller
                 ->all(),
         ]);
 
-        // Pendiente: correo a los aprendices de las fichas habilitadas con el enlace (IE-007)
+        // HU-022B esc. 1: correo con el enlace a los aprendices de las fichas habilitadas (IE-007)
+        $aviso = '';
+        if ($publicar) {
+            $correos = \Modules\TalentoHumano\Support\Aprendices::correosDeLaFase($fase->id);
+            $apertura = \Illuminate\Support\Carbon::parse($contexto['fechas']['apertura'])->format('d/m/Y');
+            $cierre = \Illuminate\Support\Carbon::parse($contexto['fechas']['cierre'])->format('d/m/Y');
+            $aviso = match (true) {
+                $correos === [] => ' Las fichas de la fase no tienen aprendices con correo registrado, así que no se envió ningún aviso.',
+                \Modules\TalentoHumano\Support\Correo::enviar($correos, "FOLIUM: convocatoria de SENA Empresa · Fase {$fase->numero}",
+                    "FOLIUM · Talento Humano\n\nSe publicó la convocatoria «" . trim($request->titulo) . "» de la Fase {$fase->numero}.\n\n"
+                    . "Postulación: del {$apertura} al {$cierre}. Debe elegir 3 cargos en orden de preferencia y cargar su hoja de vida y una propuesta de trabajo por cargo.\n\n"
+                    . 'Consulte los cargos y postúlese en ' . route('talentohumano.aprendiz.convocatoria'))
+                    => ' Se avisó por correo a ' . count($correos) . ' aprendices de las fichas de la fase.',
+                default => ' El correo a los aprendices no se pudo entregar; quedó en «Notificaciones no entregadas».',
+            };
+        }
+
         return redirect()->route('talentohumano.fases.convocatoria.edit', $fase->id)
-            ->with('success', $publicar ? 'Convocatoria publicada correctamente.' : 'Convocatoria guardada como borrador.');
+            ->with('success', ($publicar ? 'Convocatoria publicada correctamente.' : 'Convocatoria guardada como borrador.') . $aviso);
     }
 
     /**

@@ -85,8 +85,39 @@ class PostulacionController extends Controller
             'designacion' => $designacion,
             'pruebaPsicotecnica' => $verResultados ? $this->prepararPruebaPsicotecnica($postulacion) : null,
             'entrevistas' => $verResultados ? $this->prepararEvaluacionesEntrevista($postulacion) : null,
+            // HU-032 esc. 1 y HU-025B esc. 2: el Gestor ve si presentó la prueba y sus entrevistas, sin resultados
+            'seguimiento' => $verResultados ? null : $this->seguimientoSinResultados($postulacion),
             'analisisHabilitado' => (bool) $postulacion->convocatoria?->estaCerrada(),
         ]);
+    }
+
+    /**
+     * Estado de la prueba (sin puntaje ni respuestas) y entrevistas programadas (sin calificaciones ni observaciones).
+     */
+    private function seguimientoSinResultados(Postulacion $postulacion): array
+    {
+        $prueba = DB::table('th_aplicaciones_prueba')->where('postulacion_id', $postulacion->id)->latest('id')->first(['estado', 'fecha_limite', 'fecha_presentacion']);
+        $estado = match (true) {
+            $prueba?->estado === 'presentada' => 'presentada',
+            $prueba?->estado === 'no_evaluado', $postulacion->estado === 'no_evaluado' => 'no_evaluado',
+            (bool) $prueba => 'pendiente',
+            default => 'sin_habilitar',
+        };
+
+        return [
+            'prueba' => $estado,
+            'presentada_el' => $prueba?->fecha_presentacion ? \Illuminate\Support\Carbon::parse($prueba->fecha_presentacion)->format('d/m/Y') : null,
+            'plazo' => $prueba?->fecha_limite ? \Illuminate\Support\Carbon::parse($prueba->fecha_limite)->format('d/m/Y') : null,
+            'entrevistas' => DB::table('th_entrevistas as e')->join('th_entrevista_aspirantes as a', 'a.entrevista_id', '=', 'e.id')
+                ->where('a.postulacion_id', $postulacion->id)->whereNull('e.deleted_at')->orderBy('e.fecha_hora')
+                ->get(['e.tipo', 'e.modalidad', 'e.fecha_hora', 'e.lugar'])
+                ->map(fn ($e) => (object) [
+                    'tipo' => $e->tipo === 'psicologica' ? 'Psicológica' : 'Técnica',
+                    'modalidad' => $e->modalidad === 'grupal' ? 'Grupal' : 'Individual',
+                    'cuando' => \Illuminate\Support\Carbon::parse($e->fecha_hora)->locale('es')->translatedFormat('j \d\e F \d\e Y · g:i a'),
+                    'lugar' => $e->lugar,
+                ]),
+        ];
     }
 
     /**

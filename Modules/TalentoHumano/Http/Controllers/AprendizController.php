@@ -79,7 +79,7 @@ class AprendizController extends Controller
 
         return view('talentohumano::aprendiz.convocatoria', [
             'p' => $p,
-            'cargos' => $p->fichaHabilitada ? $p->cargosCompatibles() : collect(),
+            'cargos' => $p->fichaHabilitada ? $this->conRequisitos($p->cargosCompatibles()) : collect(),
             'incompatibles' => $p->fichaHabilitada ? $p->cargosIncompatibles() : collect(),
             'estadoPostulacion' => $p->estadoPostulacion(),
             'fechas' => $p->fechasPostulacion(),
@@ -96,7 +96,7 @@ class AprendizController extends Controller
             return redirect()->route('talentohumano.aprendiz.postulacion')->with('info', 'Ya está postulado en esta convocatoria');
         }
 
-        $cargos = $p->fichaHabilitada ? $p->cargosCompatibles() : collect();
+        $cargos = $p->fichaHabilitada ? $this->conRequisitos($p->cargosCompatibles()) : collect();
 
         return view('talentohumano::aprendiz.postularme', [
             'p' => $p,
@@ -125,7 +125,7 @@ class AprendizController extends Controller
             return back()->withInput()->with('error', 'La convocatoria está cerrada');
         }
 
-        $cargos = $p->cargosCompatibles()->keyBy('id');
+        $cargos = $this->conRequisitos($p->cargosCompatibles())->keyBy('id');
         $datos = $request->validate([
             'telefono' => ['required', 'regex:/^[0-9 +()-]{7,20}$/'],
             'municipality_id' => ['required', 'integer', 'exists:municipalities,id'],
@@ -205,12 +205,14 @@ class AprendizController extends Controller
                     ]);
                 }
 
-                foreach (array_keys($exigidos) as $tipo) {
+                foreach ($exigidos as $tipo => $exigido) {
                     $archivo = $request->file("documentos.{$tipo}");
                     $rutas[] = $ruta = $this->guardarArchivo($archivo, $carpeta, $tipo);
                     PostulacionDocumento::create([
                         'postulacion_id' => $postulacion->id,
-                        'tipo' => $tipo,
+                        // Soporte de un requisito no verificable (HU-004 esc. 4): tipo «requisito» con su requisito
+                        'tipo' => isset($exigido['requisito_id']) ? 'requisito' : $tipo,
+                        'cargo_requisito_id' => $exigido['requisito_id'] ?? null,
                         'ruta_archivo' => $ruta,
                         'nombre_original' => mb_substr($archivo->getClientOriginalName(), 0, 255),
                     ]);
@@ -246,7 +248,53 @@ class AprendizController extends Controller
                 ->orderBy('e.fecha_hora')->get(['e.tipo', 'e.modalidad', 'e.fecha_hora', 'e.lugar']) : collect(),
             'resultado' => $postulacion ? $this->resultado($p) : null,
             'estadoPostulacion' => $p->estadoPostulacion(),
+            'puedeReemplazar' => $postulacion && $this->puedeReemplazar($p),
         ]);
+    }
+
+    /**
+     * HU-046 esc. 6: reemplaza un documento o una propuesta de trabajo de la propia postulación por otro archivo válido,
+     * mientras la convocatoria siga abierta y la hoja de vida no se haya analizado.
+     */
+    public function reemplazarDocumento(Request $request, int $documento)
+    {
+        $p = $this->portal();
+        $esPropuesta = $request->query('tipo') === 'propuesta';
+        $registro = $esPropuesta ? PostulacionOpcion::with('postulacion')->find($documento) : PostulacionDocumento::with('postulacion')->find($documento);
+
+        if (!$registro || !$p->postulacion || $registro->postulacion_id !== $p->postulacion->id) {
+            Auditoria::registrarIntentoDenegado($request);
+            abort(403, 'No tiene permisos para realizar esta acción');
+        }
+        if (!$this->puedeReemplazar($p)) {
+            return back()->with('error', 'Los documentos solo se pueden reemplazar mientras la convocatoria esté abierta y antes del análisis de la hoja de vida.');
+        }
+
+        $request->validate(['archivo' => ['required', ...self::ARCHIVO]], [
+            'archivo.required' => 'Seleccione el archivo que reemplaza al anterior.',
+            'archivo.mimes' => self::MENSAJE_ARCHIVO, 'archivo.max' => self::MENSAJE_ARCHIVO, 'archivo.file' => self::MENSAJE_ARCHIVO, 'archivo.uploaded' => self::MENSAJE_ARCHIVO,
+        ]);
+
+        $archivo = $request->file('archivo');
+        $anterior = $esPropuesta ? $registro->propuesta_trabajo : $registro->ruta_archivo;
+        $nombre = $esPropuesta ? "propuesta-{$registro->preferencia}" : pathinfo($anterior, PATHINFO_FILENAME);
+        $nueva = $this->guardarArchivo($archivo, "talentohumano/postulaciones/{$registro->postulacion_id}", $nombre);
+        if ($anterior && $anterior !== $nueva) {
+            Storage::disk('local')->delete($anterior);
+        }
+        $registro->update($esPropuesta
+            ? ['propuesta_trabajo' => $nueva]
+            : ['ruta_archivo' => $nueva, 'nombre_original' => mb_substr($archivo->getClientOriginalName(), 0, 255)]);
+
+        $etiqueta = $esPropuesta ? 'Propuesta de trabajo de la opción ' . $registro->preferencia : $registro->etiqueta;
+        Auditoria::registrar('documento_reemplazado', $p->postulacion, [], ['documento' => $etiqueta, 'archivo' => $archivo->getClientOriginalName()]);
+
+        return back()->with('success', "{$etiqueta}: archivo reemplazado.");
+    }
+
+    private function puedeReemplazar(PortalAprendiz $p): bool
+    {
+        return $p->estadoPostulacion() === 'abierta' && !DB::table('th_analisis_hv')->where('postulacion_id', $p->postulacion->id)->exists();
     }
 
     /**
@@ -871,9 +919,29 @@ class AprendizController extends Controller
                 $exigidos[$tipo] ??= ['nombre' => $tipo === 'otro' ? ($doc['descripcion'] ?: self::DOCUMENTOS['otro']) : self::DOCUMENTOS[$tipo], 'cargos' => []];
                 $exigidos[$tipo]['cargos'][] = $cargo->nombre;
             }
+            // HU-004 esc. 4: cada requisito no verificable con «Exigir soporte» agrega su soporte como documento obligatorio
+            foreach ($cargo->requisitos_adicionales ?? [] as $requisito) {
+                if ($requisito->exige_soporte) {
+                    $exigidos["requisito_{$requisito->id}"] ??= ['nombre' => 'Soporte: ' . $requisito->descripcion, 'cargos' => [], 'requisito_id' => $requisito->id];
+                    $exigidos["requisito_{$requisito->id}"]['cargos'][] = $cargo->nombre;
+                }
+            }
         }
 
         return $exigidos;
+    }
+
+    /**
+     * Agrega a cada cargo de la convocatoria sus requisitos que el sistema no puede verificar (HU-004 esc. 4).
+     */
+    private function conRequisitos($cargos)
+    {
+        $requisitos = DB::table('th_cargo_requisitos')->whereIn('cargo_id', $cargos->pluck('cargo_id')->unique())
+            ->orderBy('id')->get(['id', 'cargo_id', 'descripcion', 'exige_soporte'])->groupBy('cargo_id');
+
+        return $cargos->each(function ($cargo) use ($requisitos) {
+            $cargo->requisitos_adicionales = $requisitos[$cargo->cargo_id] ?? collect();
+        });
     }
 
     private function guardarArchivo(UploadedFile $archivo, string $carpeta, string $nombre): string

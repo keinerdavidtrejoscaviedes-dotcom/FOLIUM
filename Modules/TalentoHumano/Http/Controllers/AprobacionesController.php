@@ -146,14 +146,6 @@ class AprobacionesController extends Controller
      */
     private function correosAprendices(int $faseId): array
     {
-        return DB::table('apprentices as a')
-            ->join('th_fase_fichas as ff', 'ff.course_id', '=', 'a.course_id')
-            ->join('people as p', 'p.id', '=', 'a.person_id')
-            ->leftJoin('users as u', fn ($j) => $j->on('u.person_id', '=', 'p.id')->whereNull('u.deleted_at'))
-            ->where('ff.fase_id', $faseId)
-            ->whereNull('a.deleted_at')
-            ->whereIn('a.apprentice_status', FaseService::ESTADOS_APRENDIZ_ACTIVO)
-            ->selectRaw("COALESCE(NULLIF(u.email, ''), NULLIF(p.misena_email, ''), NULLIF(p.sena_email, ''), NULLIF(p.personal_email, '')) as correo")
-            ->pluck('correo')->filter()->unique()->values()->all();
+        return \Modules\TalentoHumano\Support\Aprendices::correosDeLaFase($faseId);
     }
 }

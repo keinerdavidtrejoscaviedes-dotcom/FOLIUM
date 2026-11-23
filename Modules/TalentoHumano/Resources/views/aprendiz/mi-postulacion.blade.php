@@ -64,14 +64,25 @@
                             <span class="min-w-0 flex-1"><span class="block font-semibold text-slate-800">{{ $cargo?->nombre }}</span><span class="text-xs text-slate-500">{{ $cargo?->area?->nombre }}</span></span>
                             <a href="{{ route('talentohumano.aprendiz.documento', [$opcion->id, 'tipo' => 'propuesta']) }}" class="text-xs font-semibold text-emerald-700 hover:underline">Propuesta</a>
                         </li>
+                        @if ($puedeReemplazar)
+                            @include('talentohumano::aprendiz._reemplazar', ['accion' => route('talentohumano.aprendiz.documento.reemplazar', [$opcion->id, 'tipo' => 'propuesta']), 'id' => "propuesta-{$opcion->id}", 'texto' => 'propuesta de la opción ' . $opcion->preferencia])
+                        @endif
                     @endforeach
                 </ol>
                 <h3 class="mt-5 text-xs font-bold uppercase tracking-wider text-slate-400">Documentos cargados</h3>
                 <ul class="mt-2 space-y-1 text-sm">
                     @foreach ($postulacion->documentos as $doc)
-                        <li><a href="{{ route('talentohumano.aprendiz.documento', $doc->id) }}" class="text-emerald-700 hover:underline"><i class="fas fa-file-arrow-down mr-1.5" aria-hidden="true"></i>{{ $documentos[$doc->tipo] ?? $doc->tipo }}</a> <span class="text-xs text-slate-400">· {{ $doc->nombre_original }}</span></li>
+                        <li><a href="{{ route('talentohumano.aprendiz.documento', $doc->id) }}" class="text-emerald-700 hover:underline"><i class="fas fa-file-arrow-down mr-1.5" aria-hidden="true"></i>{{ $doc->etiqueta }}</a> <span class="text-xs text-slate-400">· {{ $doc->nombre_original }}</span>
+                            @if ($puedeReemplazar)
+                                @include('talentohumano::aprendiz._reemplazar', ['accion' => route('talentohumano.aprendiz.documento.reemplazar', $doc->id), 'id' => "documento-{$doc->id}", 'texto' => $doc->etiqueta])
+                            @endif
+                        </li>
                     @endforeach
                 </ul>
+                @if ($puedeReemplazar)
+                    <p class="mt-2 text-xs text-slate-500">Puedes reemplazar un archivo mientras la convocatoria esté abierta y antes del análisis de tu hoja de vida. PDF o imagen de hasta 5 MB.</p>
+                @endif
+                @error('archivo')<p class="mt-2 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{{ $message }}</p>@enderror
                 <p class="mt-4 text-xs text-slate-500"><i class="fas fa-location-dot mr-1" aria-hidden="true"></i>{{ $postulacion->municipality?->name }}{{ $postulacion->vereda_ruta ? ' · ' . $postulacion->vereda_ruta : '' }} · <i class="fas fa-phone ml-1 mr-1" aria-hidden="true"></i>{{ $postulacion->telefono ?? '—' }}</p>
             </section>
 

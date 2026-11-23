@@ -27,6 +27,22 @@ class Aprendices
         return self::consulta()->where('p.id', $personId)->first();
     }
 
+    /**
+     * Correos de los aprendices activos de las fichas de la fase: el del usuario de FOLIUM y, si no tiene, el de SICEFA.
+     */
+    public static function correosDeLaFase(int $faseId): array
+    {
+        return DB::table('apprentices as a')
+            ->join('th_fase_fichas as ff', 'ff.course_id', '=', 'a.course_id')
+            ->join('people as p', 'p.id', '=', 'a.person_id')
+            ->leftJoin('users as u', fn ($j) => $j->on('u.person_id', '=', 'p.id')->whereNull('u.deleted_at'))
+            ->where('ff.fase_id', $faseId)
+            ->whereNull('a.deleted_at')
+            ->whereIn('a.apprentice_status', \Modules\TalentoHumano\Services\FaseService::ESTADOS_APRENDIZ_ACTIVO)
+            ->selectRaw("COALESCE(NULLIF(u.email, ''), NULLIF(p.misena_email, ''), NULLIF(p.sena_email, ''), NULLIF(p.personal_email, '')) as correo")
+            ->pluck('correo')->filter()->unique()->values()->all();
+    }
+
     private static function consulta()
     {
         $ficha = DB::table('apprentices as a')

@@ -317,6 +317,7 @@ Route::prefix('talento-humano')
                 Route::post('postulacion', 'guardarPostulacion')->name('postulacion.guardar');
                 Route::get('mi-postulacion', 'miPostulacion')->name('postulacion');
                 Route::get('documentos/{documento}', 'documento')->whereNumber('documento')->name('documento');
+                Route::post('documentos/{documento}/reemplazar', 'reemplazarDocumento')->whereNumber('documento')->name('documento.reemplazar');
                 Route::get('prueba', 'prueba')->name('prueba');
                 Route::get('prueba/preguntas/{pregunta}/imagen', 'imagenPregunta')->whereNumber('pregunta')->name('prueba.imagen');
                 Route::post('prueba/progreso', 'guardarProgresoPrueba')->name('prueba.progreso');

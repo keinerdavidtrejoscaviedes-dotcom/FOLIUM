@@ -35,7 +35,7 @@
                     <i class="fas fa-file-pdf text-red-500 text-lg"></i>
                     <div class="min-w-0 flex-1">
                         <p class="font-bold text-slate-800 truncate">{{ $doc->nombre_original }}</p>
-                        <span class="text-[10px] uppercase text-slate-400">{{ $doc->tipo }}</span>
+                        <span class="text-[10px] uppercase text-slate-400">{{ $doc->etiqueta }}</span>
                     </div>
                     <a href="{{ route('talentohumano.postulaciones.documento', [$postulacion->id, $doc->id]) }}" class="rounded-lg p-1.5 text-slate-500 hover:text-[#064C3D]" title="Descargar documento" aria-label="Descargar {{ $doc->nombre_original }}">
                         <i class="fas fa-download"></i>

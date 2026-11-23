@@ -138,7 +138,11 @@ class CronogramaController extends Controller
             default => 'Guardar cronograma como borrador',
         }, 'th_cronogramas', $fase->id, $vigente ? ['anteriores' => $fechasVigentes, 'nuevas' => $fechas] : $fechas);
 
-        // Pendiente: aviso por correo al Instructor Líder (IE-007), cuando se defina el envío de notificaciones
+        // HU-020B esc. 1 y 8: aviso por correo al Instructor Líder de que tiene un cronograma por aprobar
+        if ($enviar) {
+            $this->avisarAlLider($fase, $vigente !== null, $fechas);
+        }
+
         return redirect()->route('talentohumano.fases.cronograma.edit', $fase->id)
             ->with('success', match (true) {
                 $vigente !== null => 'Modificación del cronograma enviada a aprobación. Mientras el Instructor Líder no la apruebe, siguen vigentes las fechas aprobadas.',
@@ -151,6 +155,26 @@ class CronogramaController extends Controller
      * Se puede editar mientras no exista, esté en borrador o haya sido rechazado (RF-003). Uno aprobado lo puede
      * modificar el Gestor como nueva propuesta (HU-020B esc. 8) mientras la fase no esté cerrada; uno en aprobación, no.
      */
+    /**
+     * Correo al Líder de la estrategia vigente con las fechas propuestas y el enlace a la aprobación (HU-020B, IE-007).
+     */
+    private function avisarAlLider(object $fase, bool $esModificacion, array $fechas): void
+    {
+        $lideres = DB::table('th_designaciones')->where('tipo', 'lider_estrategia')->whereNull('fecha_retiro')->whereNull('deleted_at')
+            ->where(fn ($q) => $q->whereNull('fase_id')->orWhere('fase_id', $fase->id))->pluck('person_id');
+        $cronograma = $this->fases->ultimoCronograma($fase->id);
+        $etapas = collect(self::ETAPAS)->map(fn ($etapa, $clave) => '- ' . $etapa['nombre'] . ': '
+            . Carbon::parse($fechas[$clave]['inicio'])->format('d/m/Y')
+            . ($fechas[$clave]['fin'] && $fechas[$clave]['fin'] !== $fechas[$clave]['inicio'] ? ' al ' . Carbon::parse($fechas[$clave]['fin'])->format('d/m/Y') : ''))
+            ->implode("\n");
+
+        Correo::enviar(\Modules\TalentoHumano\Support\ProcesoSeleccion::correos($lideres),
+            ($esModificacion ? 'FOLIUM: modificación del cronograma de la Fase ' : 'FOLIUM: cronograma de la Fase ') . $fase->numero . ' por aprobar',
+            "FOLIUM · Talento Humano\n\nEl Gestor de Talento Humano envió a su aprobación "
+            . ($esModificacion ? 'una modificación del cronograma aprobado' : 'el cronograma del proceso de selección') . " de la Fase {$fase->numero}.\n\n{$etapas}\n\n"
+            . 'Revíselo en ' . route('talentohumano.lider.aprobaciones.cronograma', $cronograma->id));
+    }
+
     private function editable(?object $cronograma, object $fase): bool
     {
         return $fase->estado !== 'cerrada' && (!$cronograma || in_array($cronograma->estado, ['borrador', 'rechazado', 'aprobado']));
