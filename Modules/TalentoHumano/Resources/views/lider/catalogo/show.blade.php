@@ -105,6 +105,8 @@
             @php
                 $filasInventario = old('items', $inventario->map(fn ($i) => (array) $i)->all()) ?: [['item' => '', 'cantidad' => '', 'estado' => '']];
                 $errorInventario = fn ($i, $campo) => $errors->inventario->has("items.{$i}.{$campo}") ? 'border-red-400 ring-1 ring-red-200' : 'border-slate-200';
+                // Mensaje debajo de cada campo con error (HU-012 esc. 2)
+                $mensajeInventario = fn ($i, $campo) => $errors->inventario->first("items.{$i}.{$campo}");
                 $campoInventario = 'w-full rounded-xl border bg-white px-3 py-2 text-sm focus:border-[#064C3D] focus:outline-none focus:ring-2 focus:ring-[#34D399]/40';
             @endphp
             <section class="{{ $tarjeta }}" id="inventario">
@@ -122,8 +124,10 @@
                                 <tbody id="filas-inventario-cargo">
                                     @foreach ($filasInventario as $i => $fila)
                                         <tr class="border-t border-slate-100" data-fila>
-                                            <td class="py-2 pr-2"><input name="items[{{ $i }}][item]" value="{{ $fila['item'] }}" maxlength="255" aria-label="Implemento" class="{{ $campoInventario }} {{ $errorInventario($i, 'item') }}"></td>
-                                            <td class="px-2 py-2"><input name="items[{{ $i }}][cantidad]" value="{{ $fila['cantidad'] }}" type="number" min="1" inputmode="numeric" aria-label="Cantidad" class="{{ $campoInventario }} {{ $errorInventario($i, 'cantidad') }}"></td>
+                                            <td class="py-2 pr-2"><input name="items[{{ $i }}][item]" value="{{ $fila['item'] }}" maxlength="255" aria-label="Implemento" class="{{ $campoInventario }} {{ $errorInventario($i, 'item') }}">
+                                                @if ($mensajeInventario($i, 'item')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $mensajeInventario($i, 'item') }}</p> @endif</td>
+                                            <td class="px-2 py-2 align-top"><input name="items[{{ $i }}][cantidad]" value="{{ $fila['cantidad'] }}" type="number" min="1" inputmode="numeric" aria-label="Cantidad" class="{{ $campoInventario }} {{ $errorInventario($i, 'cantidad') }}">
+                                                @if ($mensajeInventario($i, 'cantidad')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $mensajeInventario($i, 'cantidad') }}</p> @endif</td>
                                             <td class="px-2 py-2">
                                                 <select name="items[{{ $i }}][estado]" aria-label="Estado" class="{{ $campoInventario }} {{ $errorInventario($i, 'estado') }}">
                                                     <option value="">—</option>
@@ -131,6 +135,7 @@
                                                         <option @selected($fila['estado'] === $estado)>{{ $estado }}</option>
                                                     @endforeach
                                                 </select>
+                                                @if ($mensajeInventario($i, 'estado')) <p class="mt-1 text-xs font-semibold text-red-600">{{ $mensajeInventario($i, 'estado') }}</p> @endif
                                             </td>
                                             <td class="py-2 text-right"><button type="button" data-quitar class="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Quitar implemento"><i class="fas fa-trash" aria-hidden="true"></i></button></td>
                                         </tr>

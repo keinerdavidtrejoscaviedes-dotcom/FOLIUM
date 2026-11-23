@@ -62,8 +62,8 @@ class CatalogoCargosController extends Controller
     {
         $filas = collect((array) $request->input('items', []))
             ->map(fn ($f) => ['item' => trim((string) ($f['item'] ?? '')), 'cantidad' => trim((string) ($f['cantidad'] ?? '')), 'estado' => trim((string) ($f['estado'] ?? ''))])
-            ->reject(fn ($f) => $f['item'] === '' && $f['cantidad'] === '' && $f['estado'] === '')
-            ->values();
+            // Se conservan los índices del formulario para que cada error caiga en su fila
+            ->reject(fn ($f) => $f['item'] === '' && $f['cantidad'] === '' && $f['estado'] === '');
 
         $errores = [];
         foreach ($filas as $i => $fila) {
