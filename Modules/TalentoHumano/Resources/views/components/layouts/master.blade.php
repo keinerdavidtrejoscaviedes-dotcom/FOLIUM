@@ -1,4 +1,8 @@
 @props(['title' => null, 'fullWidth' => false])
+@php
+    // El Instructor ve el menú lateral del dashboard en todas las páginas de sus secciones, no solo en su panel
+    $conMenu = !$fullWidth && auth()->check() && \Modules\TalentoHumano\Support\AccesoTH::usaMenuInstructor(auth()->user());
+@endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -66,8 +70,14 @@
         </div>
     </header>
 
-    <main @class(['mx-auto max-w-6xl px-4 py-8' => !$fullWidth])>
-        {{ $slot }}
+    <main @class(['mx-auto max-w-6xl px-4 py-8' => !$fullWidth && !$conMenu])>
+        @if ($conMenu)
+            <x-talentohumano::instructor-menu>
+                {{ $slot }}
+            </x-talentohumano::instructor-menu>
+        @else
+            {{ $slot }}
+        @endif
     </main>
 
     @stack('scripts')

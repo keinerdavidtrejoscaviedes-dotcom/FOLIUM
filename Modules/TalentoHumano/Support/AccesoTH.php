@@ -101,6 +101,15 @@ class AccesoTH
     }
 
     /**
+     * ¿Se muestra el menú lateral del Instructor en las páginas del módulo? Lo usa quien tiene el rol Instructor y no entra
+     * por el submódulo del Instructor Líder (que ya tiene su propio menú).
+     */
+    public static function usaMenuInstructor(User $user): bool
+    {
+        return !self::veSubmoduloLider($user) && $user->roles->contains('slug', 'talentohumano.instructor');
+    }
+
+    /**
      * Correos de los administradores de FOLIUM (rol talentohumano.admin), para los avisos de HU-015 y RN-031.
      */
     public static function correosAdministradores(): Collection

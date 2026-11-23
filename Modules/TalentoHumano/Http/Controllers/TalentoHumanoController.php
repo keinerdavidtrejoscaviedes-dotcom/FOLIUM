@@ -3,6 +3,8 @@
 namespace Modules\TalentoHumano\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\TalentoHumano\Support\AccesoTH;
 
@@ -79,11 +81,9 @@ class TalentoHumanoController extends Controller
             ->first();
 
         // Secciones por defecto
-        $secciones = collect(self::SECCIONES)
-            ->filter(fn ($seccion) => isset($seccion['seccion']) ? AccesoTH::puede($user, $seccion['seccion']) : array_intersect($seccion['roles'], $tipos))
-            ->values();
+        $secciones = self::seccionesDe($user);
 
-        return view('talentohumano::panel', [
+        return view($esInstructor ? 'talentohumano::panel-instructor' : 'talentohumano::panel', [
             'user' => $user,
             'roles' => $roles->pluck('name'),
             'designaciones' => $designacionesNombres,
@@ -98,5 +98,46 @@ class TalentoHumanoController extends Controller
                     : []
             ),
         ]);
+    }
+
+    /**
+     * Secciones del módulo que el usuario puede ver (el panel y el menú lateral del Instructor las comparten).
+     */
+    public static function seccionesDe(User $user): Collection
+    {
+        $tipos = $user->roles
+            ->filter(fn ($role) => Str::startsWith($role->slug, 'talentohumano.'))
+            ->map(fn ($role) => Str::after($role->slug, 'talentohumano.'))
+            ->values()
+            ->all();
+
+        return collect(self::SECCIONES)
+            ->filter(fn ($seccion) => isset($seccion['seccion']) ? AccesoTH::puede($user, $seccion['seccion']) : array_intersect($seccion['roles'], $tipos))
+            ->values();
+    }
+
+    /**
+     * Nombres de los roles de Talento Humano y de las designaciones vigentes del usuario, para las etiquetas del menú.
+     */
+    public static function etiquetasDe(User $user): Collection
+    {
+        $roles = $user->roles
+            ->filter(fn ($role) => Str::startsWith($role->slug, 'talentohumano.'))
+            ->pluck('name');
+
+        $designaciones = $user->person_id
+            ? \Modules\TalentoHumano\Entities\Designacion::where('person_id', $user->person_id)
+                ->whereNull('fecha_retiro')
+                ->with('program')
+                ->get()
+                ->map(fn ($d) => match ($d->tipo) {
+                    'instructor_th' => 'Instructor de Talento Humano',
+                    'lider_estrategia' => 'Líder de la estrategia',
+                    'instructor_tecnico' => 'Instructor técnico' . ($d->program ? " · {$d->program->name}" : ''),
+                    default => 'Instructor',
+                })
+            : collect();
+
+        return $roles->merge($designaciones)->unique()->values();
     }
 }
