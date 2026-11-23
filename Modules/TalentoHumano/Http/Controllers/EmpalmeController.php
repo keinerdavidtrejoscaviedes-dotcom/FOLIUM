@@ -185,7 +185,7 @@ class EmpalmeController extends Controller
         });
         Auditoria::registrar('visto_bueno_empalme', $empalme, [], ['empalme' => $empalme->id, 'cargo' => optional($empalme->cargo)->nombre]);
 
-        return back()->with('success', 'Visto bueno registrado. El empalme cuenta con la aprobación del Instructor de Talento Humano.');
+        return back()->with('success', 'Visto bueno registrado: el empalme quedó cerrado y la asignación de quien recibe el cargo pasó a «vigente».');
     }
 
     // =========================================================================

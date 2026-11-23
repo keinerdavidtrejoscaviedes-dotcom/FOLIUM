@@ -33,6 +33,7 @@ class SupervisionController extends Controller
      */
     public function seleccion(Request $request)
     {
+        Convocatoria::cerrarVencidas();
         $fase = $this->fase($request);
         if (!$fase) {
             return view('talentohumano::lider.supervision.seleccion', ['fase' => null, 'fichas' => collect(), 'convocatoria' => null]);

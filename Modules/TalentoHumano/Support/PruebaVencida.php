@@ -24,6 +24,10 @@ class PruebaVencida
      */
     public static function sincronizar(?Convocatoria $convocatoria = null): Collection
     {
+        // HU-024A: primero, las convocatorias con la fecha de cierre vencida pasan a «Cerrada»
+        Convocatoria::cerrarVencidas();
+        $convocatoria?->refresh();
+
         // Sin convocatoria indicada (tarea programada): todas las publicadas de las fases que no están cerradas
         if (!$convocatoria) {
             return Convocatoria::whereIn('estado', ['publicada', 'cerrada'])

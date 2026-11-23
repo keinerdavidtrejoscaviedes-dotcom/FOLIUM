@@ -248,7 +248,19 @@ class EntrevistaController extends Controller
 
         if (!$esEvaluador || !$estaCitado) {
             Auditoria::registrarIntentoDenegado(request());
-            abort(403, 'No tiene permisos para realizar esta acción');
+
+            // Un evaluador (instructor o psicólogo) que no fue convocado recibe el motivo (HU-041A esc. 5 y 6);
+            // los demás usuarios y el aspirante no asignado, el mensaje general (HU-027C esc. 2, HU-042B esc. 2)
+            $funciones = \Modules\TalentoHumano\Support\AccesoTH::funciones(auth()->user());
+            $esPsicologo = in_array('psicologo', $funciones);
+            $esInstructor = (bool) array_intersect(['instructor', 'instructor_th', 'instructor_tecnico', 'lider_estrategia'], $funciones);
+            $tipo = Entrevista::whereKey($entrevistaId)->value('tipo');
+            abort(403, match (true) {
+                $esEvaluador => 'No tiene permisos para realizar esta acción',
+                $esPsicologo && $tipo === 'tecnica' => 'La entrevista técnica la califican solo los instructores técnicos convocados o el Instructor Líder',
+                $esPsicologo || $esInstructor => 'No está asignado como evaluador de esta entrevista',
+                default => 'No tiene permisos para realizar esta acción',
+            });
         }
     }
 

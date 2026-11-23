@@ -67,4 +67,19 @@ class Convocatoria extends Model
     {
         return $this->estado !== 'borrador' && $this->fecha_cierre && today()->gt($this->fecha_cierre);
     }
+
+    /**
+     * HU-024A: vencida la fecha de cierre, la convocatoria publicada pasa a «Cerrada». La revisan la tarea programada
+     * de cada hora y las pantallas del proceso (por medio de PruebaVencida::sincronizar). Devuelve cuántas cerró.
+     */
+    public static function cerrarVencidas(): int
+    {
+        $vencidas = self::where('estado', 'publicada')->whereDate('fecha_cierre', '<', today())->get();
+        foreach ($vencidas as $convocatoria) {
+            $convocatoria->update(['estado' => 'cerrada']);
+            \Modules\TalentoHumano\Support\Auditoria::registrar('convocatoria_cerrada', $convocatoria, ['estado' => 'publicada'], ['estado' => 'cerrada', 'fecha_cierre' => $convocatoria->fecha_cierre?->toDateString()]);
+        }
+
+        return $vencidas->count();
+    }
 }

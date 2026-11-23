@@ -45,6 +45,7 @@ class ConvocatoriaController extends Controller
 
     public function edit(int $fase)
     {
+        \Modules\TalentoHumano\Entities\Convocatoria::cerrarVencidas();
         $fase = $this->fases->buscar($fase);
 
         return view('talentohumano::fases.convocatoria', ['fase' => $fase] + $this->contexto($fase));
